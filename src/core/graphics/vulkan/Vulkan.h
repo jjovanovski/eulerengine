@@ -1,0 +1,125 @@
+#pragma once
+
+#include "../../API.h"
+
+#include <vulkan/vulkan.h>
+#include <vector>
+
+namespace Euler
+{
+    namespace Graphics
+    {
+        struct EULER_API QueueFamily
+        {
+            uint32_t Index;
+            uint32_t Count;
+            bool Graphics;
+            bool Transfer;
+            bool Compute;
+            bool Sparse;
+            bool Present;
+        };
+
+        struct EULER_API PhysicalDevice
+        {
+            VkPhysicalDevice Handle;
+            VkPhysicalDeviceProperties Properties;
+            std::vector<QueueFamily> QueueFamilies;
+            VkSurfaceCapabilitiesKHR SurfaceCapabilities;
+            std::vector<VkSurfaceFormatKHR> SurfaceFormats;
+            std::vector<VkPresentModeKHR> PresentModes;
+        };
+
+        class EULER_API Vulkan
+        {
+        private:
+            VkInstance _instance;
+
+            VkDebugUtilsMessengerEXT _debugMessenger;
+
+            PhysicalDevice* _physicalDevice;
+            std::vector<PhysicalDevice> _physicalDevices;
+            VkDevice _device;
+            QueueFamily* _graphicsQueueFamily;
+
+            uint32_t _graphicsQueueFamilyIndex;
+            VkQueue _graphicsQueue;
+
+            uint32_t _presentQueueFamilyIndex;
+            VkQueue _presentQueue;
+
+            VkSurfaceKHR _surface;
+            VkSurfaceFormatKHR _surfaceFormat;
+            VkPresentModeKHR _presentMode;
+            VkSwapchainKHR _swapchain;
+            VkExtent2D _extent;
+            std::vector<VkImage> _swapchainImages;
+            std::vector<VkImageView> _swapchainImageViews;
+            std::vector<VkFramebuffer> _swapchainFramebuffers;
+
+            VkRenderPass _renderPass;
+            VkImage _image;
+            VkDeviceMemory _imageMemory;
+            VkImageView _imageView;
+            VkFramebuffer _framebuffer;
+
+            VkPipelineLayout _graphicsPipelineLayout;
+            VkPipeline _graphicsPipeline;
+
+            VkCommandPool _commandPool;
+            std::vector<VkCommandBuffer> _commandBuffers;
+
+            std::vector<VkSemaphore> _imageAvailableSemaphores;
+            std::vector<VkSemaphore> _renderFinishedSemaphores;
+            std::vector<VkFence> _fences;
+            std::vector<VkFence> _imageFences;
+            int _framesInFlight = 3;
+            int _currentFrame = 0;
+
+        public:
+            Vulkan();
+
+            void InitRenderer(uint32_t width, uint32_t height);
+            void Cleanup();
+
+            void CreateInstance(const char* appName, uint32_t appVersion, std::vector<const char*> requiredLayerNames, std::vector<const char*> requiredExtensionNames);
+            void DestroyInstance();
+            VkInstance GetInstance();
+            std::vector<VkLayerProperties> GetSupportedLayers();
+            std::vector<VkExtensionProperties> GetSupportedExtensions();
+            std::vector<const char*> FilterUnsupportedLayers(const std::vector<const char*>& requiredLayerNames);
+            std::vector<const char*> FilterUnsupportedExtensions(const std::vector<const char*>& requiredExtensionNames);
+
+            void CreateDebugMessenger();
+            VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
+            void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
+            static VKAPI_ATTR VkBool32 VKAPI_CALL Vulkan::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+
+            void CreateDevice(VkSurfaceKHR surface, VkPhysicalDeviceFeatures* enabledFeatures, std::vector<const char*> requiredDeviceLayerNames, std::vector<const char*> requiredDeviceExtensionNames);
+            void DestroyDevice();
+
+            void CreateSwapchain();
+            void DestroySwapchain();
+
+            void CreateRenderPass();
+            void DestroyRenderPass();
+
+            void Vulkan::CreateShaderModule(std::vector<char> shaderCode, VkShaderModule* shaderModule);
+            void Vulkan::DestroyShaderModule(VkShaderModule shaderModule);
+
+            void CreatePipeline();
+            void DestroyPipeline();
+
+            void CreateFramebuffers();
+            void DestroyFramebuffers();
+
+            void CreateCommandPool();
+            void DestroyCommandPool();
+
+            void CreateCommandBuffers();
+            void DestroyCommandBuffers();
+
+            void DrawFrame();
+        };
+    };
+};
