@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../API.h"
+
 #include <stdint.h>
 #include <math.h>
 
@@ -8,7 +10,7 @@ namespace Euler
 	namespace Math
 	{
 		template<typename T>
-		struct Vector3Template
+		struct EULER_API Vector3Template
 		{
 			T x;
 			T y;

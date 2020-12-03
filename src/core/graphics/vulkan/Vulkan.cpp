@@ -741,7 +741,7 @@ void Vulkan::CreatePipeline()
 	pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutCreateInfo.setLayoutCount = 0;
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-
+	
 	HANDLE_VKRESULT(vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &_graphicsPipelineLayout), "Create Pipeline Layout");
 
 	// create pipeline
