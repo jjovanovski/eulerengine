@@ -91,11 +91,19 @@ namespace Euler
 
             VkBuffer _vertexBuffer;
             VkDeviceMemory _vertexBufferMemory;
+            VkBuffer _indexBuffer;
+            VkDeviceMemory _indexBufferMemory;
 
             std::vector<Vertex> vertices = {
-                Vertex(Vec3(-0.5f, +0.5f, 0.0f), Vec3(1.0f, 0.0f, 0.0f)),
-                Vertex(Vec3(+0.0f, -0.5f, 0.0f), Vec3(0.0f, 1.0f, 0.0f)),
-                Vertex(Vec3(+0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 1.0f))
+                Vertex(Vec3(-0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f)),
+                Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(1.0f, 1.0f, 1.0f)),
+                Vertex(Vec3(+0.5f, -0.5f, 0.0f), Vec3(1.0f, 0.0f, 0.0f)),
+                Vertex(Vec3(+0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f))
+            };
+
+            std::vector<uint32_t> indices = {
+                0, 1, 2,
+                0, 2, 3
             };
 
         public:

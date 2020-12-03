@@ -857,7 +857,11 @@ void Vulkan::AllocateCommandBuffers()
 			VkBuffer buffers[] = { _vertexBuffer };
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(_commandBuffers[i], 0, 1, buffers, offsets);
-			vkCmdDraw(_commandBuffers[i], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+			
+			vkCmdBindIndexBuffer(_commandBuffers[i], _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			
+			//vkCmdDraw(_commandBuffers[i], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+			vkCmdDrawIndexed(_commandBuffers[i], indices.size(), 1, 0, 0, 0);
 
 			vkCmdEndRenderPass(_commandBuffers[i]);
 		}
@@ -990,11 +994,12 @@ void Vulkan::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 
 void Vulkan::CreateVertexBuffer()
 {
+	// CREATE VERTEX BUFFER
 	size_t bufferSize = vertices.size() * sizeof(Vertex);
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
 	
-	CreateBuffer(bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+	CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
 	void* data;
 	HANDLE_VKRESULT(vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data), "Map Buffer Memory");
@@ -1005,6 +1010,22 @@ void Vulkan::CreateVertexBuffer()
 	CopyBuffer(stagingBuffer, _vertexBuffer, bufferSize);
 
 	DestroyBuffer(stagingBuffer, stagingBufferMemory);
+
+	// CREATE INDEX BUFFER
+	size_t indexBufferSize = indices.size() * sizeof(indices[0]);
+	VkBuffer indexStagingBuffer;
+	VkDeviceMemory indexStagingBufferMemory;
+
+	CreateBuffer(indexBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, indexStagingBuffer, indexStagingBufferMemory);
+
+	HANDLE_VKRESULT(vkMapMemory(_device, indexStagingBufferMemory, 0, indexBufferSize, 0, &data), "Map Buffer Memory");
+	memcpy(data, indices.data(), indexBufferSize);
+	vkUnmapMemory(_device, indexStagingBufferMemory);
+
+	CreateBuffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _indexBuffer, _indexBufferMemory);
+	CopyBuffer(indexStagingBuffer, _indexBuffer, indexBufferSize);
+
+	DestroyBuffer(indexStagingBuffer, indexStagingBufferMemory);
 }
 
 void Vulkan::DestroyVertexBuffer()
