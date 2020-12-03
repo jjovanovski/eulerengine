@@ -7,15 +7,13 @@ namespace Euler
 {
 	namespace Math
 	{
-
 		template<typename T>
 		struct Vector2Template
 		{
 			T x;
 			T y;
-			T z;
 
-			Vector2Template() : x(0), y(0), z(0) {}
+			Vector2Template() : x(0), y(0) {}
 		};
 	}
 }
