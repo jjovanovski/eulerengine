@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../API.h"
+#include "../../math/Vec3.h"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -28,6 +29,15 @@ namespace Euler
             VkSurfaceCapabilitiesKHR SurfaceCapabilities;
             std::vector<VkSurfaceFormatKHR> SurfaceFormats;
             std::vector<VkPresentModeKHR> PresentModes;
+            VkPhysicalDeviceMemoryProperties MemoryProperties;
+        };
+
+        struct EULER_API Vertex
+        {
+            Vec3 Position;
+            Vec3 Color;
+
+            Vertex(Vec3 position, Vec3 color) : Position(position), Color(color) {}
         };
 
         class EULER_API Vulkan
@@ -79,6 +89,15 @@ namespace Euler
             uint32_t _resizeWidth = UINT32_MAX;
             uint32_t _resizeHeight = UINT32_MAX;
 
+            VkBuffer _vertexBuffer;
+            VkDeviceMemory _vertexBufferMemory;
+
+            std::vector<Vertex> vertices = {
+                Vertex(Vec3(-0.5f, +0.5f, 0.0f), Vec3(1.0f, 0.0f, 0.0f)),
+                Vertex(Vec3(+0.0f, -0.5f, 0.0f), Vec3(0.0f, 1.0f, 0.0f)),
+                Vertex(Vec3(+0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 1.0f))
+            };
+
         public:
             Vulkan();
 
@@ -127,6 +146,10 @@ namespace Euler
 
             void CreateFrameSyncObjects();
             void DestroyFrameSyncObjects();
+
+            uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+            void CreateVertexBuffer();
+            void DestroyVertexBuffer();
 
             void DrawFrame();
         };

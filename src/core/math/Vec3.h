@@ -7,7 +7,6 @@ namespace Euler
 {
 	namespace Math
 	{
-
 		template<typename T>
 		struct Vector3Template
 		{
@@ -16,6 +15,8 @@ namespace Euler
 			T z;
 
 			Vector3Template() : x(0), y(0), z(0) {}
+
+			Vector3Template(T px, T py, T pz) : x(px), y(py), z(pz) {}
 		};
 	}
 }

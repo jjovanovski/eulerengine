@@ -43,6 +43,7 @@ void Vulkan::InitRenderer(uint32_t width, uint32_t height)
 	CreatePipeline();
 	CreateFramebuffers();
 	CreateCommandPool();
+	CreateVertexBuffer();
 	AllocateCommandBuffers();
 	CreateFrameSyncObjects();
 }
@@ -53,6 +54,7 @@ void Vulkan::Cleanup()
 
 	DestroyFrameSyncObjects();
 	FreeCommandBuffers();
+	DestroyVertexBuffer();
 	DestroyCommandPool();
 	DestroyFramebuffers();
 	DestroyPipeline();
@@ -325,6 +327,8 @@ void Vulkan::CreateDevice(VkSurfaceKHR surface, VkPhysicalDeviceFeatures* enable
 		vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice->Handle, _surface, &presentModeCount, nullptr);
 		physicalDevice->PresentModes.resize(presentModeCount);
 		vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice->Handle, _surface, &presentModeCount, physicalDevice->PresentModes.data());
+
+		vkGetPhysicalDeviceMemoryProperties(physicalDevice->Handle, &physicalDevice->MemoryProperties);
 	}
 
 	// pick physical device
@@ -635,11 +639,34 @@ void Vulkan::CreatePipeline()
 
 	VkPipelineShaderStageCreateInfo stages[] = { vertexStageCreateInfo, fragmentStageCreateInfo };
 
+	// vertex binding description
+	VkVertexInputBindingDescription bindingDesc{};
+	bindingDesc.binding = 0;
+	bindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	bindingDesc.stride = sizeof(Vertex);
+
+	// vertex attribute description
+	VkVertexInputAttributeDescription positionAttrDesc{};
+	positionAttrDesc.binding = 0;
+	positionAttrDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
+	positionAttrDesc.location = 0;
+	positionAttrDesc.offset = 0;
+
+	VkVertexInputAttributeDescription colorAttrDesc{};
+	colorAttrDesc.binding = 0;
+	colorAttrDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
+	colorAttrDesc.location = 1;
+	colorAttrDesc.offset = offsetof(Vertex, Color);
+
+	VkVertexInputAttributeDescription attrDescs[] = { positionAttrDesc, colorAttrDesc };
+
 	// vertex input state
 	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
 	vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
+	vertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
+	vertexInputStateCreateInfo.pVertexBindingDescriptions = &bindingDesc;
+	vertexInputStateCreateInfo.vertexAttributeDescriptionCount = 2;
+	vertexInputStateCreateInfo.pVertexAttributeDescriptions = attrDescs;
 
 	// input assembly state
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo{};
@@ -827,7 +854,10 @@ void Vulkan::AllocateCommandBuffers()
 			vkCmdBeginRenderPass(_commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 			vkCmdBindPipeline(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
 
-			vkCmdDraw(_commandBuffers[i], 3, 1, 0, 0);
+			VkBuffer buffers[] = { _vertexBuffer };
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(_commandBuffers[i], 0, 1, buffers, offsets);
+			vkCmdDraw(_commandBuffers[i], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
 			vkCmdEndRenderPass(_commandBuffers[i]);
 		}
@@ -880,6 +910,57 @@ void Vulkan::DestroyFrameSyncObjects()
 		vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
 		vkDestroyFence(_device, _fences[i], nullptr);
 	}
+}
+
+uint32_t Vulkan::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+	for (uint32_t i = 0; i < _physicalDevice->MemoryProperties.memoryTypeCount; i++)
+	{
+		if (((typeFilter & (1 << i)) != 0)
+			&& ((_physicalDevice->MemoryProperties.memoryTypes[i].propertyFlags & properties) == properties))
+		{
+			return i;
+		}
+	}
+	
+	return UINT32_MAX;
+}
+
+void Vulkan::CreateVertexBuffer()
+{
+	VkBufferCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	/*createInfo.queueFamilyIndexCount = 1;
+	createInfo.pQueueFamilyIndices = &_graphicsQueueFamilyIndex;*/
+	createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	createInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	createInfo.size = vertices.size() * sizeof(Vertex);
+
+	HANDLE_VKRESULT(vkCreateBuffer(_device, &createInfo, nullptr, &_vertexBuffer), "Create Buffer");
+
+	VkMemoryRequirements memreq;
+	vkGetBufferMemoryRequirements(_device, _vertexBuffer, &memreq);
+
+	VkMemoryAllocateInfo allocateInfo{};
+	allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocateInfo.allocationSize = memreq.size;
+	allocateInfo.memoryTypeIndex = FindMemoryType(memreq.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	ASSERT(allocateInfo.memoryTypeIndex < UINT32_MAX);
+
+	HANDLE_VKRESULT(vkAllocateMemory(_device, &allocateInfo, nullptr, &_vertexBufferMemory), "Allocate Buffer Memory");
+
+	HANDLE_VKRESULT(vkBindBufferMemory(_device, _vertexBuffer, _vertexBufferMemory, 0), "Bind Buffer Memory");
+
+	void* data;
+	HANDLE_VKRESULT(vkMapMemory(_device, _vertexBufferMemory, 0, createInfo.size, 0, &data), "Map Buffer Memory");
+	memcpy(data, vertices.data(), (size_t)createInfo.size);
+	vkUnmapMemory(_device, _vertexBufferMemory);
+}
+
+void Vulkan::DestroyVertexBuffer()
+{
+	vkDestroyBuffer(_device, _vertexBuffer, nullptr);
+	vkFreeMemory(_device, _vertexBufferMemory, nullptr);
 }
 
 void Vulkan::DrawFrame()

@@ -14,6 +14,8 @@ namespace Euler
 			T y;
 
 			Vector2Template() : x(0), y(0) {}
+
+			Vector2Template(T px, T py) : x(px), y(py){}
 		};
 	}
 }
