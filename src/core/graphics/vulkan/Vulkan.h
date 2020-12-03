@@ -148,6 +148,10 @@ namespace Euler
             void DestroyFrameSyncObjects();
 
             uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+            void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& deviceMemory);
+            void DestroyBuffer(VkBuffer buffer, VkDeviceMemory deviceMemory);
+            void CopyBuffer(VkBuffer srcBuffer, VkBuffer destBuffer, VkDeviceSize size);
+
             void CreateVertexBuffer();
             void DestroyVertexBuffer();
 
