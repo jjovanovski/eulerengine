@@ -7,6 +7,20 @@
 
 using namespace Euler;
 
+void framebufferResized(GLFWwindow* window, int width, int height)
+{
+	App* app = (App*) glfwGetWindowUserPointer(window);
+	app->Vulkan->SetWindowResized(width, height);
+
+	if (width == 0 || height == 0)
+	{
+		app->WindowMinimized = true;
+	}
+	else
+	{
+		app->WindowMinimized = false;
+	}
+}
 
 App::App()
 {
@@ -17,8 +31,10 @@ App::App()
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-	_window = glfwCreateWindow(WIDTH, HEIGHT, "Euler Engine", nullptr, nullptr);
-
+	Window = glfwCreateWindow(WIDTH, HEIGHT, "Euler Engine", nullptr, nullptr);
+	
+	glfwSetWindowUserPointer(Window, this);
+	glfwSetFramebufferSizeCallback(Window, framebufferResized);
 
 	// create vulkan instance
 	std::vector<const char*> requiredInstanceExtensions;
@@ -32,11 +48,12 @@ App::App()
 	}
 
 	Graphics::Vulkan vulkan;
+	Vulkan = &vulkan;	// TODO: wtf?
 	vulkan.CreateInstance("Sandbox", VK_MAKE_VERSION(0, 1, 0), requiredInstanceLayers, requiredInstanceExtensions);
 	
 	// create vulkan device
 	VkSurfaceKHR surface;
-	glfwCreateWindowSurface(vulkan.GetInstance(), _window, nullptr, &surface);
+	glfwCreateWindowSurface(vulkan.GetInstance(), Window, nullptr, &surface);
 	VkPhysicalDeviceFeatures physicalDeviceFeatures{};
 	std::vector<const char*> requiredDeviceLayers;
 	std::vector<const char*> requiredDeviceExtensions;
@@ -46,7 +63,12 @@ App::App()
 	vulkan.InitRenderer(WIDTH, HEIGHT);
 
 	// main loop
-	while (!glfwWindowShouldClose(_window)) {
+	while (!glfwWindowShouldClose(Window)) {
+		while (WindowMinimized)
+		{
+			glfwWaitEvents();
+		}
+
 		vulkan.DrawFrame();
 		glfwPollEvents();
 	}
@@ -55,6 +77,6 @@ App::App()
 	vkDestroySurfaceKHR(vulkan.GetInstance(), surface, nullptr);
 	vulkan.Cleanup();
 
-	glfwDestroyWindow(_window);
+	glfwDestroyWindow(Window);
 	glfwTerminate();
 }

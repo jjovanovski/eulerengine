@@ -76,11 +76,17 @@ namespace Euler
             int _framesInFlight = 3;
             int _currentFrame = 0;
 
+            uint32_t _resizeWidth = UINT32_MAX;
+            uint32_t _resizeHeight = UINT32_MAX;
+
         public:
             Vulkan();
 
             void InitRenderer(uint32_t width, uint32_t height);
             void Cleanup();
+            void RecreateSwapchain(uint32_t width, uint32_t height);
+
+            void SetWindowResized(uint32_t width, uint32_t height);
 
             void CreateInstance(const char* appName, uint32_t appVersion, std::vector<const char*> requiredLayerNames, std::vector<const char*> requiredExtensionNames);
             void DestroyInstance();
@@ -116,8 +122,11 @@ namespace Euler
             void CreateCommandPool();
             void DestroyCommandPool();
 
-            void CreateCommandBuffers();
-            void DestroyCommandBuffers();
+            void AllocateCommandBuffers();
+            void FreeCommandBuffers();
+
+            void CreateFrameSyncObjects();
+            void DestroyFrameSyncObjects();
 
             void DrawFrame();
         };

@@ -43,14 +43,16 @@ void Vulkan::InitRenderer(uint32_t width, uint32_t height)
 	CreatePipeline();
 	CreateFramebuffers();
 	CreateCommandPool();
-	CreateCommandBuffers();
+	AllocateCommandBuffers();
+	CreateFrameSyncObjects();
 }
 
 void Vulkan::Cleanup()
 {
 	vkDeviceWaitIdle(_device);
 
-	DestroyCommandBuffers();
+	DestroyFrameSyncObjects();
+	FreeCommandBuffers();
 	DestroyCommandPool();
 	DestroyFramebuffers();
 	DestroyPipeline();
@@ -59,6 +61,33 @@ void Vulkan::Cleanup()
 	DestroyDevice();
 	DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
 	DestroyInstance();
+}
+
+void Vulkan::RecreateSwapchain(uint32_t width, uint32_t height)
+{
+	vkDeviceWaitIdle(_device);
+
+	_extent = { width, height };
+
+	FreeCommandBuffers();
+	DestroyCommandPool();
+	DestroyFramebuffers();
+	DestroyPipeline();
+	DestroyRenderPass();
+	DestroySwapchain();
+
+	CreateSwapchain();
+	CreateRenderPass();
+	CreatePipeline();
+	CreateFramebuffers();
+	CreateCommandPool();
+	AllocateCommandBuffers();
+}
+
+void Vulkan::SetWindowResized(uint32_t width, uint32_t height)
+{
+	_resizeWidth = width;
+	_resizeHeight = height;
 }
 
 void Vulkan::CreateInstance(const char* appName, uint32_t appVersion, std::vector<const char*> requiredLayerNames, std::vector<const char*> requiredExtensionNames)
@@ -760,7 +789,7 @@ void Vulkan::DestroyCommandPool()
 	vkDestroyCommandPool(_device, _commandPool, nullptr);
 }
 
-void Vulkan::CreateCommandBuffers()
+void Vulkan::AllocateCommandBuffers()
 {
 	_commandBuffers.resize(_swapchainImageViews.size());
 
@@ -804,7 +833,15 @@ void Vulkan::CreateCommandBuffers()
 		}
 		HANDLE_VKRESULT(vkEndCommandBuffer(_commandBuffers[i]), "End Command Buffer");
 	}
+}
 
+void Vulkan::FreeCommandBuffers()
+{
+	vkFreeCommandBuffers(_device, _commandPool, _commandBuffers.size(), _commandBuffers.data());
+}
+
+void Vulkan::CreateFrameSyncObjects()
+{
 	// create semaphores
 	_imageAvailableSemaphores.resize(_framesInFlight);
 	_renderFinishedSemaphores.resize(_framesInFlight);
@@ -824,7 +861,7 @@ void Vulkan::CreateCommandBuffers()
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-		
+
 		vkCreateFence(_device, &fenceCreateInfo, nullptr, &_fences[i]);
 	}
 
@@ -835,7 +872,7 @@ void Vulkan::CreateCommandBuffers()
 	}
 }
 
-void Vulkan::DestroyCommandBuffers()
+void Vulkan::DestroyFrameSyncObjects()
 {
 	for (int i = 0; i < _framesInFlight; i++)
 	{
@@ -847,10 +884,26 @@ void Vulkan::DestroyCommandBuffers()
 
 void Vulkan::DrawFrame()
 {
+	if (_resizeWidth != UINT32_MAX && _resizeHeight != UINT32_MAX)
+	{
+		RecreateSwapchain(_resizeWidth, _resizeHeight);
+		_resizeWidth = UINT32_MAX;
+		_resizeHeight = UINT32_MAX;
+	}
+
 	vkWaitForFences(_device, 1, &_fences[_currentFrame], VK_TRUE, UINT64_MAX);
 
 	uint32_t imageIndex;
-	vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
+	VkResult acquireImageResult = vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+	if (acquireImageResult == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		return;
+	}
+	else
+	{
+		ASSERT(acquireImageResult == VK_SUCCESS || acquireImageResult == VK_SUBOPTIMAL_KHR);
+	}
 
 	if (_imageFences[imageIndex] != VK_NULL_HANDLE)
 	{
@@ -880,7 +933,16 @@ void Vulkan::DrawFrame()
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = &_renderFinishedSemaphores[_currentFrame];
 
-	vkQueuePresentKHR(_presentQueue, &presentInfo);
+	VkResult presentResult = vkQueuePresentKHR(_presentQueue, &presentInfo);
+
+	if (presentResult == VK_ERROR_OUT_OF_DATE_KHR || presentResult == VK_SUBOPTIMAL_KHR)
+	{
+		return;
+	}
+	else
+	{
+		ASSERT(presentResult == VK_SUCCESS);
+	}
 
 	//vkQueueWaitIdle(_graphicsQueue);
 	_currentFrame = (_currentFrame + 1) % _framesInFlight;
