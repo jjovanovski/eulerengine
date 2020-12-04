@@ -8,6 +8,9 @@ using namespace Euler::Graphics;
 
 #include "../../io/Utils.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #define ASSERT(exp)									\
 {													\
 	assert(exp);									\

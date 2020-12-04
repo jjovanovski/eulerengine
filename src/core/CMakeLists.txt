@@ -9,6 +9,7 @@ add_library(EulerCore ${CORE_SRC_FILES})
 target_include_directories(EulerCore PUBLIC
 	"${PROJECT_SOURCE_DIR}/thirdparty/glfw/include"
 	"${PROJECT_SOURCE_DIR}/thirdparty/vulkan/include"
+	"${PROJECT_SOURCE_DIR}/thirdparty/stb"
 )
 
 target_link_directories(EulerCore PUBLIC
