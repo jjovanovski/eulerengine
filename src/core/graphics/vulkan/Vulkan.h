@@ -2,6 +2,7 @@
 
 #include "../../API.h"
 #include "../../math/Vec3.h"
+#include "../../math/Mat4.h"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -68,11 +69,8 @@ namespace Euler
             std::vector<VkFramebuffer> _swapchainFramebuffers;
 
             VkRenderPass _renderPass;
-            VkImage _image;
-            VkDeviceMemory _imageMemory;
-            VkImageView _imageView;
-            VkFramebuffer _framebuffer;
 
+            VkDescriptorSetLayout _descriptorSetLayout;
             VkPipelineLayout _graphicsPipelineLayout;
             VkPipeline _graphicsPipeline;
 
@@ -94,6 +92,11 @@ namespace Euler
             VkBuffer _indexBuffer;
             VkDeviceMemory _indexBufferMemory;
 
+            std::vector<VkBuffer> _uniformBuffers;
+            std::vector<VkDeviceMemory> _uniformBufferMemories;
+            VkDescriptorPool _descriptorPool;
+            std::vector<VkDescriptorSet> _descriptorSets;
+
             std::vector<Vertex> vertices = {
                 Vertex(Vec3(-0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f)),
                 Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(1.0f, 1.0f, 1.0f)),
@@ -105,6 +108,8 @@ namespace Euler
                 0, 1, 2,
                 0, 2, 3
             };
+
+            float zRot = 0.0f;
 
         public:
             Vulkan();
@@ -162,6 +167,11 @@ namespace Euler
 
             void CreateVertexBuffer();
             void DestroyVertexBuffer();
+
+            void CreateUniformBuffer();
+            void DestroyUniformBuffer();
+            void CreateDescriptorPool();
+            void DestroyDescriptorPool();
 
             void DrawFrame();
         };

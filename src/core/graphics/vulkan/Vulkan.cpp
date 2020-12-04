@@ -44,6 +44,8 @@ void Vulkan::InitRenderer(uint32_t width, uint32_t height)
 	CreateFramebuffers();
 	CreateCommandPool();
 	CreateVertexBuffer();
+	CreateUniformBuffer();
+	CreateDescriptorPool();
 	AllocateCommandBuffers();
 	CreateFrameSyncObjects();
 }
@@ -54,6 +56,8 @@ void Vulkan::Cleanup()
 
 	DestroyFrameSyncObjects();
 	FreeCommandBuffers();
+	DestroyDescriptorPool();
+	DestroyUniformBuffer();
 	DestroyVertexBuffer();
 	DestroyCommandPool();
 	DestroyFramebuffers();
@@ -72,6 +76,8 @@ void Vulkan::RecreateSwapchain(uint32_t width, uint32_t height)
 	_extent = { width, height };
 
 	FreeCommandBuffers();
+	DestroyDescriptorPool();
+	DestroyUniformBuffer();
 	DestroyCommandPool();
 	DestroyFramebuffers();
 	DestroyPipeline();
@@ -83,6 +89,8 @@ void Vulkan::RecreateSwapchain(uint32_t width, uint32_t height)
 	CreatePipeline();
 	CreateFramebuffers();
 	CreateCommandPool();
+	CreateUniformBuffer();
+	CreateDescriptorPool();
 	AllocateCommandBuffers();
 }
 
@@ -736,10 +744,25 @@ void Vulkan::CreatePipeline()
 	colorBlending.blendConstants[2] = 0.0f;
 	colorBlending.blendConstants[3] = 0.0f;
 
+	// descriptor set layout
+	VkDescriptorSetLayoutBinding uboBinding{};
+	uboBinding.binding = 0;
+	uboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	uboBinding.descriptorCount = 1;
+	uboBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo{};
+	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = 1;
+	layoutInfo.pBindings = &uboBinding;
+
+	HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &layoutInfo, nullptr, &_descriptorSetLayout), "Create Descriptor Set Layout");
+
 	// layout
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 	pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutCreateInfo.setLayoutCount = 0;
+	pipelineLayoutCreateInfo.setLayoutCount = 1;
+	pipelineLayoutCreateInfo.pSetLayouts = &_descriptorSetLayout;
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 	
 	HANDLE_VKRESULT(vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &_graphicsPipelineLayout), "Create Pipeline Layout");
@@ -773,6 +796,7 @@ void Vulkan::DestroyPipeline()
 {
 	vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(_device, _graphicsPipelineLayout, nullptr);
+	vkDestroyDescriptorSetLayout(_device, _descriptorSetLayout, nullptr);
 }
 
 void Vulkan::CreateFramebuffers()
@@ -860,6 +884,8 @@ void Vulkan::AllocateCommandBuffers()
 			
 			vkCmdBindIndexBuffer(_commandBuffers[i], _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 			
+			vkCmdBindDescriptorSets(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
+
 			//vkCmdDraw(_commandBuffers[i], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 			vkCmdDrawIndexed(_commandBuffers[i], indices.size(), 1, 0, 0, 0);
 
@@ -1033,6 +1059,82 @@ void Vulkan::DestroyVertexBuffer()
 	DestroyBuffer(_vertexBuffer, _vertexBufferMemory);
 }
 
+void Vulkan::CreateUniformBuffer()
+{
+	Mat4 transformMatrix;
+	transformMatrix.Set(0, 0, 1);
+	transformMatrix.Set(1, 1, 1);
+	transformMatrix.Set(2, 2, 1);
+	transformMatrix.Set(3, 3, 1);
+
+	_uniformBuffers.resize(_swapchainImageViews.size());
+	_uniformBufferMemories.resize(_swapchainImageViews.size());
+
+	for (int i = 0; i < _uniformBuffers.size(); i++)
+	{
+		CreateBuffer(sizeof(transformMatrix), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, _uniformBuffers[i], _uniformBufferMemories[i]);
+	}
+}
+
+void Vulkan::DestroyUniformBuffer()
+{
+	for (int i = 0; i < _uniformBuffers.size(); i++)
+	{
+		DestroyBuffer(_uniformBuffers[i], _uniformBufferMemories[i]);
+	}
+}
+
+void Vulkan::CreateDescriptorPool()
+{
+	VkDescriptorPoolSize poolSize{};
+	poolSize.descriptorCount = static_cast<uint32_t>(_swapchainImageViews.size());
+	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+	VkDescriptorPoolCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	createInfo.poolSizeCount = 1;
+	createInfo.pPoolSizes = &poolSize;
+	createInfo.maxSets = static_cast<uint32_t>(_swapchainImageViews.size());
+
+	HANDLE_VKRESULT(vkCreateDescriptorPool(_device, &createInfo, nullptr, &_descriptorPool), "Create Descriptor Pool");
+
+	// create descriptor sets
+	std::vector<VkDescriptorSetLayout> layouts(_swapchainImageViews.size(), _descriptorSetLayout);
+	_descriptorSets.resize(_swapchainImageViews.size());
+	VkDescriptorSetAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = _descriptorPool;
+	allocInfo.descriptorSetCount = static_cast<uint32_t>(_swapchainImageViews.size());
+	allocInfo.pSetLayouts = layouts.data();
+
+	HANDLE_VKRESULT(vkAllocateDescriptorSets(_device, &allocInfo, _descriptorSets.data()), "Allocate Descriptor Sets");
+
+	for (int i = 0; i < _descriptorSets.size(); i++)
+	{
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = _uniformBuffers[i];
+		bufferInfo.offset = 0;
+		bufferInfo.range = VK_WHOLE_SIZE;
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstSet = _descriptorSets[i];
+		write.dstBinding = 0;
+		write.dstArrayElement = 0;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write.descriptorCount = 1;
+		write.pBufferInfo = &bufferInfo;
+
+		vkUpdateDescriptorSets(_device, 1, &write, 0, nullptr);
+	}
+}
+
+void Vulkan::DestroyDescriptorPool()
+{
+	vkFreeDescriptorSets(_device, _descriptorPool, _descriptorSets.size(), _descriptorSets.data());
+	vkDestroyDescriptorPool(_device, _descriptorPool, nullptr);
+}
+
 void Vulkan::DrawFrame()
 {
 	if (_resizeWidth != UINT32_MAX && _resizeHeight != UINT32_MAX)
@@ -1046,6 +1148,19 @@ void Vulkan::DrawFrame()
 
 	uint32_t imageIndex;
 	VkResult acquireImageResult = vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+	// update uniform buffer
+	zRot += 0.0001f;
+	Mat4 transformMat;
+	transformMat.Set(0, 0, 1); transformMat.Set(1, 1, 1); transformMat.Set(2, 2, 1); transformMat.Set(3, 3, 1);
+	transformMat.Set(0, 0, cos(zRot));
+	transformMat.Set(1, 1, cos(zRot));
+	transformMat.Set(0, 1, -sin(zRot));
+	transformMat.Set(1, 0, sin(zRot));
+	void* data;
+	vkMapMemory(_device, _uniformBufferMemories[imageIndex], 0, sizeof(transformMat), 0, &data);
+	memcpy(data, &transformMat, sizeof(transformMat));
+	vkUnmapMemory(_device, _uniformBufferMemories[imageIndex]);
 
 	if (acquireImageResult == VK_ERROR_OUT_OF_DATE_KHR)
 	{
