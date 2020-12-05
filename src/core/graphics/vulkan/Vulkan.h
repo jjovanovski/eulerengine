@@ -97,6 +97,11 @@ namespace Euler
             VkDescriptorPool _descriptorPool;
             std::vector<VkDescriptorSet> _descriptorSets;
 
+            VkImage _textureImage;
+            VkDeviceMemory _textureMemory;
+            VkImageView _textureImageView;
+            VkSampler _sampler;
+
             std::vector<Vertex> vertices = {
                 Vertex(Vec3(-0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f)),
                 Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(1.0f, 1.0f, 1.0f)),
@@ -172,6 +177,17 @@ namespace Euler
             void DestroyUniformBuffer();
             void CreateDescriptorPool();
             void DestroyDescriptorPool();
+
+            void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& memory);;
+            void DestroyImage(VkImage image, VkDeviceMemory memory);
+            void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+            void CopyBufferToImage(VkBuffer srcBuffer, VkImage dstImage, uint32_t width, uint32_t height);
+
+            void CreateTexture();
+            void DestroyTexture();
+
+            VkCommandBuffer BeginSingleUseCommandBuffer();
+            void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
             void DrawFrame();
         };
