@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../API.h"
+#include "../../math/Vec2.h"
 #include "../../math/Vec3.h"
 #include "../../math/Mat4.h"
 
@@ -37,8 +38,9 @@ namespace Euler
         {
             Vec3 Position;
             Vec3 Color;
+            Vec2 Uv;
 
-            Vertex(Vec3 position, Vec3 color) : Position(position), Color(color) {}
+            Vertex(Vec3 position, Vec3 color, Vec2 uv) : Position(position), Color(color), Uv(uv) {}
         };
 
         class EULER_API Vulkan
@@ -103,10 +105,10 @@ namespace Euler
             VkSampler _sampler;
 
             std::vector<Vertex> vertices = {
-                Vertex(Vec3(-0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f)),
-                Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(1.0f, 1.0f, 1.0f)),
-                Vertex(Vec3(+0.5f, -0.5f, 0.0f), Vec3(1.0f, 0.0f, 0.0f)),
-                Vertex(Vec3(+0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f))
+                Vertex(Vec3(-0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
+                Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
+                Vertex(Vec3(+0.5f, -0.5f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
+                Vertex(Vec3(+0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f))
             };
 
             std::vector<uint32_t> indices = {

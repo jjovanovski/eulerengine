@@ -674,14 +674,20 @@ void Vulkan::CreatePipeline()
 	colorAttrDesc.location = 1;
 	colorAttrDesc.offset = offsetof(Vertex, Color);
 
-	VkVertexInputAttributeDescription attrDescs[] = { positionAttrDesc, colorAttrDesc };
+	VkVertexInputAttributeDescription uvAttrDesc{};
+	uvAttrDesc.binding = 0;
+	uvAttrDesc.format = VK_FORMAT_R32G32_SFLOAT;
+	uvAttrDesc.location = 2;
+	uvAttrDesc.offset = offsetof(Vertex, Uv);
+
+	VkVertexInputAttributeDescription attrDescs[] = { positionAttrDesc, colorAttrDesc, uvAttrDesc };
 
 	// vertex input state
 	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
 	vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
 	vertexInputStateCreateInfo.pVertexBindingDescriptions = &bindingDesc;
-	vertexInputStateCreateInfo.vertexAttributeDescriptionCount = 2;
+	vertexInputStateCreateInfo.vertexAttributeDescriptionCount = 3;
 	vertexInputStateCreateInfo.pVertexAttributeDescriptions = attrDescs;
 
 	// input assembly state
@@ -759,10 +765,18 @@ void Vulkan::CreatePipeline()
 	uboBinding.descriptorCount = 1;
 	uboBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
+	VkDescriptorSetLayoutBinding samplerBinding{};
+	samplerBinding.binding = 1;
+	samplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	samplerBinding.descriptorCount = 1;
+	samplerBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	VkDescriptorSetLayoutBinding bindings[] = { uboBinding, samplerBinding };
+
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = 1;
-	layoutInfo.pBindings = &uboBinding;
+	layoutInfo.bindingCount = 2;
+	layoutInfo.pBindings = bindings;
 
 	HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &layoutInfo, nullptr, &_descriptorSetLayout), "Create Descriptor Set Layout");
 
@@ -1275,10 +1289,16 @@ void Vulkan::CreateDescriptorPool()
 	poolSize.descriptorCount = static_cast<uint32_t>(_swapchainImageViews.size());
 	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
+	VkDescriptorPoolSize samplerPoolSize{};
+	samplerPoolSize.descriptorCount = static_cast<uint32_t>(_swapchainImageViews.size());
+	samplerPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+	VkDescriptorPoolSize poolSizes[] = { poolSize, samplerPoolSize };
+
 	VkDescriptorPoolCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	createInfo.poolSizeCount = 1;
-	createInfo.pPoolSizes = &poolSize;
+	createInfo.poolSizeCount = 2;
+	createInfo.pPoolSizes = poolSizes;
 	createInfo.maxSets = static_cast<uint32_t>(_swapchainImageViews.size());
 
 	HANDLE_VKRESULT(vkCreateDescriptorPool(_device, &createInfo, nullptr, &_descriptorPool), "Create Descriptor Pool");
@@ -1301,16 +1321,32 @@ void Vulkan::CreateDescriptorPool()
 		bufferInfo.offset = 0;
 		bufferInfo.range = VK_WHOLE_SIZE;
 
-		VkWriteDescriptorSet write{};
-		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write.dstSet = _descriptorSets[i];
-		write.dstBinding = 0;
-		write.dstArrayElement = 0;
-		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		write.descriptorCount = 1;
-		write.pBufferInfo = &bufferInfo;
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.imageView = _textureImageView;
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.sampler = _sampler;
 
-		vkUpdateDescriptorSets(_device, 1, &write, 0, nullptr);
+		VkWriteDescriptorSet writeUbo{};
+		writeUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeUbo.dstSet = _descriptorSets[i];
+		writeUbo.dstBinding = 0;
+		writeUbo.dstArrayElement = 0;
+		writeUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		writeUbo.descriptorCount = 1;
+		writeUbo.pBufferInfo = &bufferInfo;
+
+		VkWriteDescriptorSet writeSampler{};
+		writeSampler.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeSampler.dstSet = _descriptorSets[i];
+		writeSampler.dstBinding = 1;
+		writeSampler.dstArrayElement = 0;
+		writeSampler.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		writeSampler.descriptorCount = 1;
+		writeSampler.pImageInfo = &imageInfo;
+
+		VkWriteDescriptorSet writes[] = { writeUbo, writeSampler };
+
+		vkUpdateDescriptorSets(_device, 2, writes, 0, nullptr);
 	}
 }
 
