@@ -105,15 +105,23 @@ namespace Euler
             VkSampler _sampler;
 
             std::vector<Vertex> vertices = {
-                Vertex(Vec3(-0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
-                Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
-                Vertex(Vec3(+0.5f, -0.5f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
-                Vertex(Vec3(+0.5f, +0.5f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f))
+                Vertex(Vec3(-0.5f, +0.5f, 0.4f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
+                Vertex(Vec3(-0.5f, -0.5f, 0.4f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
+                Vertex(Vec3(+0.5f, -0.5f, 0.4f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
+                Vertex(Vec3(+0.5f, +0.5f, 0.4f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f)),
+
+                Vertex(Vec3(-0.5f + 0.2f, +0.5f, 0.5f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
+                Vertex(Vec3(-0.5f + 0.2f, -0.5f, 0.5f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
+                Vertex(Vec3(+0.5f + 0.2f, -0.5f, 0.5f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
+                Vertex(Vec3(+0.5f + 0.2f, +0.5f, 0.5f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f))
             };
 
             std::vector<uint32_t> indices = {
                 0, 1, 2,
-                0, 2, 3
+                0, 2, 3,
+
+                4, 5, 6,
+                4, 6, 7
             };
 
             float zRot = 0.0f;

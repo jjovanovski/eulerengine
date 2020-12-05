@@ -23,6 +23,22 @@ namespace Euler
 			{
 				m[i][j] = value;
 			}
+
+			void Transpose()
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						if (i > j)
+						{
+							T tmp = m[i][j];
+							m[i][j] = m[j][i];
+							m[j][i] = tmp;
+						}
+					}
+				}
+			}
 		};
 	}
 }

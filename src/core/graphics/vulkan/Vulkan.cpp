@@ -1067,7 +1067,8 @@ void Vulkan::CreateUniformBuffer()
 	transformMatrix.Set(0, 0, 1);
 	transformMatrix.Set(1, 1, 1);
 	transformMatrix.Set(2, 2, 1);
-	transformMatrix.Set(3, 3, 1);
+	transformMatrix.Set(3, 3, 0);
+	transformMatrix.Set(3, 2, -1/2.0f);
 
 	_uniformBuffers.resize(_swapchainImageViews.size());
 	_uniformBufferMemories.resize(_swapchainImageViews.size());
@@ -1403,13 +1404,20 @@ void Vulkan::DrawFrame()
 	VkResult acquireImageResult = vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
 
 	// update uniform buffer
-	zRot += 0.0001f;
+	zRot += 0.00003f;
 	Mat4 transformMat;
-	transformMat.Set(0, 0, 1); transformMat.Set(1, 1, 1); transformMat.Set(2, 2, 1); transformMat.Set(3, 3, 1);
+	/*transformMat.Set(0, 0, 1); transformMat.Set(1, 1, 1); transformMat.Set(2, 2, 1); transformMat.Set(3, 3, 1);
 	transformMat.Set(0, 0, cos(zRot));
 	transformMat.Set(1, 1, cos(zRot));
 	transformMat.Set(0, 1, -sin(zRot));
-	transformMat.Set(1, 0, sin(zRot));
+	transformMat.Set(1, 0, sin(zRot));*/
+
+	transformMat.Set(0, 0, 1.0f);
+	transformMat.Set(1, 1, 1.0f);
+	transformMat.Set(2, 2, 1.0f);
+	transformMat.Set(3, 3, 1.0f);
+	transformMat.Set(3, 2, 1.0f);
+	transformMat.Transpose();
 	void* data;
 	vkMapMemory(_device, _uniformBufferMemories[imageIndex], 0, sizeof(transformMat), 0, &data);
 	memcpy(data, &transformMat, sizeof(transformMat));
