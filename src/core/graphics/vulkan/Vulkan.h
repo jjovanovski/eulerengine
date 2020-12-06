@@ -104,16 +104,20 @@ namespace Euler
             VkImageView _textureImageView;
             VkSampler _sampler;
 
+            VkImage _depthImage;
+            VkDeviceMemory _depthMemory;
+            VkImageView _depthImageView;
+
             std::vector<Vertex> vertices = {
                 Vertex(Vec3(-0.5f, +0.5f, 0.4f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
                 Vertex(Vec3(-0.5f, -0.5f, 0.4f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
                 Vertex(Vec3(+0.5f, -0.5f, 0.4f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
                 Vertex(Vec3(+0.5f, +0.5f, 0.4f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f)),
 
-                Vertex(Vec3(-0.5f + 0.2f, +0.5f, 0.5f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
-                Vertex(Vec3(-0.5f + 0.2f, -0.5f, 0.5f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
-                Vertex(Vec3(+0.5f + 0.2f, -0.5f, 0.5f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
-                Vertex(Vec3(+0.5f + 0.2f, +0.5f, 0.5f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f))
+                Vertex(Vec3(-0.5f + 0.2f, +0.5f, 0.3f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
+                Vertex(Vec3(-0.5f + 0.2f, -0.5f, 0.3f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
+                Vertex(Vec3(+0.5f + 0.2f, -0.5f, 0.3f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
+                Vertex(Vec3(+0.5f + 0.2f, +0.5f, 0.3f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f))
             };
 
             std::vector<uint32_t> indices = {
@@ -195,6 +199,9 @@ namespace Euler
 
             void CreateTexture();
             void DestroyTexture();
+
+            void CreateDepthImage();
+            void DestroyDepthImage();
 
             VkCommandBuffer BeginSingleUseCommandBuffer();
             void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
