@@ -26,6 +26,7 @@ namespace Euler
 
 			void Transpose()
 			{
+				// TODO: Manually unroll this statement
 				for (int i = 0; i < 4; i++)
 				{
 					for (int j = 0; j < 4; j++)
