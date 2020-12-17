@@ -7,6 +7,7 @@ using namespace Euler::Graphics;
 #include <algorithm>
 
 #include "../../io/Utils.h"
+#include "../../math/Matrices.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -1475,19 +1476,9 @@ void Vulkan::DrawFrame()
 
 	// update uniform buffer
 	zRot += 0.00003f;
-	Mat4 transformMat;
-	/*transformMat.Set(0, 0, 1); transformMat.Set(1, 1, 1); transformMat.Set(2, 2, 1); transformMat.Set(3, 3, 1);
-	transformMat.Set(0, 0, cos(zRot));
-	transformMat.Set(1, 1, cos(zRot));
-	transformMat.Set(0, 1, -sin(zRot));
-	transformMat.Set(1, 0, sin(zRot));*/
-
-	transformMat.Set(0, 0, 1.0f);
-	transformMat.Set(1, 1, 1.0f);
-	transformMat.Set(2, 2, 1.0f);
-	transformMat.Set(3, 3, 1.0f);
-	transformMat.Set(3, 2, 1.0f);
+	Mat4 transformMat = Euler::Math::Matrices::Perspective(_extent.width, _extent.height, 90, 0.001f, 100.0f);
 	transformMat.Transpose();
+
 	void* data;
 	vkMapMemory(_device, _uniformBufferMemories[imageIndex], 0, sizeof(transformMat), 0, &data);
 	memcpy(data, &transformMat, sizeof(transformMat));

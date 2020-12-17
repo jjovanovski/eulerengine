@@ -109,15 +109,19 @@ namespace Euler
             VkImageView _depthImageView;
 
             std::vector<Vertex> vertices = {
-                Vertex(Vec3(-0.5f, +0.5f, 0.4f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
-                Vertex(Vec3(-0.5f, -0.5f, 0.4f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
-                Vertex(Vec3(+0.5f, -0.5f, 0.4f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
-                Vertex(Vec3(+0.5f, +0.5f, 0.4f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f)),
+                Vertex(Vec3(-1.0f, +1.0f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
+                Vertex(Vec3(-1.0f, -1.0f, 1.0f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
+                Vertex(Vec3(+1.0f, -1.0f, 1.0f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
+                Vertex(Vec3(+1.0f, +1.0f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f))
+                /*Vertex(Vec3(-0.5f, +0.5f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
+                Vertex(Vec3(-0.5f, -0.5f, 1.0f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
+                Vertex(Vec3(+0.5f, -0.5f, 1.0f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
+                Vertex(Vec3(+0.5f, +0.5f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f)),
 
                 Vertex(Vec3(-0.5f + 0.2f, +0.5f, 0.3f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
                 Vertex(Vec3(-0.5f + 0.2f, -0.5f, 0.3f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
                 Vertex(Vec3(+0.5f + 0.2f, -0.5f, 0.3f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
-                Vertex(Vec3(+0.5f + 0.2f, +0.5f, 0.3f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f))
+                Vertex(Vec3(+0.5f + 0.2f, +0.5f, 0.3f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f))*/
             };
 
             std::vector<uint32_t> indices = {
