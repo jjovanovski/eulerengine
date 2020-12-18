@@ -8,6 +8,55 @@
 
 using namespace Euler::Math;
 
+Mat4 Matrices::Identity()
+{
+	Mat4 mat;
+	mat.Set(0, 0, 1);
+	mat.Set(1, 1, 1);
+	mat.Set(2, 2, 1);
+	mat.Set(3, 3, 1);
+
+	return mat;
+}
+
+
+Mat4 Matrices::Translate(float x, float y, float z)
+{
+	Mat4 mat;
+	mat.Set(0, 3, x);
+	mat.Set(1, 3, y);
+	mat.Set(2, 3, z);
+
+	mat.Set(0, 0, 1);
+	mat.Set(1, 1, 1);
+	mat.Set(2, 2, 1);
+	mat.Set(3, 3, 1);
+
+	return mat;
+}
+
+Mat4 Matrices::Scale(float s)
+{
+	Mat4 mat;
+	mat.Set(0, 0, s);
+	mat.Set(1, 1, s);
+	mat.Set(2, 2, s);
+	mat.Set(3, 3, 1);
+
+	return mat;
+}
+
+Mat4 Matrices::Scale(float x, float y, float z)
+{
+	Mat4 mat;
+	mat.Set(0, 0, x);
+	mat.Set(1, 1, y);
+	mat.Set(2, 2, z);
+	mat.Set(3, 3, 1);
+
+	return mat;
+}
+
 Mat4 Matrices::Perspective(uint32_t width, uint32_t height, float fieldOfView, float nearZ, float farZ)
 {
 	float aspectRatio = (float)width / height;

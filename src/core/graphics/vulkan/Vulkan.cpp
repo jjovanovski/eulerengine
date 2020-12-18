@@ -1097,19 +1097,14 @@ void Vulkan::DestroyVertexBuffer()
 
 void Vulkan::CreateUniformBuffer()
 {
-	Mat4 transformMatrix;
-	transformMatrix.Set(0, 0, 1);
-	transformMatrix.Set(1, 1, 1);
-	transformMatrix.Set(2, 2, 1);
-	transformMatrix.Set(3, 3, 0);
-	transformMatrix.Set(3, 2, -1/2.0f);
+	MVP mvp;
 
 	_uniformBuffers.resize(_swapchainImageViews.size());
 	_uniformBufferMemories.resize(_swapchainImageViews.size());
 
 	for (int i = 0; i < _uniformBuffers.size(); i++)
 	{
-		CreateBuffer(sizeof(transformMatrix), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, _uniformBuffers[i], _uniformBufferMemories[i]);
+		CreateBuffer(sizeof(mvp), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, _uniformBuffers[i], _uniformBufferMemories[i]);
 	}
 }
 
@@ -1476,12 +1471,18 @@ void Vulkan::DrawFrame()
 
 	// update uniform buffer
 	zRot += 0.00003f;
-	Mat4 transformMat = Euler::Math::Matrices::Perspective(_extent.width, _extent.height, 90, 0.001f, 100.0f);
-	transformMat.Transpose();
+	MVP mvp;
+	mvp.Model = Math::Matrices::Translate(0, 0, 2.0f);
+	mvp.View = Math::Matrices::Identity();
+	mvp.Projection = Euler::Math::Matrices::Perspective(_extent.width, _extent.height, 90, 0.001f, 100.0f);
+
+	mvp.Model.Transpose();
+	mvp.View.Transpose();
+	mvp.Projection.Transpose();
 
 	void* data;
-	vkMapMemory(_device, _uniformBufferMemories[imageIndex], 0, sizeof(transformMat), 0, &data);
-	memcpy(data, &transformMat, sizeof(transformMat));
+	vkMapMemory(_device, _uniformBufferMemories[imageIndex], 0, sizeof(mvp), 0, &data);
+	memcpy(data, &mvp, sizeof(mvp));
 	vkUnmapMemory(_device, _uniformBufferMemories[imageIndex]);
 
 	if (acquireImageResult == VK_ERROR_OUT_OF_DATE_KHR)
