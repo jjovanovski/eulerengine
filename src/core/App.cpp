@@ -24,7 +24,7 @@ void framebufferResized(GLFWwindow* window, int width, int height)
 
 App::App()
 {
-	const int WIDTH = 800;
+	const int WIDTH = 1200;
 	const int HEIGHT = 800;
 
 	glfwInit();
