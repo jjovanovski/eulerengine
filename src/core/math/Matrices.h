@@ -19,7 +19,9 @@ namespace Euler
 			static Mat4 Scale(float s);
 			static Mat4 Scale(float x, float y, float z);
 
-			// TODO: Rotation matrix
+			static Mat4 RotateX(float deg);
+			static Mat4 RotateY(float deg);
+			static Mat4 RotateZ(float deg);
 
 			static Mat4 Perspective(uint32_t width, uint32_t height, float fieldOfView, float nearZ, float farZ);
 		};

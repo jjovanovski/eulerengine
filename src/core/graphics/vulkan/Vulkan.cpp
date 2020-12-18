@@ -1470,13 +1470,13 @@ void Vulkan::DrawFrame()
 	VkResult acquireImageResult = vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
 
 	// update uniform buffer
-	zRot += 0.00003f;
+	zRot += 0.0001f;
 	MVP mvp;
-	mvp.Model = Math::Matrices::Translate(0, 0, 2.0f);
-	mvp.View = Math::Matrices::Identity();
-	mvp.Projection = Euler::Math::Matrices::Perspective(_extent.width, _extent.height, 90, 0.001f, 100.0f);
+	mvp.Model = Math::Matrices::RotateY(zRot);
+	mvp.View = Math::Matrices::Translate(0, 0, 3);
+	mvp.Projection = Euler::Math::Matrices::Perspective(_extent.width, _extent.height, 60, 0.001f, 100.0f);
 
-	mvp.Model.Transpose();
+	//mvp.Model.Transpose();
 	mvp.View.Transpose();
 	mvp.Projection.Transpose();
 

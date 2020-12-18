@@ -57,6 +57,51 @@ Mat4 Matrices::Scale(float x, float y, float z)
 	return mat;
 }
 
+Mat4 Matrices::RotateX(float rad)
+{
+	Mat4 mat;
+	mat.Set(0, 0, 1);
+	mat.Set(3, 3, 1);
+
+	mat.Set(1, 1, cosf(rad));
+	mat.Set(1, 2, -sinf(rad));
+
+	mat.Set(2, 1, sinf(rad));
+	mat.Set(2, 2, cosf(rad));
+
+	return mat;
+}
+
+Mat4 Matrices::RotateY(float rad)
+{
+	Mat4 mat;
+	mat.Set(0, 0, cosf(rad));
+	mat.Set(0, 2, -sinf(rad));
+
+	mat.Set(1, 1, 1);
+	mat.Set(3, 3, 1);
+
+	mat.Set(2, 0, sinf(rad));
+	mat.Set(2, 2, cosf(rad));
+
+	return mat;
+}
+
+Mat4 Matrices::RotateZ(float rad)
+{
+	Mat4 mat;
+	mat.Set(0, 0, cosf(rad));
+	mat.Set(0, 1, -sinf(rad));
+
+	mat.Set(1, 0, sinf(rad));
+	mat.Set(1, 1, cosf(rad));
+
+	mat.Set(2, 2, 1);
+	mat.Set(3, 3, 1);
+
+	return mat;
+}
+
 Mat4 Matrices::Perspective(uint32_t width, uint32_t height, float fieldOfView, float nearZ, float farZ)
 {
 	float aspectRatio = (float)width / height;
