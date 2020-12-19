@@ -1120,10 +1120,51 @@ void Vulkan::CreateVertexBuffer(size_t vertexSize, uint32_t vertexCount, void* d
 	memcpy(bufferData, data, bufferSize);
 	vkUnmapMemory(_device, stagingBufferMemory);
 
-	// create device-local vertex buffer
+	// create device-local buffer
 	CreateBuffer(
 		bufferSize,
 		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		buffer->Buffer,
+		buffer->Memory
+	);
+
+	// copy staging to device-local
+	CopyBuffer(stagingBuffer, buffer->Buffer, bufferSize);
+
+	// destroy staging buffer
+	DestroyBuffer(stagingBuffer, stagingBufferMemory);
+}
+
+void Vulkan::CreateIndexBuffer(size_t indexSize, uint32_t indexCount, void* data, Buffer* buffer)
+{
+	ASSERT(indexSize > 0);
+	ASSERT(indexCount > 0);
+	ASSERT(data != nullptr);
+
+	size_t bufferSize = indexSize * indexCount;
+
+	// create staging buffer
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	CreateBuffer(
+		bufferSize,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		stagingBuffer,
+		stagingBufferMemory
+	);
+
+	// fill staging buffer
+	void* bufferData;
+	vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &bufferData);
+	memcpy(bufferData, data, bufferSize);
+	vkUnmapMemory(_device, stagingBufferMemory);
+
+	// create device-local buffer
+	CreateBuffer(
+		bufferSize,
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		buffer->Buffer,
 		buffer->Memory
