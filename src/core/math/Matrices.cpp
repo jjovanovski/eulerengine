@@ -64,9 +64,9 @@ Mat4 Matrices::RotateX(float rad)
 	mat.Set(3, 3, 1);
 
 	mat.Set(1, 1, cosf(rad));
-	mat.Set(1, 2, -sinf(rad));
+	mat.Set(1, 2, sinf(rad));
 
-	mat.Set(2, 1, sinf(rad));
+	mat.Set(2, 1, -sinf(rad));
 	mat.Set(2, 2, cosf(rad));
 
 	return mat;
@@ -91,9 +91,9 @@ Mat4 Matrices::RotateZ(float rad)
 {
 	Mat4 mat;
 	mat.Set(0, 0, cosf(rad));
-	mat.Set(0, 1, -sinf(rad));
+	mat.Set(0, 1, sinf(rad));
 
-	mat.Set(1, 0, sinf(rad));
+	mat.Set(1, 0, -sinf(rad));
 	mat.Set(1, 1, cosf(rad));
 
 	mat.Set(2, 2, 1);

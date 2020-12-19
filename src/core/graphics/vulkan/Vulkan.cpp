@@ -1472,11 +1472,11 @@ void Vulkan::DrawFrame()
 	// update uniform buffer
 	zRot += 0.0001f;
 	MVP mvp;
-	mvp.Model = Math::Matrices::RotateY(zRot);
+	mvp.Model = Math::Matrices::RotateX(zRot);
 	mvp.View = Math::Matrices::Translate(0, 0, 3);
 	mvp.Projection = Euler::Math::Matrices::Perspective(_extent.width, _extent.height, 60, 0.001f, 100.0f);
 
-	//mvp.Model.Transpose();
+	mvp.Model.Transpose();
 	mvp.View.Transpose();
 	mvp.Projection.Transpose();
 
