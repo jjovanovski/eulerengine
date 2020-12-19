@@ -934,17 +934,10 @@ void Vulkan::AllocateCommandBuffers()
 			vkCmdBeginRenderPass(_commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 			vkCmdBindPipeline(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
 
-			VkBuffer buffers[] = { _vertexBuffer.Buffer };
-			VkDeviceSize offsets[] = { 0 };
-			vkCmdBindVertexBuffers(_commandBuffers[i], 0, 1, buffers, offsets);
-			
-			vkCmdBindIndexBuffer(_commandBuffers[i], _indexBuffer.Buffer, 0, VK_INDEX_TYPE_UINT32);
-			
 			vkCmdBindDescriptorSets(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
 
-			//vkCmdDraw(_commandBuffers[i], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
-			vkCmdDrawIndexed(_commandBuffers[i], indices.size(), 1, 0, 0, 0);
-
+			DrawMesh(_commandBuffers[i], &_vertexBuffer, &_indexBuffer);
+			
 			vkCmdEndRenderPass(_commandBuffers[i]);
 		}
 		HANDLE_VKRESULT(vkEndCommandBuffer(_commandBuffers[i]), "End Command Buffer");
@@ -1588,4 +1581,14 @@ void Vulkan::DrawFrame()
 
 	//vkQueueWaitIdle(_graphicsQueue);
 	_currentFrame = (_currentFrame + 1) % _framesInFlight;
+}
+
+void Vulkan::DrawMesh(VkCommandBuffer commandBuffer, Buffer* vertexBuffer, Buffer* indexBuffer)
+{
+	VkBuffer buffers[] = { _vertexBuffer.Buffer };
+	VkDeviceSize offsets[] = { 0 };
+
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+	vkCmdBindIndexBuffer(commandBuffer, _indexBuffer.Buffer, 0, VK_INDEX_TYPE_UINT32);
+	vkCmdDrawIndexed(commandBuffer, indices.size(), 1, 0, 0, 0);
 }
