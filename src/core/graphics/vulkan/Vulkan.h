@@ -50,6 +50,12 @@ namespace Euler
             Mat4 Projection;
         };
 
+        struct EULER_API Buffer
+        {
+            VkBuffer Buffer;
+            VkDeviceMemory Memory;
+        };
+
         class EULER_API Vulkan
         {
         private:
@@ -218,6 +224,14 @@ namespace Euler
             void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
             void DrawFrame();
+
+
+            // =====   ABSTRACTED   =====
+
+            void CreateVertexBuffer(size_t vertexSize, uint32_t vertexCount, void* data, Buffer* buffer);
+
+
+            // ===== ABSTRACTED END =====
         };
     };
 };
