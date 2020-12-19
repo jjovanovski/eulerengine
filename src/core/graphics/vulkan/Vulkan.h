@@ -102,10 +102,8 @@ namespace Euler
             uint32_t _resizeWidth = UINT32_MAX;
             uint32_t _resizeHeight = UINT32_MAX;
 
-            VkBuffer _vertexBuffer;
-            VkDeviceMemory _vertexBufferMemory;
-            VkBuffer _indexBuffer;
-            VkDeviceMemory _indexBufferMemory;
+            Buffer _vertexBuffer;
+            Buffer _indexBuffer;
 
             std::vector<VkBuffer> _uniformBuffers;
             std::vector<VkDeviceMemory> _uniformBufferMemories;
