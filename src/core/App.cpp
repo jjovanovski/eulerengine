@@ -4,6 +4,10 @@
 #include <vector>
 
 #include "graphics/vulkan/Vulkan.h"
+#include "graphics/Vertex.h"
+#include "graphics/Mesh.h"
+#include "math/Vec3.h"
+#include "math/Vec2.h"
 
 using namespace Euler;
 
@@ -62,6 +66,26 @@ App::App()
 	// init renderer
 	vulkan.InitRenderer(WIDTH, HEIGHT);
 
+	std::vector<Vertex> vertices = {
+		Vertex(Vec3(-1.0f, +1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 1.0f)),
+		Vertex(Vec3(-1.0f, -1.0f, 0.0f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 0.0f)),
+		Vertex(Vec3(+1.0f, -1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f)),
+		Vertex(Vec3(+1.0f, +1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f))
+	};
+
+	std::vector<uint32_t> indices = {
+		0, 1, 2,
+		0, 2, 3,
+
+		4, 5, 6,
+		4, 6, 7
+	};
+
+	Mesh plane;
+	plane.Vertices = vertices;
+	plane.Indices = indices;
+	plane.Create(&vulkan);
+
 	// main loop
 	while (!glfwWindowShouldClose(Window)) {
 		while (WindowMinimized)
@@ -69,9 +93,14 @@ App::App()
 			glfwWaitEvents();
 		}
 
-		vulkan.DrawFrame();
+		vulkan.BeginDrawFrame();
+		plane.RecordDrawCommands(&vulkan, *vulkan.GetMainCommandBuffer());
+		vulkan.EndDrawFrame();
+
 		glfwPollEvents();
 	}
+
+	plane.Destroy(&vulkan);
 	
 	// cleanup
 	vkDestroySurfaceKHR(vulkan.GetInstance(), surface, nullptr);

@@ -48,7 +48,6 @@ void Vulkan::InitRenderer(uint32_t width, uint32_t height)
 	CreateDepthImage();
 	CreateFramebuffers();
 	CreateCommandPool();
-	CreateVertexBuffer();
 	CreateUniformBuffer();
 	CreateTexture();
 	CreateDescriptorPool();
@@ -65,7 +64,6 @@ void Vulkan::Cleanup()
 	DestroyDescriptorPool();
 	DestroyTexture();
 	DestroyUniformBuffer();
-	DestroyVertexBuffer();
 	DestroyCommandPool();
 	DestroyFramebuffers();
 	DestroyDepthImage();
@@ -909,39 +907,6 @@ void Vulkan::AllocateCommandBuffers()
 
 		HANDLE_VKRESULT(vkAllocateCommandBuffers(_device, &allocateInfo, &_commandBuffers[i]), "Allocate Command Buffer");
 	}
-
-	// record command buffers
-	for (int i = 0; i < _commandBuffers.size(); i++)
-	{
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		
-		HANDLE_VKRESULT(vkBeginCommandBuffer(_commandBuffers[i], &beginInfo), "Begin Command Buffer");
-		{
-			VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-			VkClearValue clearDepth = { 1.0f, 0.0f, 0.0f, 0.0f };
-			VkClearValue clearValues[] = { clearColor, clearDepth };
-
-			VkRenderPassBeginInfo renderPassBeginInfo{};
-			renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			renderPassBeginInfo.renderPass = _renderPass;
-			renderPassBeginInfo.framebuffer = _swapchainFramebuffers[i];
-			renderPassBeginInfo.renderArea.extent = _extent;
-			renderPassBeginInfo.renderArea.offset = { 0, 0 };
-			renderPassBeginInfo.clearValueCount = 2;
-			renderPassBeginInfo.pClearValues = clearValues;
-
-			vkCmdBeginRenderPass(_commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-			vkCmdBindPipeline(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
-
-			vkCmdBindDescriptorSets(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
-
-			DrawMesh(_commandBuffers[i], &_vertexBuffer, &_indexBuffer);
-			
-			vkCmdEndRenderPass(_commandBuffers[i]);
-		}
-		HANDLE_VKRESULT(vkEndCommandBuffer(_commandBuffers[i]), "End Command Buffer");
-	}
 }
 
 void Vulkan::FreeCommandBuffers()
@@ -1045,18 +1010,6 @@ void Vulkan::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 	
 	EndSingleUseCommandBuffer(commandBuffer);
-}
-
-void Vulkan::CreateVertexBuffer()
-{
-	CreateVertexBuffer(sizeof(vertices[0]), vertices.size(), vertices.data(), &_vertexBuffer);
-	CreateIndexBuffer(sizeof(indices[0]), indices.size(), indices.data(), &_indexBuffer);
-}
-
-void Vulkan::DestroyVertexBuffer()
-{
-	DestroyBuffer(_vertexBuffer.Buffer, _vertexBuffer.Memory);
-	DestroyBuffer(_indexBuffer.Buffer, _indexBuffer.Memory);
 }
 
 void Vulkan::CreateVertexBuffer(size_t vertexSize, uint32_t vertexCount, void* data, Buffer* buffer)
@@ -1501,7 +1454,7 @@ void Vulkan::EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
 	vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer);
 }
 
-void Vulkan::DrawFrame()
+void Vulkan::BeginDrawFrame()
 {
 	if (_resizeWidth != UINT32_MAX && _resizeHeight != UINT32_MAX)
 	{
@@ -1512,9 +1465,55 @@ void Vulkan::DrawFrame()
 
 	vkWaitForFences(_device, 1, &_fences[_currentFrame], VK_TRUE, UINT64_MAX);
 
-	uint32_t imageIndex;
-	VkResult acquireImageResult = vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
+	VkResult acquireImageResult = vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &_currentImage);
 
+	if (acquireImageResult == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		//return;	// TODO: fix this
+	}
+	else
+	{
+		ASSERT(acquireImageResult == VK_SUCCESS || acquireImageResult == VK_SUBOPTIMAL_KHR);
+	}
+
+	// begin recording the main command buffer
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+	vkBeginCommandBuffer(_commandBuffers[_currentImage], &beginInfo);
+	
+		VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+		VkClearValue clearDepth = { 1.0f, 0.0f, 0.0f, 0.0f };
+		VkClearValue clearValues[] = { clearColor, clearDepth };
+
+		VkRenderPassBeginInfo renderPassBeginInfo{};
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.renderPass = _renderPass;
+		renderPassBeginInfo.framebuffer = _swapchainFramebuffers[_currentImage];
+		renderPassBeginInfo.renderArea.extent = _extent;
+		renderPassBeginInfo.renderArea.offset = { 0, 0 };
+		renderPassBeginInfo.clearValueCount = 2;
+		renderPassBeginInfo.pClearValues = clearValues;
+
+		vkCmdBeginRenderPass(_commandBuffers[_currentImage], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBindPipeline(_commandBuffers[_currentImage], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
+
+		// TODO: Set the descriptor sets per model
+		vkCmdBindDescriptorSets(_commandBuffers[_currentImage], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipelineLayout, 0, 1, &_descriptorSets[_currentImage], 0, nullptr);
+}
+
+VkCommandBuffer* Vulkan::GetMainCommandBuffer()
+{
+	return &_commandBuffers[_currentImage];
+}
+
+void Vulkan::EndDrawFrame()
+{
+	// end recording the main command buffer
+	vkCmdEndRenderPass(_commandBuffers[_currentImage]);
+	vkEndCommandBuffer(_commandBuffers[_currentImage]);
+
+	/* TMP */
 	// update uniform buffer
 	zRot += 0.0001f;
 	MVP mvp;
@@ -1527,30 +1526,22 @@ void Vulkan::DrawFrame()
 	mvp.Projection.Transpose();
 
 	void* data;
-	vkMapMemory(_device, _uniformBufferMemories[imageIndex], 0, sizeof(mvp), 0, &data);
+	vkMapMemory(_device, _uniformBufferMemories[_currentImage], 0, sizeof(mvp), 0, &data);
 	memcpy(data, &mvp, sizeof(mvp));
-	vkUnmapMemory(_device, _uniformBufferMemories[imageIndex]);
+	vkUnmapMemory(_device, _uniformBufferMemories[_currentImage]);
+	/* END TMP*/
 
-	if (acquireImageResult == VK_ERROR_OUT_OF_DATE_KHR)
+	if (_imageFences[_currentImage] != VK_NULL_HANDLE)
 	{
-		return;
+		vkWaitForFences(_device, 1, &_imageFences[_currentImage], VK_TRUE, UINT64_MAX);
 	}
-	else
-	{
-		ASSERT(acquireImageResult == VK_SUCCESS || acquireImageResult == VK_SUBOPTIMAL_KHR);
-	}
-
-	if (_imageFences[imageIndex] != VK_NULL_HANDLE)
-	{
-		vkWaitForFences(_device, 1, &_imageFences[imageIndex], VK_TRUE, UINT64_MAX);
-	}
-	_imageFences[imageIndex] = _fences[_currentFrame];
+	_imageFences[_currentImage] = _fences[_currentFrame];
 
 	VkPipelineStageFlags waitStages = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &_commandBuffers[imageIndex];
+	submitInfo.pCommandBuffers = &_commandBuffers[_currentImage];
 	submitInfo.waitSemaphoreCount = 1;
 	submitInfo.pWaitSemaphores = &_imageAvailableSemaphores[_currentFrame];
 	submitInfo.pWaitDstStageMask = &waitStages;
@@ -1564,7 +1555,7 @@ void Vulkan::DrawFrame()
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &_swapchain;
-	presentInfo.pImageIndices = &imageIndex;
+	presentInfo.pImageIndices = &_currentImage;
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = &_renderFinishedSemaphores[_currentFrame];
 
@@ -1583,12 +1574,12 @@ void Vulkan::DrawFrame()
 	_currentFrame = (_currentFrame + 1) % _framesInFlight;
 }
 
-void Vulkan::DrawMesh(VkCommandBuffer commandBuffer, Buffer* vertexBuffer, Buffer* indexBuffer)
+void Vulkan::DrawMesh(VkCommandBuffer commandBuffer, Buffer* vertexBuffer, Buffer* indexBuffer, int indexCount)
 {
-	VkBuffer buffers[] = { _vertexBuffer.Buffer };
+	VkBuffer buffers[] = { vertexBuffer->Buffer };
 	VkDeviceSize offsets[] = { 0 };
 
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
-	vkCmdBindIndexBuffer(commandBuffer, _indexBuffer.Buffer, 0, VK_INDEX_TYPE_UINT32);
-	vkCmdDrawIndexed(commandBuffer, indices.size(), 1, 0, 0, 0);
+	vkCmdBindIndexBuffer(commandBuffer, indexBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
+	vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
 }

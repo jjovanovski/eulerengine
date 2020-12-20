@@ -50,8 +50,9 @@ namespace Euler
             Mat4 Projection;
         };
 
-        struct EULER_API Buffer
+        class EULER_API Buffer
         {
+        public:
             VkBuffer Buffer;
             VkDeviceMemory Memory;
         };
@@ -98,12 +99,10 @@ namespace Euler
             std::vector<VkFence> _imageFences;
             int _framesInFlight = 3;
             int _currentFrame = 0;
+            uint32_t _currentImage = 0;
 
             uint32_t _resizeWidth = UINT32_MAX;
             uint32_t _resizeHeight = UINT32_MAX;
-
-            Buffer _vertexBuffer;
-            Buffer _indexBuffer;
 
             std::vector<VkBuffer> _uniformBuffers;
             std::vector<VkDeviceMemory> _uniformBufferMemories;
@@ -118,31 +117,8 @@ namespace Euler
             VkImage _depthImage;
             VkDeviceMemory _depthMemory;
             VkImageView _depthImageView;
-
-            std::vector<Vertex> vertices = {
-                Vertex(Vec3(-1.0f, +1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 1.0f)),
-                Vertex(Vec3(-1.0f, -1.0f, 0.0f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 0.0f)),
-                Vertex(Vec3(+1.0f, -1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f)),
-                Vertex(Vec3(+1.0f, +1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f))
-                /*Vertex(Vec3(-0.5f, +0.5f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
-                Vertex(Vec3(-0.5f, -0.5f, 1.0f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
-                Vertex(Vec3(+0.5f, -0.5f, 1.0f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
-                Vertex(Vec3(+0.5f, +0.5f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f)),
-
-                Vertex(Vec3(-0.5f + 0.2f, +0.5f, 0.3f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 0.0f)),
-                Vertex(Vec3(-0.5f + 0.2f, -0.5f, 0.3f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 1.0f)),
-                Vertex(Vec3(+0.5f + 0.2f, -0.5f, 0.3f), Vec3(1.0f, 0.0f, 0.0f), Vec2(1.0f, 1.0f)),
-                Vertex(Vec3(+0.5f + 0.2f, +0.5f, 0.3f), Vec3(0.0f, 0.0f, 0.0f), Vec2(1.0f, 0.0f))*/
-            };
-
-            std::vector<uint32_t> indices = {
-                0, 1, 2,
-                0, 2, 3,
-
-                4, 5, 6,
-                4, 6, 7
-            };
-
+            
+            // tmp:
             float zRot = 0.0f;
 
         public:
@@ -199,9 +175,6 @@ namespace Euler
             void DestroyBuffer(VkBuffer buffer, VkDeviceMemory deviceMemory);
             void CopyBuffer(VkBuffer srcBuffer, VkBuffer destBuffer, VkDeviceSize size);
 
-            void CreateVertexBuffer();
-            void DestroyVertexBuffer();
-
             void CreateUniformBuffer();
             void DestroyUniformBuffer();
             void CreateDescriptorPool();
@@ -221,7 +194,9 @@ namespace Euler
             VkCommandBuffer BeginSingleUseCommandBuffer();
             void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
-            void DrawFrame();
+            void BeginDrawFrame();
+            VkCommandBuffer* GetMainCommandBuffer();
+            void EndDrawFrame();
 
 
             // =====   ABSTRACTED   =====
@@ -229,7 +204,7 @@ namespace Euler
             void CreateVertexBuffer(size_t vertexSize, uint32_t vertexCount, void* data, Buffer* buffer);
             void CreateIndexBuffer(size_t indexSize, uint32_t indexCount, void*data, Buffer* buffer);
 
-            void DrawMesh(VkCommandBuffer commandBuffer, Buffer* vertexBuffer, Buffer* indexBuffer);
+            void DrawMesh(VkCommandBuffer commandBuffer, Buffer* vertexBuffer, Buffer* indexBuffer, int indexCount);
 
             // ===== ABSTRACTED END =====
         };
