@@ -1476,6 +1476,8 @@ void Vulkan::BeginDrawFrame()
 		ASSERT(acquireImageResult == VK_SUCCESS || acquireImageResult == VK_SUBOPTIMAL_KHR);
 	}
 
+	vkResetCommandPool(_device, _commandPool, 0);
+
 	// begin recording the main command buffer
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
