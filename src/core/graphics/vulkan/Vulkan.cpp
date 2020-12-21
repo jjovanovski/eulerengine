@@ -1562,15 +1562,25 @@ void Vulkan::BeginDrawFrame()
 		vkCmdBindPipeline(_commandBuffers[_currentImage], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
 
 		// TODO: Set the descriptor sets per model
-		VkDescriptorSet sets[] = { _descriptorSets[_currentImage], _samplerDescriptorSets[_currentImage] };
+		VkDescriptorSet sets[] = { _descriptorSets[_currentImage], };
 		vkCmdBindDescriptorSets(
 			_commandBuffers[_currentImage],
 			VK_PIPELINE_BIND_POINT_GRAPHICS, 
 			_graphicsPipelineLayout, 
 			0, 
-			2,
-			sets,
+			1,
+			&_descriptorSets[_currentImage],
 			0, 
+			nullptr
+		);
+		vkCmdBindDescriptorSets(
+			_commandBuffers[_currentImage],
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			_graphicsPipelineLayout,
+			1,
+			1,
+			&_samplerDescriptorSets[_currentImage],
+			0,
 			nullptr
 		);
 }
