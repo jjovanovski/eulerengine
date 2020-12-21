@@ -241,7 +241,7 @@ void Vulkan::CreateDebugMessenger()
 {
 	VkDebugUtilsMessengerCreateInfoEXT createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-	createInfo.messageSeverity = /*VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |*/ VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 	createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 	createInfo.pfnUserCallback = DebugCallback;
 	createInfo.pUserData = nullptr; // Optional
@@ -786,33 +786,54 @@ void Vulkan::CreatePipeline()
 	colorBlending.blendConstants[2] = 0.0f;
 	colorBlending.blendConstants[3] = 0.0f;
 
-	// descriptor set layout
-	VkDescriptorSetLayoutBinding uboBinding{};
-	uboBinding.binding = 0;
-	uboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	uboBinding.descriptorCount = 1;
-	uboBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	// ViewProj descriptor set layout
+	VkDescriptorSetLayoutBinding viewProjBinding{};
+	viewProjBinding.binding = 0;
+	viewProjBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	viewProjBinding.descriptorCount = 1;
+	viewProjBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
+	VkDescriptorSetLayoutCreateInfo viewProjInfo{};
+	viewProjInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	viewProjInfo.bindingCount = 1;
+	viewProjInfo.pBindings = &viewProjBinding;
+
+	HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &viewProjInfo, nullptr, &_viewProjLayout), "Create ViewProj Layout");
+
+	// Model descriptor set layout
+	//VkDescriptorSetLayoutBinding modelBinding{};
+	//modelBinding.binding = 0;
+	//modelBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+	//modelBinding.descriptorCount = 1;
+	//modelBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	//VkDescriptorSetLayoutCreateInfo modelInfo{};
+	//modelInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	//modelInfo.bindingCount = 1;
+	//modelInfo.pBindings = &modelBinding;
+
+	//HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &modelInfo, nullptr, &_modelLayout), "Create Model Layout");
+
+	// sampler descriptor set layout
 	VkDescriptorSetLayoutBinding samplerBinding{};
-	samplerBinding.binding = 1;
+	samplerBinding.binding = 0;
 	samplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	samplerBinding.descriptorCount = 1;
 	samplerBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-	VkDescriptorSetLayoutBinding bindings[] = { uboBinding, samplerBinding };
+	VkDescriptorSetLayoutCreateInfo samplerInfo{};
+	samplerInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	samplerInfo.bindingCount = 1;
+	samplerInfo.pBindings = &samplerBinding;
 
-	VkDescriptorSetLayoutCreateInfo layoutInfo{};
-	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = 2;
-	layoutInfo.pBindings = bindings;
-
-	HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &layoutInfo, nullptr, &_descriptorSetLayout), "Create Descriptor Set Layout");
+	HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &samplerInfo, nullptr, &_samplerLayout), "Create Model Layout");
 
 	// layout
+	VkDescriptorSetLayout layouts[] = { _viewProjLayout, _samplerLayout };
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 	pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutCreateInfo.setLayoutCount = 1;
-	pipelineLayoutCreateInfo.pSetLayouts = &_descriptorSetLayout;
+	pipelineLayoutCreateInfo.setLayoutCount = 2;
+	pipelineLayoutCreateInfo.pSetLayouts = layouts;
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 	
 	HANDLE_VKRESULT(vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &_graphicsPipelineLayout), "Create Pipeline Layout");
@@ -846,7 +867,10 @@ void Vulkan::DestroyPipeline()
 {
 	vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(_device, _graphicsPipelineLayout, nullptr);
-	vkDestroyDescriptorSetLayout(_device, _descriptorSetLayout, nullptr);
+
+	vkDestroyDescriptorSetLayout(_device, _viewProjLayout, nullptr);
+	//vkDestroyDescriptorSetLayout(_device, _modelLayout, nullptr);
+	vkDestroyDescriptorSetLayout(_device, _samplerLayout, nullptr);
 }
 
 void Vulkan::CreateFramebuffers()
@@ -1107,7 +1131,7 @@ void Vulkan::CreateIndexBuffer(size_t indexSize, uint32_t indexCount, void* data
 
 void Vulkan::CreateUniformBuffer()
 {
-	MVP mvp;
+	ViewProj mvp;
 
 	_uniformBuffers.resize(_swapchainImageViews.size());
 	_uniformBufferMemories.resize(_swapchainImageViews.size());
@@ -1325,26 +1349,30 @@ void Vulkan::DestroyTexture()
 
 void Vulkan::CreateDescriptorPool()
 {
-	VkDescriptorPoolSize poolSize{};
-	poolSize.descriptorCount = static_cast<uint32_t>(_swapchainImageViews.size());
-	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	VkDescriptorPoolSize viewProjPoolSize{};
+	viewProjPoolSize.descriptorCount = static_cast<uint32_t>(_swapchainImageViews.size());
+	viewProjPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+	VkDescriptorPoolSize modelPoolSize{};
+	viewProjPoolSize.descriptorCount = static_cast<uint32_t>(_swapchainImageViews.size());
+	viewProjPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 
 	VkDescriptorPoolSize samplerPoolSize{};
 	samplerPoolSize.descriptorCount = static_cast<uint32_t>(_swapchainImageViews.size());
 	samplerPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 
-	VkDescriptorPoolSize poolSizes[] = { poolSize, samplerPoolSize };
+	VkDescriptorPoolSize poolSizes[] = { viewProjPoolSize, modelPoolSize, samplerPoolSize };
 
 	VkDescriptorPoolCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	createInfo.poolSizeCount = 2;
+	createInfo.poolSizeCount = 3;
 	createInfo.pPoolSizes = poolSizes;
-	createInfo.maxSets = static_cast<uint32_t>(_swapchainImageViews.size());
+	createInfo.maxSets = 3 * static_cast<uint32_t>(_swapchainImageViews.size());
 
 	HANDLE_VKRESULT(vkCreateDescriptorPool(_device, &createInfo, nullptr, &_descriptorPool), "Create Descriptor Pool");
 
-	// create descriptor sets
-	std::vector<VkDescriptorSetLayout> layouts(_swapchainImageViews.size(), _descriptorSetLayout);
+	// create ViewProj descriptor set
+	std::vector<VkDescriptorSetLayout> layouts(_swapchainImageViews.size(), _viewProjLayout);
 	_descriptorSets.resize(_swapchainImageViews.size());
 	VkDescriptorSetAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -1361,11 +1389,6 @@ void Vulkan::CreateDescriptorPool()
 		bufferInfo.offset = 0;
 		bufferInfo.range = VK_WHOLE_SIZE;
 
-		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageView = _textureImageView;
-		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo.sampler = _sampler;
-
 		VkWriteDescriptorSet writeUbo{};
 		writeUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		writeUbo.dstSet = _descriptorSets[i];
@@ -1375,24 +1398,51 @@ void Vulkan::CreateDescriptorPool()
 		writeUbo.descriptorCount = 1;
 		writeUbo.pBufferInfo = &bufferInfo;
 
+		VkWriteDescriptorSet writes[] = { writeUbo };
+
+		vkUpdateDescriptorSets(_device, 1, writes, 0, nullptr);
+	}
+
+	// create Model descriptor sets
+	// => TODO
+
+	// create Sampler descriptor sets
+	std::vector<VkDescriptorSetLayout> samplerLayouts(_swapchainImageViews.size(), _samplerLayout);
+	_samplerDescriptorSets.resize(_swapchainImageViews.size());
+	VkDescriptorSetAllocateInfo samplerAllocInfo{};
+	samplerAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	samplerAllocInfo.descriptorPool = _descriptorPool;
+	samplerAllocInfo.descriptorSetCount = static_cast<uint32_t>(_swapchainImageViews.size());
+	samplerAllocInfo.pSetLayouts = samplerLayouts.data();
+
+	HANDLE_VKRESULT(vkAllocateDescriptorSets(_device, &samplerAllocInfo, _samplerDescriptorSets.data()), "Allocate Descriptor Sets");
+
+	for (int i = 0; i < _samplerDescriptorSets.size(); i++)
+	{
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.imageView = _textureImageView;
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.sampler = _sampler;
+
 		VkWriteDescriptorSet writeSampler{};
 		writeSampler.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeSampler.dstSet = _descriptorSets[i];
-		writeSampler.dstBinding = 1;
+		writeSampler.dstSet = _samplerDescriptorSets[i];
+		writeSampler.dstBinding = 0;
 		writeSampler.dstArrayElement = 0;
 		writeSampler.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		writeSampler.descriptorCount = 1;
 		writeSampler.pImageInfo = &imageInfo;
 
-		VkWriteDescriptorSet writes[] = { writeUbo, writeSampler };
+		VkWriteDescriptorSet writes[] = { writeSampler };
 
-		vkUpdateDescriptorSets(_device, 2, writes, 0, nullptr);
+		vkUpdateDescriptorSets(_device, 1, writes, 0, nullptr);
 	}
 }
 
 void Vulkan::DestroyDescriptorPool()
 {
 	vkFreeDescriptorSets(_device, _descriptorPool, _descriptorSets.size(), _descriptorSets.data());
+	vkFreeDescriptorSets(_device, _descriptorPool, _samplerDescriptorSets.size(), _samplerDescriptorSets.data());
 	vkDestroyDescriptorPool(_device, _descriptorPool, nullptr);
 }
 
@@ -1512,7 +1562,17 @@ void Vulkan::BeginDrawFrame()
 		vkCmdBindPipeline(_commandBuffers[_currentImage], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
 
 		// TODO: Set the descriptor sets per model
-		vkCmdBindDescriptorSets(_commandBuffers[_currentImage], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipelineLayout, 0, 1, &_descriptorSets[_currentImage], 0, nullptr);
+		VkDescriptorSet sets[] = { _descriptorSets[_currentImage], _samplerDescriptorSets[_currentImage] };
+		vkCmdBindDescriptorSets(
+			_commandBuffers[_currentImage],
+			VK_PIPELINE_BIND_POINT_GRAPHICS, 
+			_graphicsPipelineLayout, 
+			0, 
+			2,
+			sets,
+			0, 
+			nullptr
+		);
 }
 
 VkCommandBuffer* Vulkan::GetMainCommandBuffer()
@@ -1529,12 +1589,10 @@ void Vulkan::EndDrawFrame()
 	/* TMP */
 	// update uniform buffer
 	zRot += 0.0001f;
-	MVP mvp;
-	mvp.Model = Math::Matrices::RotateX(zRot);
-	mvp.View = Math::Matrices::Translate(0, 0, 3);
+	ViewProj mvp;
+	mvp.View = Math::Matrices::Translate(sinf(zRot), 0, 3);
 	mvp.Projection = Euler::Math::Matrices::Perspective(_extent.width, _extent.height, 60, 0.001f, 100.0f);
 
-	mvp.Model.Transpose();
 	mvp.View.Transpose();
 	mvp.Projection.Transpose();
 

@@ -43,9 +43,8 @@ namespace Euler
             Vertex(Vec3 position, Vec3 color, Vec2 uv) : Position(position), Color(color), Uv(uv) {}
         };
 
-        struct EULER_API MVP
+        struct EULER_API ViewProj
         {
-            Mat4 Model;
             Mat4 View;
             Mat4 Projection;
         };
@@ -86,7 +85,6 @@ namespace Euler
 
             VkRenderPass _renderPass;
 
-            VkDescriptorSetLayout _descriptorSetLayout;
             VkPipelineLayout _graphicsPipelineLayout;
             VkPipeline _graphicsPipeline;
 
@@ -104,10 +102,14 @@ namespace Euler
             uint32_t _resizeWidth = UINT32_MAX;
             uint32_t _resizeHeight = UINT32_MAX;
 
+            VkDescriptorSetLayout _viewProjLayout;
+            VkDescriptorSetLayout _modelLayout;
+            VkDescriptorSetLayout _samplerLayout;
             std::vector<VkBuffer> _uniformBuffers;
             std::vector<VkDeviceMemory> _uniformBufferMemories;
             VkDescriptorPool _descriptorPool;
             std::vector<VkDescriptorSet> _descriptorSets;
+            std::vector<VkDescriptorSet> _samplerDescriptorSets;
 
             VkImage _textureImage;
             VkDeviceMemory _textureMemory;
