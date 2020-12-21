@@ -90,7 +90,7 @@ namespace Euler
             VkPipelineLayout _graphicsPipelineLayout;
             VkPipeline _graphicsPipeline;
 
-            VkCommandPool _commandPool;
+            std::vector<VkCommandPool> _commandPools;
             std::vector<VkCommandBuffer> _commandBuffers;
 
             std::vector<VkSemaphore> _imageAvailableSemaphores;
@@ -161,8 +161,8 @@ namespace Euler
             void CreateFramebuffers();
             void DestroyFramebuffers();
 
-            void CreateCommandPool();
-            void DestroyCommandPool();
+            void CreateCommandPools();
+            void DestroyCommandPools();
 
             void AllocateCommandBuffers();
             void FreeCommandBuffers();

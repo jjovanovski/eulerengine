@@ -47,7 +47,7 @@ void Vulkan::InitRenderer(uint32_t width, uint32_t height)
 	CreatePipeline();
 	CreateDepthImage();
 	CreateFramebuffers();
-	CreateCommandPool();
+	CreateCommandPools();
 	CreateUniformBuffer();
 	CreateTexture();
 	CreateDescriptorPool();
@@ -64,7 +64,7 @@ void Vulkan::Cleanup()
 	DestroyDescriptorPool();
 	DestroyTexture();
 	DestroyUniformBuffer();
-	DestroyCommandPool();
+	DestroyCommandPools();
 	DestroyFramebuffers();
 	DestroyDepthImage();
 	DestroyPipeline();
@@ -84,7 +84,7 @@ void Vulkan::RecreateSwapchain(uint32_t width, uint32_t height)
 	FreeCommandBuffers();
 	DestroyDescriptorPool();
 	DestroyUniformBuffer();
-	DestroyCommandPool();
+	DestroyCommandPools();
 	DestroyFramebuffers();
 	DestroyDepthImage();
 	DestroyPipeline();
@@ -96,7 +96,7 @@ void Vulkan::RecreateSwapchain(uint32_t width, uint32_t height)
 	CreatePipeline();
 	CreateDepthImage();
 	CreateFramebuffers();
-	CreateCommandPool();
+	CreateCommandPools();
 	CreateUniformBuffer();
 	CreateDescriptorPool();
 	AllocateCommandBuffers();
@@ -878,18 +878,26 @@ void Vulkan::DestroyFramebuffers()
 	}
 }
 
-void Vulkan::CreateCommandPool()
+void Vulkan::CreateCommandPools()
 {
-	VkCommandPoolCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	createInfo.queueFamilyIndex = _graphicsQueueFamilyIndex;
+	_commandPools.resize(_swapchainImageViews.size());
 
-	HANDLE_VKRESULT(vkCreateCommandPool(_device, &createInfo, nullptr, &_commandPool), "Create Command Pool");
+	for (int i = 0; i < _swapchainImageViews.size(); i++)
+	{
+		VkCommandPoolCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		createInfo.queueFamilyIndex = _graphicsQueueFamilyIndex;
+
+		HANDLE_VKRESULT(vkCreateCommandPool(_device, &createInfo, nullptr, &_commandPools[i]), "Create Command Pool");
+	}
 }
 
-void Vulkan::DestroyCommandPool()
+void Vulkan::DestroyCommandPools()
 {
-	vkDestroyCommandPool(_device, _commandPool, nullptr);
+	for (int i = 0; i < _commandPools.size(); i++)
+	{
+		vkDestroyCommandPool(_device, _commandPools[i], nullptr);
+	}
 }
 
 void Vulkan::AllocateCommandBuffers()
@@ -902,7 +910,7 @@ void Vulkan::AllocateCommandBuffers()
 		VkCommandBufferAllocateInfo allocateInfo{};
 		allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocateInfo.commandPool = _commandPool;
+		allocateInfo.commandPool = _commandPools[i];
 		allocateInfo.commandBufferCount = 1;
 
 		HANDLE_VKRESULT(vkAllocateCommandBuffers(_device, &allocateInfo, &_commandBuffers[i]), "Allocate Command Buffer");
@@ -911,7 +919,10 @@ void Vulkan::AllocateCommandBuffers()
 
 void Vulkan::FreeCommandBuffers()
 {
-	vkFreeCommandBuffers(_device, _commandPool, _commandBuffers.size(), _commandBuffers.data());
+	for (int i = 0; i < _commandBuffers.size(); i++)
+	{
+		vkFreeCommandBuffers(_device, _commandPools[i], 1, &_commandBuffers[i]);
+	}
 }
 
 void Vulkan::CreateFrameSyncObjects()
@@ -1426,7 +1437,7 @@ VkCommandBuffer Vulkan::BeginSingleUseCommandBuffer()
 {
 	VkCommandBufferAllocateInfo commandBufferAllocInfo{};
 	commandBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	commandBufferAllocInfo.commandPool = _commandPool;
+	commandBufferAllocInfo.commandPool = _commandPools[0];
 	commandBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	commandBufferAllocInfo.commandBufferCount = 1;
 
@@ -1451,7 +1462,7 @@ void Vulkan::EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
 	vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
 	vkQueueWaitIdle(_graphicsQueue);
 
-	vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer);
+	vkFreeCommandBuffers(_device, _commandPools[0], 1, &commandBuffer);
 }
 
 void Vulkan::BeginDrawFrame()
@@ -1476,7 +1487,7 @@ void Vulkan::BeginDrawFrame()
 		ASSERT(acquireImageResult == VK_SUCCESS || acquireImageResult == VK_SUBOPTIMAL_KHR);
 	}
 
-	vkResetCommandPool(_device, _commandPool, 0);
+	vkResetCommandPool(_device, _commandPools[_currentImage], 0);
 
 	// begin recording the main command buffer
 	VkCommandBufferBeginInfo beginInfo{};
