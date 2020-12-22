@@ -16,8 +16,10 @@ namespace Euler
 		Vec3 Rotation;
 		Vec3 Scale;
 
-		std::vector<Mesh> Meshes;
+		std::vector<Mesh*> Meshes;
 
 		Model();
+
+		Mat4 GetModelMatrix();
 	};
 };

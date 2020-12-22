@@ -800,20 +800,6 @@ void Vulkan::CreatePipeline()
 
 	HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &viewProjInfo, nullptr, &_viewProjLayout), "Create ViewProj Layout");
 
-	// Model descriptor set layout
-	//VkDescriptorSetLayoutBinding modelBinding{};
-	//modelBinding.binding = 0;
-	//modelBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	//modelBinding.descriptorCount = 1;
-	//modelBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-	//VkDescriptorSetLayoutCreateInfo modelInfo{};
-	//modelInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	//modelInfo.bindingCount = 1;
-	//modelInfo.pBindings = &modelBinding;
-
-	//HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &modelInfo, nullptr, &_modelLayout), "Create Model Layout");
-
 	// sampler descriptor set layout
 	VkDescriptorSetLayoutBinding samplerBinding{};
 	samplerBinding.binding = 0;
@@ -828,11 +814,25 @@ void Vulkan::CreatePipeline()
 
 	HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &samplerInfo, nullptr, &_samplerLayout), "Create Model Layout");
 
+	// Model descriptor set layout
+	VkDescriptorSetLayoutBinding modelBinding{};
+	modelBinding.binding = 0;
+	modelBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+	modelBinding.descriptorCount = 1;
+	modelBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	VkDescriptorSetLayoutCreateInfo modelInfo{};
+	modelInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	modelInfo.bindingCount = 1;
+	modelInfo.pBindings = &modelBinding;
+
+	HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &modelInfo, nullptr, &_modelLayout), "Create Model Layout");
+
 	// layout
-	VkDescriptorSetLayout layouts[] = { _viewProjLayout, _samplerLayout };
+	VkDescriptorSetLayout layouts[] = { _viewProjLayout, _samplerLayout, _modelLayout };
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 	pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutCreateInfo.setLayoutCount = 2;
+	pipelineLayoutCreateInfo.setLayoutCount = 3;
 	pipelineLayoutCreateInfo.pSetLayouts = layouts;
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 	
@@ -1404,7 +1404,36 @@ void Vulkan::CreateDescriptorPool()
 	}
 
 	// create Model descriptor sets
-	// => TODO
+	/*std::vector<VkDescriptorSetLayout> modelLayouts(_swapchainImageViews.size(), _modelLayout);
+	_modelSets.resize(_swapchainImageViews.size());
+	VkDescriptorSetAllocateInfo modelAllocInfo{};
+	modelAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	modelAllocInfo.descriptorPool = _descriptorPool;
+	modelAllocInfo.descriptorSetCount = static_cast<uint32_t>(_swapchainImageViews.size());
+	modelAllocInfo.pSetLayouts = modelLayouts.data();
+
+	HANDLE_VKRESULT(vkAllocateDescriptorSets(_device, &modelAllocInfo, _modelSets.data()), "Allocate Model Sets");
+
+	for (int i = 0; i < _modelSets.size(); i++)
+	{
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = _modelBuffers[i];
+		bufferInfo.offset = 0;
+		bufferInfo.range = VK_WHOLE_SIZE;
+
+		VkWriteDescriptorSet writeUbo{};
+		writeUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeUbo.dstSet = _modelSets[i];
+		writeUbo.dstBinding = 0;
+		writeUbo.dstArrayElement = 0;
+		writeUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		writeUbo.descriptorCount = 1;
+		writeUbo.pBufferInfo = &bufferInfo;
+
+		VkWriteDescriptorSet writes[] = { writeUbo };
+
+		vkUpdateDescriptorSets(_device, 1, writes, 0, nullptr);
+	}*/
 
 	// create Sampler descriptor sets
 	std::vector<VkDescriptorSetLayout> samplerLayouts(_swapchainImageViews.size(), _samplerLayout);
@@ -1513,6 +1542,11 @@ void Vulkan::EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
 	vkQueueWaitIdle(_graphicsQueue);
 
 	vkFreeCommandBuffers(_device, _commandPools[0], 1, &commandBuffer);
+}
+
+int Vulkan::GetSwapchainImageCount()
+{
+	return _swapchainImages.size();
 }
 
 void Vulkan::BeginDrawFrame()

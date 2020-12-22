@@ -58,7 +58,7 @@ namespace Euler
 
         class EULER_API Vulkan
         {
-        private:
+        public:
             VkInstance _instance;
 
             VkDebugUtilsMessengerEXT _debugMessenger;
@@ -107,8 +107,11 @@ namespace Euler
             VkDescriptorSetLayout _samplerLayout;
             std::vector<VkBuffer> _uniformBuffers;
             std::vector<VkDeviceMemory> _uniformBufferMemories;
+            std::vector<VkBuffer> _modelBuffers;
+            std::vector<VkDeviceMemory> _modelBufferMemories;
             VkDescriptorPool _descriptorPool;
             std::vector<VkDescriptorSet> _descriptorSets;
+            std::vector<VkDescriptorSet> _modelSets;
             std::vector<VkDescriptorSet> _samplerDescriptorSets;
 
             VkImage _textureImage;
@@ -202,6 +205,8 @@ namespace Euler
 
 
             // =====   ABSTRACTED   =====
+
+            int GetSwapchainImageCount();
 
             void CreateVertexBuffer(size_t vertexSize, uint32_t vertexCount, void* data, Buffer* buffer);
             void CreateIndexBuffer(size_t indexSize, uint32_t indexCount, void*data, Buffer* buffer);
