@@ -4,6 +4,7 @@
 #include "../../math/Vec2.h"
 #include "../../math/Vec3.h"
 #include "../../math/Mat4.h"
+#include "../Common.h"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -158,10 +159,9 @@ namespace Euler
             void DestroyRenderPass();
 
             void Vulkan::CreateShaderModule(std::vector<char> shaderCode, VkShaderModule* shaderModule);
-            void Vulkan::DestroyShaderModule(VkShaderModule shaderModule);
-
-            void CreatePipeline();
-            void DestroyPipeline();
+            
+            void CreatePipelineFixed();
+            void DestroyPipelineFixed();
 
             void CreateFramebuffers();
             void DestroyFramebuffers();
@@ -207,6 +207,12 @@ namespace Euler
             // =====   ABSTRACTED   =====
 
             int GetSwapchainImageCount();
+
+            void CreateShaderModule(const char* shaderCode, size_t codeSize, VkShaderModule* shaderModule);
+            void DestroyShaderModule(VkShaderModule shaderModule);
+
+            void CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* pipelineLayout, VkPipeline* pipeline);
+            void DestroyPipeline(VkPipelineLayout pipelineLayout, VkPipeline pipeline)
 
             void CreateVertexBuffer(size_t vertexSize, uint32_t vertexCount, void* data, Buffer* buffer);
             void CreateIndexBuffer(size_t indexSize, uint32_t indexCount, void*data, Buffer* buffer);
