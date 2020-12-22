@@ -212,7 +212,7 @@ namespace Euler
             void DestroyShaderModule(VkShaderModule shaderModule);
 
             void CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* pipelineLayout, VkPipeline* pipeline);
-            void DestroyPipeline(VkPipelineLayout pipelineLayout, VkPipeline pipeline)
+            void DestroyPipeline(VkPipelineLayout pipelineLayout, VkPipeline pipeline);
 
             void CreateVertexBuffer(size_t vertexSize, uint32_t vertexCount, void* data, Buffer* buffer);
             void CreateIndexBuffer(size_t indexSize, uint32_t indexCount, void*data, Buffer* buffer);
