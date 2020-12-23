@@ -1801,30 +1801,30 @@ void Vulkan::BeginDrawFrame()
 		renderPassBeginInfo.pClearValues = clearValues;
 
 		vkCmdBeginRenderPass(_commandBuffers[_currentImage], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-		vkCmdBindPipeline(_commandBuffers[_currentImage], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
+		//vkCmdBindPipeline(_commandBuffers[_currentImage], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
 
-		// TODO: Set the descriptor sets per model
-		VkDescriptorSet sets[] = { _descriptorSets[_currentImage], };
-		vkCmdBindDescriptorSets(
-			_commandBuffers[_currentImage],
-			VK_PIPELINE_BIND_POINT_GRAPHICS, 
-			_graphicsPipelineLayout, 
-			0, 
-			1,
-			&_descriptorSets[_currentImage],
-			0, 
-			nullptr
-		);
-		vkCmdBindDescriptorSets(
-			_commandBuffers[_currentImage],
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			_graphicsPipelineLayout,
-			1,
-			1,
-			&_samplerDescriptorSets[_currentImage],
-			0,
-			nullptr
-		);
+		//// TODO: Set the descriptor sets per model
+		//VkDescriptorSet sets[] = { _descriptorSets[_currentImage], };
+		//vkCmdBindDescriptorSets(
+		//	_commandBuffers[_currentImage],
+		//	VK_PIPELINE_BIND_POINT_GRAPHICS, 
+		//	_graphicsPipelineLayout, 
+		//	0, 
+		//	1,
+		//	&_descriptorSets[_currentImage],
+		//	0, 
+		//	nullptr
+		//);
+		//vkCmdBindDescriptorSets(
+		//	_commandBuffers[_currentImage],
+		//	VK_PIPELINE_BIND_POINT_GRAPHICS,
+		//	_graphicsPipelineLayout,
+		//	1,
+		//	1,
+		//	&_samplerDescriptorSets[_currentImage],
+		//	0,
+		//	nullptr
+		//);
 }
 
 VkCommandBuffer* Vulkan::GetMainCommandBuffer()

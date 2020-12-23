@@ -175,20 +175,10 @@ namespace Euler
             void CreateFrameSyncObjects();
             void DestroyFrameSyncObjects();
 
-            uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-            void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& deviceMemory);
-            void DestroyBuffer(VkBuffer buffer, VkDeviceMemory deviceMemory);
-            void CopyBuffer(VkBuffer srcBuffer, VkBuffer destBuffer, VkDeviceSize size);
-
             void CreateUniformBuffer();
             void DestroyUniformBuffer();
             void CreateDescriptorPool();
             void DestroyDescriptorPool();
-
-            void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& memory);;
-            void DestroyImage(VkImage image, VkDeviceMemory memory);
-            void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-            void CopyBufferToImage(VkBuffer srcBuffer, VkImage dstImage, uint32_t width, uint32_t height);
 
             void CreateTexture();
             void DestroyTexture();
@@ -207,6 +197,16 @@ namespace Euler
             // =====   ABSTRACTED   =====
 
             int GetSwapchainImageCount();
+
+            uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+            void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& deviceMemory);
+            void DestroyBuffer(VkBuffer buffer, VkDeviceMemory deviceMemory);
+            void CopyBuffer(VkBuffer srcBuffer, VkBuffer destBuffer, VkDeviceSize size);
+
+            void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& memory);;
+            void DestroyImage(VkImage image, VkDeviceMemory memory);
+            void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+            void CopyBufferToImage(VkBuffer srcBuffer, VkImage dstImage, uint32_t width, uint32_t height);
 
             void CreateShaderModule(const char* shaderCode, size_t codeSize, VkShaderModule* shaderModule);
             void DestroyShaderModule(VkShaderModule shaderModule);

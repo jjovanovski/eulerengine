@@ -26,7 +26,7 @@ public:
 	uint32_t VertexStride;
 	std::vector<VertexAttributeInfo> VertexAttributes;
 
-	VkPrimitiveTopology Topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	VkPrimitiveTopology Topology;
 
 	bool DepthTestEnabled = true;
 

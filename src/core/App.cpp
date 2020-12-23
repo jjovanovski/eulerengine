@@ -7,6 +7,7 @@
 #include "graphics/Vertex.h"
 #include "graphics/Mesh.h"
 #include "graphics/Model.h"
+#include "graphics/ModelPipeline.h"
 #include "math/Vec3.h"
 #include "math/Vec2.h"
 
@@ -67,6 +68,9 @@ App::App()
 	// init renderer
 	vulkan.InitRenderer(WIDTH, HEIGHT);
 
+	Graphics::ModelPipeline modelPipeline;
+	modelPipeline.Create(&vulkan, WIDTH, HEIGHT);
+
 	std::vector<Vertex> vertices = {
 		Vertex(Vec3(-1.0f, +1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 1.0f)),
 		Vertex(Vec3(-1.0f, -1.0f, 0.0f), Vec3(1.0f, 1.0f, 1.0f), Vec2(0.0f, 0.0f)),
@@ -102,6 +106,9 @@ App::App()
 	Model m2;
 	m2.Meshes.push_back(&plane);
 	models.push_back(m2);
+
+	modelPipeline.Models.push_back(&m1);
+	modelPipeline.Models.push_back(&m2);
 
 	Mat4 mat;
 	auto minOffset = vulkan._physicalDevice->Properties.limits.minUniformBufferOffsetAlignment;
@@ -166,27 +173,32 @@ App::App()
 			glfwWaitEvents();
 		}
 
+		m1.Position.x += 0.0001f;
+		m2.Position.y += 0.0001f;
+
 		vulkan.BeginDrawFrame();
 
-		uint32_t i = 0;
-		Mat4 m;
-		for (auto& model : models)
-		{
-			uint32_t offset = i * alignment;
-			vkCmdBindDescriptorSets(
-				*vulkan.GetMainCommandBuffer(),
-				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				vulkan._graphicsPipelineLayout,
-				2,
-				1,
-				&vulkan._modelSets[vulkan._currentImage],
-				1,
-				&offset
-			);
-			model.Meshes[0]->RecordDrawCommands(&vulkan, *vulkan.GetMainCommandBuffer());
+		modelPipeline.RecordCommands();
 
-			i++;
-		}
+		//uint32_t i = 0;
+		//Mat4 m;
+		//for (auto& model : models)
+		//{
+		//	uint32_t offset = i * alignment;
+		//	vkCmdBindDescriptorSets(
+		//		*vulkan.GetMainCommandBuffer(),
+		//		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		//		vulkan._graphicsPipelineLayout,
+		//		2,
+		//		1,
+		//		&vulkan._modelSets[vulkan._currentImage],
+		//		1,
+		//		&offset
+		//	);
+		//	model.Meshes[0]->RecordDrawCommands(&vulkan, *vulkan.GetMainCommandBuffer());
+
+		//	i++;
+		//}
 
 		vulkan.EndDrawFrame();
 
@@ -200,6 +212,8 @@ App::App()
 
 	plane.Destroy(&vulkan);
 	
+	modelPipeline.Destroy();
+
 	// cleanup
 	vkDestroySurfaceKHR(vulkan.GetInstance(), surface, nullptr);
 	vulkan.Cleanup();
