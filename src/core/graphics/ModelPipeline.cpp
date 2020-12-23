@@ -296,18 +296,6 @@ void ModelPipeline::RecordCommands()
 			&offset
 		);
 
-		// TODO: this is temporary
-		/*vkCmdBindDescriptorSets(
-			*_vulkan->GetMainCommandBuffer(),
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			_pipelineLayout,
-			2,
-			1,
-			&_vulkan->_samplerDescriptorSets[_vulkan->_currentImage],
-			0,
-			nullptr
-		);*/
-
 		// draw model meshes
 		for (int j = 0; j < model->Meshes.size(); j++)
 		{
