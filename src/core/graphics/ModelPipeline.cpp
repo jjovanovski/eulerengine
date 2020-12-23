@@ -265,18 +265,18 @@ void ModelPipeline::RecordCommands()
 		nullptr
 	);
 
+	void* modelsData;
+	vkMapMemory(_vulkan->_device, _modelBuffers[_vulkan->_currentImage].Memory, 0, Models.size() * _modelMatrixAlignment, 0, &modelsData);
 	for (int i = 0; i < Models.size(); i++)
 	{
 		Mat4 modelMatrix = Models[i]->GetModelMatrix();
 		modelMatrix.Transpose();
-
-		// TODO: Can we do all this in one mapping? How can we measure it?
-		void* data;
-		vkMapMemory(_vulkan->_device, _modelBuffers[_vulkan->_currentImage].Memory, i * _modelMatrixAlignment, _modelMatrixAlignment, 0, &data);
-		memcpy(data, &modelMatrix, sizeof(modelMatrix));
-		memset(static_cast<char*>(data) + sizeof(modelMatrix) + 1, 0, _modelMatrixAlignment - sizeof(modelMatrix));
-		vkUnmapMemory(_vulkan->_device, _modelBuffers[_vulkan->_currentImage].Memory);
+		
+		size_t dataOffset = _modelMatrixAlignment * i;
+		memcpy(dataOffset + static_cast<char*>(modelsData), &modelMatrix, sizeof(modelMatrix));
+		memset(dataOffset + static_cast<char*>(modelsData) + sizeof(modelMatrix) + 1, 0, _modelMatrixAlignment - sizeof(modelMatrix));
 	}
+	vkUnmapMemory(_vulkan->_device, _modelBuffers[_vulkan->_currentImage].Memory);
 
 	for (int i = 0; i < Models.size(); i++)
 	{
