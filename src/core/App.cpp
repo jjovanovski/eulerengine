@@ -95,7 +95,7 @@ App::App()
 	std::vector<Model> models;
 
 	Model m1;
-	m1.Position = Vec3(1, 0, 0);
+	m1.Position = Vec3(1, 0, 1);
 	m1.Meshes.push_back(&plane);
 	models.push_back(m1);
 

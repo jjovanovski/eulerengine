@@ -2,6 +2,7 @@
 
 #include "../API.h"
 
+#include <vulkan/vulkan.h>
 #include <stdint.h>
 #include <vector>
 

@@ -211,6 +211,9 @@ namespace Euler
             void CreateShaderModule(const char* shaderCode, size_t codeSize, VkShaderModule* shaderModule);
             void DestroyShaderModule(VkShaderModule shaderModule);
 
+            void CreateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding> bindings, VkDescriptorSetLayout* descriptorSetLayout);
+            void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
+
             void CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* pipelineLayout, VkPipeline* pipeline);
             void DestroyPipeline(VkPipelineLayout pipelineLayout, VkPipeline pipeline);
 

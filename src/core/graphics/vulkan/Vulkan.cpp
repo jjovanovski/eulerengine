@@ -655,6 +655,21 @@ void Vulkan::DestroyShaderModule(VkShaderModule shaderModule)
 	vkDestroyShaderModule(_device, shaderModule, nullptr);
 }
 
+void Vulkan::CreateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding> bindings, VkDescriptorSetLayout* descriptorSetLayout)
+{
+	VkDescriptorSetLayoutCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	createInfo.bindingCount = bindings.size();
+	createInfo.pBindings = bindings.data();
+
+	HANDLE_VKRESULT(vkCreateDescriptorSetLayout(_device, &createInfo, nullptr, descriptorSetLayout), "");
+}
+
+void Vulkan::DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+{
+	vkDestroyDescriptorSetLayout(_device, descriptorSetLayout, nullptr);
+}
+
 void Vulkan::CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* pipelineLayout, VkPipeline* pipeline)
 {
 	/* === PIPELINE SHADERS AND STAGES === */
