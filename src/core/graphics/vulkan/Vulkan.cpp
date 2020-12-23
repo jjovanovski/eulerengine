@@ -1757,6 +1757,22 @@ int Vulkan::GetSwapchainImageCount()
 	return _swapchainImages.size();
 }
 
+void Vulkan::CreateDescriptorPool(std::vector<VkDescriptorPoolSize> poolSizes, uint32_t maxSets, VkDescriptorPool* pool)
+{
+	VkDescriptorPoolCreateInfo poolCreateInfo{};
+	poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	poolCreateInfo.poolSizeCount = poolSizes.size();
+	poolCreateInfo.pPoolSizes = poolSizes.data();
+	poolCreateInfo.maxSets = maxSets;
+
+	HANDLE_VKRESULT(vkCreateDescriptorPool(_device, &poolCreateInfo, nullptr, pool), "");
+}
+
+void Vulkan::DestroyDescriptorPool(VkDescriptorPool pool)
+{
+	vkDestroyDescriptorPool(_device, pool, nullptr);
+}
+
 void Vulkan::BeginDrawFrame()
 {
 	if (_resizeWidth != UINT32_MAX && _resizeHeight != UINT32_MAX)

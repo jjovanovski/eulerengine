@@ -211,6 +211,9 @@ namespace Euler
             void CreateShaderModule(const char* shaderCode, size_t codeSize, VkShaderModule* shaderModule);
             void DestroyShaderModule(VkShaderModule shaderModule);
 
+            void CreateDescriptorPool(std::vector<VkDescriptorPoolSize> poolSizes, uint32_t maxSets, VkDescriptorPool* pool);
+            void DestroyDescriptorPool(VkDescriptorPool pool);
+
             void CreateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding> bindings, VkDescriptorSetLayout* descriptorSetLayout);
             void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
 

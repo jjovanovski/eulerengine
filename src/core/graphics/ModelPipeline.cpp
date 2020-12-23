@@ -125,19 +125,11 @@ void ModelPipeline::CreateDescriptorSets()
 
 	/* === CREATE DESCRIPTOR SET POOL === */
 
-	VkDescriptorPoolSize viewProjPoolSize = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };
-	VkDescriptorPoolSize modelPoolSize = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };
-	VkDescriptorPoolSize texturePoolSize = { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageCount };
-	VkDescriptorPoolSize poolSizes[] = { viewProjPoolSize, modelPoolSize, texturePoolSize };
+	std::vector<VkDescriptorPoolSize> poolSizes(2);
+	poolSizes[0] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// ViewProj
+	poolSizes[1] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };	// Model
 
-	// TODO: Add abstract method for this in the vulkan api
-	VkDescriptorPoolCreateInfo poolCreateInfo{};
-	poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	poolCreateInfo.poolSizeCount = 3;
-	poolCreateInfo.pPoolSizes = poolSizes;
-	poolCreateInfo.maxSets = 3 * imageCount;
-	
-	vkCreateDescriptorPool(_vulkan->_device, &poolCreateInfo, nullptr, &_descriptorPool);
+	_vulkan->CreateDescriptorPool(poolSizes, poolSizes.size() * imageCount, &_descriptorPool);
 
 	/* === CREATE DESCRIPTOR SETS === */
 
