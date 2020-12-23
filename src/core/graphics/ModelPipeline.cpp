@@ -64,7 +64,6 @@ void ModelPipeline::Destroy()
 
 	_vulkan->DestroyDescriptorSetLayout(_viewProjLayout);
 	_vulkan->DestroyDescriptorSetLayout(_modelLayout);
-	//_vulkan->DestroyDescriptorSetLayout(_textureLayout);
 }
 
 std::vector<VertexAttributeInfo> ModelPipeline::GetVertexAttributes()
@@ -108,15 +107,6 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	modelBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(modelBindings, &_modelLayout);
-
-	/* === Texture DESCRIPTOR SET LAYOUT */
-	std::vector<VkDescriptorSetLayoutBinding> textureBindings(1);
-	textureBindings[0].binding = 0;
-	textureBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	textureBindings[0].descriptorCount = 1;
-	textureBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-	//_vulkan->CreateDescriptorSetLayout(textureBindings, &_textureLayout);
 }
 
 void ModelPipeline::CreateDescriptorSets()
