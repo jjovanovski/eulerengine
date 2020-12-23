@@ -197,6 +197,7 @@ namespace Euler
             // =====   ABSTRACTED   =====
 
             int GetSwapchainImageCount();
+            PhysicalDevice* GetPhysicalDevice();
 
             uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
             void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& deviceMemory);

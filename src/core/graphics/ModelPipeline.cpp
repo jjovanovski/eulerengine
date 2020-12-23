@@ -184,8 +184,7 @@ void ModelPipeline::CreateModelDescriptorSets()
 {
 	uint32_t imageCount = _vulkan->GetSwapchainImageCount();
 
-	// TODO: Add getter for the physical device
-	auto minOffset = _vulkan->_physicalDevice->Properties.limits.minUniformBufferOffsetAlignment;
+	auto minOffset = _vulkan->GetPhysicalDevice()->Properties.limits.minUniformBufferOffsetAlignment;
 	auto alignment = (sizeof(Mat4) + minOffset - 1) & ~(minOffset - 1);
 
 	/* === CREATE Model BUFFERS === */

@@ -1757,6 +1757,11 @@ int Vulkan::GetSwapchainImageCount()
 	return _swapchainImages.size();
 }
 
+PhysicalDevice* Vulkan::GetPhysicalDevice()
+{
+	return _physicalDevice;
+}
+
 void Vulkan::CreateDescriptorPool(std::vector<VkDescriptorPoolSize> poolSizes, uint32_t maxSets, VkDescriptorPool* pool)
 {
 	VkDescriptorPoolCreateInfo poolCreateInfo{};
