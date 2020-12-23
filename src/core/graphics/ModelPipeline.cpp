@@ -184,8 +184,10 @@ void ModelPipeline::CreateModelDescriptorSets()
 {
 	uint32_t imageCount = _vulkan->GetSwapchainImageCount();
 
+	/* === CALCULATE THE MODEL MATRIX ALLIGNMENT IN THE UNIFORM BUFFER === */
+
 	auto minOffset = _vulkan->GetPhysicalDevice()->Properties.limits.minUniformBufferOffsetAlignment;
-	auto alignment = (sizeof(Mat4) + minOffset - 1) & ~(minOffset - 1);
+	_modelMatrixAlignment = (sizeof(Mat4) + minOffset - 1) & ~(minOffset - 1);
 
 	/* === CREATE Model BUFFERS === */
 
@@ -263,9 +265,6 @@ void ModelPipeline::RecordCommands()
 		nullptr
 	);
 
-	auto minOffset = _vulkan->_physicalDevice->Properties.limits.minUniformBufferOffsetAlignment;
-	auto alignment = (sizeof(Mat4) + minOffset - 1) & ~(minOffset - 1);
-
 	for (int i = 0; i < Models.size(); i++)
 	{
 		Mat4 modelMatrix = Models[i]->GetModelMatrix();
@@ -273,9 +272,9 @@ void ModelPipeline::RecordCommands()
 
 		// TODO: Can we do all this in one mapping? How can we measure it?
 		void* data;
-		vkMapMemory(_vulkan->_device, _modelBuffers[_vulkan->_currentImage].Memory, i * alignment, alignment, 0, &data);
+		vkMapMemory(_vulkan->_device, _modelBuffers[_vulkan->_currentImage].Memory, i * _modelMatrixAlignment, _modelMatrixAlignment, 0, &data);
 		memcpy(data, &modelMatrix, sizeof(modelMatrix));
-		memset(static_cast<char*>(data) + sizeof(modelMatrix) + 1, 0, alignment - sizeof(modelMatrix));
+		memset(static_cast<char*>(data) + sizeof(modelMatrix) + 1, 0, _modelMatrixAlignment - sizeof(modelMatrix));
 		vkUnmapMemory(_vulkan->_device, _modelBuffers[_vulkan->_currentImage].Memory);
 	}
 
@@ -284,7 +283,7 @@ void ModelPipeline::RecordCommands()
 		Model* model = Models[i];
 		
 		// set model matrix
-		uint32_t offset = alignment * i;
+		uint32_t offset = _modelMatrixAlignment * i;
 		vkCmdBindDescriptorSets(
 			*_vulkan->GetMainCommandBuffer(),
 			VK_PIPELINE_BIND_POINT_GRAPHICS,

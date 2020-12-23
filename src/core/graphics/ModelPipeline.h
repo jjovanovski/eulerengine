@@ -23,7 +23,6 @@ namespace Euler
 
 			VkDescriptorSetLayout _viewProjLayout;
 			VkDescriptorSetLayout _modelLayout;
-			//VkDescriptorSetLayout _textureLayout;
 
 			VkDescriptorPool _descriptorPool;
 			std::vector<VkDescriptorSet> _viewProjDescriptorSets;
@@ -31,6 +30,8 @@ namespace Euler
 
 			std::vector<Buffer> _viewProjBuffers;
 			std::vector<Buffer> _modelBuffers;
+
+			uint64_t _modelMatrixAlignment;
 
 		public:
 			std::vector<Model*> Models;
