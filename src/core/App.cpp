@@ -122,62 +122,6 @@ App::App()
 	modelPipeline.Models.push_back(&m1);
 	modelPipeline.Models.push_back(&m2);
 
-	Mat4 mat;
-	auto minOffset = vulkan._physicalDevice->Properties.limits.minUniformBufferOffsetAlignment;
-	auto alignment = (sizeof(mat) + minOffset - 1) & ~(minOffset - 1);
-
-	// write dynamic model matrices
-	for (int i = 0; i < modelBuffers.size(); i++)
-	{
-		Mat4 model;
-		vulkan.CreateBuffer(models.size() * alignment, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, modelBuffers[i], modelMemories[i]);
-
-		int j = 0;
-		for (auto& model : models)
-		{
-			Mat4 modelMatrix = model.GetModelMatrix();
-			modelMatrix.Transpose();
-			void* data;
-			vkMapMemory(vulkan._device, modelMemories[i], j * alignment, alignment, 0, &data);
-			memcpy(data, &modelMatrix, sizeof(modelMatrix));
-			memset(static_cast<char*>(data) + sizeof(modelMatrix) + 1, 0, alignment - sizeof(modelMatrix));
-			vkUnmapMemory(vulkan._device, modelMemories[i]);
-
-			j++;
-		}
-	}
-
-	std::vector<VkDescriptorSetLayout> modelLayouts(vulkan.GetSwapchainImageCount(), vulkan._modelLayout);
-	vulkan._modelSets.resize(vulkan.GetSwapchainImageCount());
-	VkDescriptorSetAllocateInfo modelAllocInfo{};
-	modelAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	modelAllocInfo.descriptorPool = vulkan._descriptorPool;
-	modelAllocInfo.descriptorSetCount = static_cast<uint32_t>(vulkan.GetSwapchainImageCount());
-	modelAllocInfo.pSetLayouts = modelLayouts.data();
-
-	vkAllocateDescriptorSets(vulkan._device, &modelAllocInfo, vulkan._modelSets.data());
-
-	for (int i = 0; i < vulkan._modelSets.size(); i++)
-	{
-		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = modelBuffers[i];
-		bufferInfo.offset = 0;
-		bufferInfo.range = VK_WHOLE_SIZE;
-
-		VkWriteDescriptorSet writeUbo{};
-		writeUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeUbo.dstSet = vulkan._modelSets[i];
-		writeUbo.dstBinding = 0;
-		writeUbo.dstArrayElement = 0;
-		writeUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-		writeUbo.descriptorCount = 1;
-		writeUbo.pBufferInfo = &bufferInfo;
-
-		VkWriteDescriptorSet writes[] = { writeUbo };
-
-		vkUpdateDescriptorSets(vulkan._device, 1, writes, 0, nullptr);
-	}
-
 	// main loop
 	while (!glfwWindowShouldClose(Window)) {
 		while (WindowMinimized)
@@ -189,46 +133,17 @@ App::App()
 		m2.Position.y += 0.0001f;
 
 		vulkan.BeginDrawFrame();
-
 		modelPipeline.RecordCommands();
-
-		//uint32_t i = 0;
-		//Mat4 m;
-		//for (auto& model : models)
-		//{
-		//	uint32_t offset = i * alignment;
-		//	vkCmdBindDescriptorSets(
-		//		*vulkan.GetMainCommandBuffer(),
-		//		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		//		vulkan._graphicsPipelineLayout,
-		//		2,
-		//		1,
-		//		&vulkan._modelSets[vulkan._currentImage],
-		//		1,
-		//		&offset
-		//	);
-		//	model.Meshes[0]->RecordDrawCommands(&vulkan, *vulkan.GetMainCommandBuffer());
-
-		//	i++;
-		//}
-
 		vulkan.EndDrawFrame();
 
 		glfwPollEvents();
 	}
 
+	// cleanup
 	texture.Destroy();
-
-	for (int i = 0; i < modelBuffers.size(); i++)
-	{
-		vulkan.DestroyBuffer(modelBuffers[i], modelMemories[i]);
-	}
-
 	plane.Destroy(&vulkan);
-	
 	modelPipeline.Destroy();
 
-	// cleanup
 	vkDestroySurfaceKHR(vulkan.GetInstance(), surface, nullptr);
 	vulkan.Cleanup();
 
