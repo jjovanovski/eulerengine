@@ -307,6 +307,17 @@ void ModelPipeline::RecordCommands()
 		// draw model meshes
 		for (int j = 0; j < model->Meshes.size(); j++)
 		{
+			vkCmdBindDescriptorSets(
+				*_vulkan->GetMainCommandBuffer(),
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				_pipelineLayout,
+				2,
+				1,
+				&model->Meshes[j]->Texture->DescriptorSets[_vulkan->_currentImage],
+				0,
+				nullptr
+			);
+
 			_vulkan->DrawMesh(
 				*_vulkan->GetMainCommandBuffer(),
 				&model->Meshes[j]->VertexBuffer,

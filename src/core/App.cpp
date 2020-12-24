@@ -100,6 +100,7 @@ App::App()
 	Mesh plane;
 	plane.Vertices = vertices;
 	plane.Indices = indices;
+	plane.Texture = &texture;
 	plane.Create(&vulkan);
 
 	std::vector<VkBuffer> modelBuffers;

@@ -2,6 +2,7 @@
 
 #include "../API.h"
 #include "Vertex.h"
+#include "Texture.h"
 #include "vulkan/Vulkan.h"
 
 #include <vector>
@@ -14,6 +15,7 @@ namespace Euler
 		std::vector<Vertex> Vertices;
 		std::vector<uint32_t> Indices;
 		// TODO: Material
+		Graphics::Texture* Texture;
 
 		// vulkan specific
 		Graphics::Buffer VertexBuffer;
