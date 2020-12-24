@@ -47,7 +47,7 @@ void ModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float viewportHe
 
 void ModelPipeline::Destroy()
 {
-	vkDestroyDescriptorPool(_vulkan->_device, _descriptorPool, nullptr);
+	_vulkan->DestroyDescriptorPool(_descriptorPool);
 
 	uint32_t vpc = _viewProjBuffers.size();
 	uint32_t mc = _modelBuffers.size();
