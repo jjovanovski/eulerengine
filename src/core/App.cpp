@@ -86,6 +86,14 @@ App::App()
 
 	stbi_image_free(pixels);
 
+	pixels = stbi_load("texture.jpg", &width, &height, &channels, STBI_rgb_alpha);
+
+	Graphics::Texture planeTexture;
+	planeTexture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.ColorTextureLayout);
+
+	stbi_image_free(pixels);
+
+
 	// load model
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -139,7 +147,7 @@ App::App()
 	Mesh plane;
 	plane.Vertices = vertices;
 	plane.Indices = indices;
-	plane.Texture = &texture;
+	plane.Texture = &planeTexture;
 	plane.Create(&vulkan);
 
 	std::vector<VkBuffer> modelBuffers;
@@ -150,11 +158,14 @@ App::App()
 	std::vector<Model> models;
 
 	Model m1;
-	m1.Position = Vec3(1, 0, 1);
+	m1.Position = Vec3(1.85f, 0, 0);
+	m1.Scale = Vec3(0.5f, 0.5f, 0.5f);
 	m1.Meshes.push_back(&plane);
 	models.push_back(m1);
 
 	Model m2;
+	m2.Position = Vec3(-1.85f, 0, 0);
+	m2.Scale = Vec3(0.5f, 0.5f, 0.5f);
 	m2.Meshes.push_back(&plane);
 	models.push_back(m2);
 
@@ -179,8 +190,11 @@ App::App()
 		/*modelModel.Rotation.z = -90.0f * (3.14159265359f / 180.0f);
 		modelModel.Rotation.y = 45.0f * (3.14159265359f / 180.0f);*/
 
-		m1.Position.x += 0.0001f;
-		m2.Position.y += 0.0001f;
+		m1.Rotation.z += 0.0001f;
+		m1.Scale.x = (sinf(3*m1.Rotation.z)*0.5f + 0.5f) * 0.25f + 0.25f;
+		m1.Scale.y = m1.Scale.x;
+		
+		m2.Rotation.y += 0.001f;
 
 		vulkan.BeginDrawFrame();
 		modelPipeline.RecordCommands();
