@@ -8,8 +8,11 @@
 #include "graphics/Mesh.h"
 #include "graphics/Model.h"
 #include "graphics/ModelPipeline.h"
+#include "graphics/Texture.h"
 #include "math/Vec3.h"
 #include "math/Vec2.h"
+
+#include "stb_image.h"
 
 using namespace Euler;
 
@@ -70,6 +73,14 @@ App::App()
 
 	Graphics::ModelPipeline modelPipeline;
 	modelPipeline.Create(&vulkan, WIDTH, HEIGHT);
+
+	int width, height, channels;
+	stbi_uc* pixels = stbi_load("texture.jpg", &width, &height, &channels, STBI_rgb_alpha);
+	
+	Graphics::Texture texture;
+	//texture.Create(&vulkan, pixels, width, height, width * height * 4, VK_NULL_HANDLE);
+
+	stbi_image_free(pixels);
 
 	std::vector<Vertex> vertices = {
 		Vertex(Vec3(-1.0f, +1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 1.0f)),

@@ -209,6 +209,12 @@ namespace Euler
             void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
             void CopyBufferToImage(VkBuffer srcBuffer, VkImage dstImage, uint32_t width, uint32_t height);
 
+            void CreateImageView(VkImage image, VkImageView* imageView);
+            void DestroyImageView(VkImageView imageView);
+
+            void CreateSampler(VkSampler* sampler);
+            void DestroySampler(VkSampler sampler);
+
             void CreateShaderModule(const char* shaderCode, size_t codeSize, VkShaderModule* shaderModule);
             void DestroyShaderModule(VkShaderModule shaderModule);
 
