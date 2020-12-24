@@ -19,5 +19,5 @@ Mat4 Model::GetModelMatrix()
 	Mat4 roty = Math::Matrices::RotateY(Rotation.y);
 	Mat4 rotz = Math::Matrices::RotateZ(Rotation.z);
 
-	return translate.Multiply(rotz.Multiply(roty.Multiply(rotx.Multiply(scale))));
+	return translate.Multiply(scale.Multiply(rotz.Multiply(roty.Multiply(rotx))));
 }
