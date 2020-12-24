@@ -204,7 +204,7 @@ void ModelPipeline::CreateModelDescriptorSets()
 	for (int i = 0; i < imageCount; i++)
 	{
 		_vulkan->CreateBuffer(
-			INITIAL_MODELS_FOR_BUFFER_SIZE * sizeof(Mat4),
+			INITIAL_MODELS_FOR_BUFFER_SIZE * _modelMatrixAlignment,
 			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			_modelBuffers[i].Buffer,

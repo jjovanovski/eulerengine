@@ -13,7 +13,11 @@ Model::Model()
 
 Mat4 Model::GetModelMatrix()
 {
-	Mat4 mat = Math::Matrices::Translate(Position.x, Position.y, Position.z);
+	Mat4 scale = Math::Matrices::Scale(Scale.x, Scale.y, Scale.z);
+	Mat4 translate = Math::Matrices::Translate(Position.x, Position.y, Position.z);
+	Mat4 rotx = Math::Matrices::RotateX(Rotation.x);
+	Mat4 roty = Math::Matrices::RotateY(Rotation.y);
+	Mat4 rotz = Math::Matrices::RotateZ(Rotation.z);
 
-	return mat;
+	return translate.Multiply(rotz.Multiply(roty.Multiply(rotx.Multiply(scale))));
 }

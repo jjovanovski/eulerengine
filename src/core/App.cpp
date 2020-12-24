@@ -14,6 +14,9 @@
 
 #include "stb_image.h"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+
 using namespace Euler;
 
 void framebufferResized(GLFWwindow* window, int width, int height)
@@ -74,13 +77,49 @@ App::App()
 	Graphics::ModelPipeline modelPipeline;
 	modelPipeline.Create(&vulkan, WIDTH, HEIGHT);
 
+	// load texture
 	int width, height, channels;
-	stbi_uc* pixels = stbi_load("texture.jpg", &width, &height, &channels, STBI_rgb_alpha);
+	stbi_uc* pixels = stbi_load("model/viking_room.png", &width, &height, &channels, STBI_rgb_alpha);
 	
 	Graphics::Texture texture;
 	texture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.ColorTextureLayout);
 
 	stbi_image_free(pixels);
+
+	// load model
+	tinyobj::attrib_t attrib;
+	std::vector<tinyobj::shape_t> shapes;
+	std::vector<tinyobj::material_t> materials;
+	std::string warn, err;
+
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, "model/viking_room.obj")) {
+		throw std::runtime_error(warn + err);
+	}
+
+	std::vector<Vertex> modelVertices;
+	std::vector<uint32_t> modelIndices;
+	for (const auto& shape : shapes)
+	{
+		for (const auto& index : shape.mesh.indices)
+		{
+			Vertex vert{};
+			vert.Position.x = attrib.vertices[3 * index.vertex_index + 0];
+			vert.Position.y = attrib.vertices[3 * index.vertex_index + 1];
+			vert.Position.z = attrib.vertices[3 * index.vertex_index + 2];
+
+			vert.UV.x = attrib.texcoords[2 * index.texcoord_index + 0];
+			vert.UV.y = 1.0f - attrib.texcoords[2 * index.texcoord_index + 1];
+
+			modelVertices.push_back(vert);
+			modelIndices.push_back(modelIndices.size());
+		}
+	}
+
+	Mesh model;
+	model.Vertices = modelVertices;
+	model.Indices = modelIndices;
+	model.Texture = &texture;
+	model.Create(&vulkan);
 
 	std::vector<Vertex> vertices = {
 		Vertex(Vec3(-1.0f, +1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 1.0f)),
@@ -90,11 +129,11 @@ App::App()
 	};
 
 	std::vector<uint32_t> indices = {
-		0, 1, 2,
-		0, 2, 3,
+		2, 1, 0,
+		3, 2, 0,
 
-		4, 5, 6,
-		4, 6, 7
+		6, 5, 4,
+		7, 6, 4
 	};
 
 	Mesh plane;
@@ -119,15 +158,26 @@ App::App()
 	m2.Meshes.push_back(&plane);
 	models.push_back(m2);
 
+	Model modelModel;
+	modelModel.Position.y = 0.5f;
+	modelModel.Rotation.x = 270.0f * (3.14159265359f / 180.0f);
+	modelModel.Rotation.y = 45.0f * 5 * (3.14159265359f / 180.0f);
+	//modelModel.Scale = Vec3(0.8f, 0.8f, 0.8f);
+	modelModel.Meshes.push_back(&model);
+
+	modelPipeline.Models.push_back(&modelModel);
 	modelPipeline.Models.push_back(&m1);
 	modelPipeline.Models.push_back(&m2);
-
+	
 	// main loop
 	while (!glfwWindowShouldClose(Window)) {
 		while (WindowMinimized)
 		{
 			glfwWaitEvents();
 		}
+
+		/*modelModel.Rotation.z = -90.0f * (3.14159265359f / 180.0f);
+		modelModel.Rotation.y = 45.0f * (3.14159265359f / 180.0f);*/
 
 		m1.Position.x += 0.0001f;
 		m2.Position.y += 0.0001f;

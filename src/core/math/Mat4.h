@@ -40,6 +40,23 @@ namespace Euler
 					}
 				}
 			}
+
+			Mat4t Multiply(Mat4t other)
+			{
+				Mat4t m;
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						for (int k = 0; k < 4; k++)
+						{
+							m.Set(i, j, m.Get(i, j) + Get(i, k) * other.Get(k, j));
+						}
+					}
+				}
+
+				return m;
+			}
 		};
 	}
 }
