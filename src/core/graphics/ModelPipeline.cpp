@@ -35,7 +35,7 @@ void ModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float viewportHe
 	pipelineInfo.ViewportHeight = viewportHeight;
 
 	CreateDescriptorSetLayouts();
-	std::vector<VkDescriptorSetLayout> layouts = { _viewProjLayout, _modelLayout };
+	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, ColorTextureLayout };
 	pipelineInfo.DescriptorSetLayouts = layouts;
 
 	pipelineInfo.RenderPass = _vulkan->_renderPass;	// TODO: This should be a parameter
@@ -62,8 +62,8 @@ void ModelPipeline::Destroy()
 
 	_vulkan->DestroyPipeline(_pipelineLayout, _pipeline);
 
-	_vulkan->DestroyDescriptorSetLayout(_viewProjLayout);
-	_vulkan->DestroyDescriptorSetLayout(_modelLayout);
+	_vulkan->DestroyDescriptorSetLayout(ViewProjLayout);
+	_vulkan->DestroyDescriptorSetLayout(ModelLayout);
 }
 
 std::vector<VertexAttributeInfo> ModelPipeline::GetVertexAttributes()
@@ -97,7 +97,7 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	viewProjBindings[0].descriptorCount = 1;
 	viewProjBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-	_vulkan->CreateDescriptorSetLayout(viewProjBindings, &_viewProjLayout);
+	_vulkan->CreateDescriptorSetLayout(viewProjBindings, &ViewProjLayout);
 
 	/* === Model DESCRIPTOR SET LAYOUT */
 	std::vector<VkDescriptorSetLayoutBinding> modelBindings(1);
@@ -106,7 +106,16 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	modelBindings[0].descriptorCount = 1;
 	modelBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-	_vulkan->CreateDescriptorSetLayout(modelBindings, &_modelLayout);
+	_vulkan->CreateDescriptorSetLayout(modelBindings, &ModelLayout);
+
+	/* === ColorTexture DESCRIPTOR SET LAYOUT */
+	std::vector<VkDescriptorSetLayoutBinding> colorTextureBindings(1);
+	colorTextureBindings[0].binding = 0;
+	colorTextureBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	colorTextureBindings[0].descriptorCount = 1;
+	colorTextureBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	_vulkan->CreateDescriptorSetLayout(colorTextureBindings, &ColorTextureLayout);
 }
 
 void ModelPipeline::CreateDescriptorSets()
@@ -147,7 +156,7 @@ void ModelPipeline::CreateViewProjDescriptorSets()
 
 	/* === ALLOCATE DESCRIPTOR SETS === */
 
-	std::vector<VkDescriptorSetLayout> layouts(imageCount, _viewProjLayout);
+	std::vector<VkDescriptorSetLayout> layouts(imageCount, ViewProjLayout);
 	_viewProjDescriptorSets.resize(imageCount);
 
 	VkDescriptorSetAllocateInfo allocInfo{};
@@ -205,7 +214,7 @@ void ModelPipeline::CreateModelDescriptorSets()
 
 	/* === ALLOCATE DESCRIPTOR SETS === */
 
-	std::vector<VkDescriptorSetLayout> layouts(imageCount, _modelLayout);
+	std::vector<VkDescriptorSetLayout> layouts(imageCount, ModelLayout);
 	_modelDescriptorSets.resize(imageCount);
 
 	VkDescriptorSetAllocateInfo allocInfo{};

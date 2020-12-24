@@ -3,6 +3,7 @@
 using namespace Euler::Graphics;
 
 bool Texture::DescriptorPoolCreated = false;
+VkDescriptorPool Texture::DescriptorPool = VK_NULL_HANDLE;
 
 void Texture::Create(Vulkan* vulkan, void* pixels, uint32_t width, uint32_t height, size_t size, VkDescriptorSetLayout descriptorSetLayout)
 {

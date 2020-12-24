@@ -78,7 +78,7 @@ App::App()
 	stbi_uc* pixels = stbi_load("texture.jpg", &width, &height, &channels, STBI_rgb_alpha);
 	
 	Graphics::Texture texture;
-	//texture.Create(&vulkan, pixels, width, height, width * height * 4, VK_NULL_HANDLE);
+	texture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.ColorTextureLayout);
 
 	stbi_image_free(pixels);
 
@@ -215,6 +215,8 @@ App::App()
 
 		glfwPollEvents();
 	}
+
+	texture.Destroy();
 
 	for (int i = 0; i < modelBuffers.size(); i++)
 	{

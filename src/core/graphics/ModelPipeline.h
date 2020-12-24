@@ -27,9 +27,6 @@ namespace Euler
 			VkPipeline _pipeline;
 			VkPipelineLayout _pipelineLayout;
 
-			VkDescriptorSetLayout _viewProjLayout;
-			VkDescriptorSetLayout _modelLayout;
-
 			VkDescriptorPool _descriptorPool;
 			std::vector<VkDescriptorSet> _viewProjDescriptorSets;
 			std::vector<VkDescriptorSet> _modelDescriptorSets;
@@ -41,6 +38,10 @@ namespace Euler
 
 		public:
 			std::vector<Model*> Models;
+
+			VkDescriptorSetLayout ViewProjLayout;
+			VkDescriptorSetLayout ModelLayout;
+			VkDescriptorSetLayout ColorTextureLayout;
 
 			void Create(Vulkan* vulkan, float viewportWidth, float viewportHeight);
 			void Destroy();
