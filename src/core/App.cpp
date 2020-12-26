@@ -11,6 +11,8 @@
 #include "graphics/Texture.h"
 #include "math/Vec3.h"
 #include "math/Vec2.h"
+#include "input/GLFWInputHandler.h"
+#include "input/Input.h"
 
 #include "stb_image.h"
 
@@ -47,6 +49,10 @@ App::App()
 	
 	glfwSetWindowUserPointer(Window, this);
 	glfwSetFramebufferSizeCallback(Window, framebufferResized);
+
+	// init input
+	GLFWInputHandler* glfwInputHandler = new GLFWInputHandler(Window);
+	Input::Init(glfwInputHandler);
 
 	// create vulkan instance
 	std::vector<const char*> requiredInstanceExtensions;
@@ -196,6 +202,15 @@ App::App()
 		
 		m2.Rotation.y += 0.001f;
 
+		if (Input::GetKeyDown(Key::ARROW_LEFT))
+		{
+			modelModel.Position.x -= 0.001f;
+		}
+		else if (Input::GetKeyDown(Key::ARROW_RIGHT))
+		{
+			modelModel.Position.x += 0.001f;
+		}
+
 		vulkan.BeginDrawFrame();
 		modelPipeline.RecordCommands();
 		vulkan.EndDrawFrame();
@@ -210,6 +225,8 @@ App::App()
 
 	vkDestroySurfaceKHR(vulkan.GetInstance(), surface, nullptr);
 	vulkan.Cleanup();
+
+	Input::Dispose();
 
 	glfwDestroyWindow(Window);
 	glfwTerminate();
