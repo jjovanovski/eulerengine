@@ -44,12 +44,6 @@ namespace Euler
             Vertex(Vec3 position, Vec3 color, Vec2 uv) : Position(position), Color(color), Uv(uv) {}
         };
 
-        struct EULER_API ViewProj
-        {
-            Mat4 View;
-            Mat4 Projection;
-        };
-
         class EULER_API Buffer
         {
         public:

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../API.h"
+#include "../math/Mat4.h"
 
 #include <vulkan/vulkan.h>
 #include <stdint.h>
@@ -36,4 +37,11 @@ public:
 	std::vector<VkDescriptorSetLayout> DescriptorSetLayouts;
 
 	VkRenderPass RenderPass;
+};
+
+class EULER_API ViewProj
+{
+public:
+	Mat4 View;
+	Mat4 Projection;
 };

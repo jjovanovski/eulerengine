@@ -9,6 +9,8 @@
 #include "graphics/Model.h"
 #include "graphics/ModelPipeline.h"
 #include "graphics/Texture.h"
+#include "graphics/Common.h"
+#include "graphics/Camera.h"
 #include "math/Vec3.h"
 #include "math/Vec2.h"
 #include "math/Matrices.h"
@@ -186,6 +188,10 @@ App::App()
 	modelPipeline.Models.push_back(&modelModel);
 	modelPipeline.Models.push_back(&m1);
 	modelPipeline.Models.push_back(&m2);
+
+	Camera camera;
+	camera.Init(WIDTH, HEIGHT, 60.0f, 0.01f, 10000.0f);
+	camera.Position = Vec3(0, 0, -3);
 	
 	// main loop
 	while (!glfwWindowShouldClose(Window)) {
@@ -212,14 +218,8 @@ App::App()
 			modelModel.Position.x += 0.001f;
 		}
 
-		Graphics::ViewProj viewProj;
-		viewProj.View = Math::Matrices::Translate(0, 0, 3);
-		viewProj.Projection = Math::Matrices::Perspective(WIDTH, HEIGHT, 60.0f, 0.1f, 10000);
-		viewProj.View.Transpose();
-		viewProj.Projection.Transpose();
-
 		vulkan.BeginDrawFrame();
-		modelPipeline.RecordCommands(viewProj);
+		modelPipeline.RecordCommands(camera.GetViewProj());
 		vulkan.EndDrawFrame();
 
 		glfwPollEvents();
