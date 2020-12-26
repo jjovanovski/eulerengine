@@ -46,7 +46,7 @@ namespace Euler
 			void Create(Vulkan* vulkan, float viewportWidth, float viewportHeight);
 			void Destroy();
 
-			void RecordCommands();
+			void RecordCommands(ViewProj viewProjMatrix);
 
 		private:
 			std::vector<VertexAttributeInfo> GetVertexAttributes();

@@ -11,6 +11,7 @@
 #include "graphics/Texture.h"
 #include "math/Vec3.h"
 #include "math/Vec2.h"
+#include "math/Matrices.h"
 #include "input/GLFWInputHandler.h"
 #include "input/Input.h"
 
@@ -211,8 +212,14 @@ App::App()
 			modelModel.Position.x += 0.001f;
 		}
 
+		Graphics::ViewProj viewProj;
+		viewProj.View = Math::Matrices::Translate(0, 0, 3);
+		viewProj.Projection = Math::Matrices::Perspective(WIDTH, HEIGHT, 60.0f, 0.1f, 10000);
+		viewProj.View.Transpose();
+		viewProj.Projection.Transpose();
+
 		vulkan.BeginDrawFrame();
-		modelPipeline.RecordCommands();
+		modelPipeline.RecordCommands(viewProj);
 		vulkan.EndDrawFrame();
 
 		glfwPollEvents();

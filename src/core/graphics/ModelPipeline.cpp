@@ -247,20 +247,14 @@ void ModelPipeline::CreateModelDescriptorSets()
 	}
 }
 
-void ModelPipeline::RecordCommands()
+void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 {
 	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 
 	// update viewproj
-	ViewProj mvp;
-	mvp.View = Math::Matrices::Translate(0, 0, 3);
-	mvp.Projection = Euler::Math::Matrices::Perspective(1200, 800, 60, 0.001f, 100.0f);
-	mvp.View.Transpose();
-	mvp.Projection.Transpose();
-
 	void* data;
-	vkMapMemory(_vulkan->_device, _viewProjBuffers[_vulkan->_currentImage].Memory, 0, sizeof(mvp), 0, &data);
-	memcpy(data, &mvp, sizeof(mvp));
+	vkMapMemory(_vulkan->_device, _viewProjBuffers[_vulkan->_currentImage].Memory, 0, sizeof(viewProjMatrix), 0, &data);
+	memcpy(data, &viewProjMatrix, sizeof(viewProjMatrix));
 	vkUnmapMemory(_vulkan->_device, _viewProjBuffers[_vulkan->_currentImage].Memory);
 
 	vkCmdBindDescriptorSets(
