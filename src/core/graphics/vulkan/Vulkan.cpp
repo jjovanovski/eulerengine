@@ -724,9 +724,9 @@ void Vulkan::CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* 
 	
 	VkViewport viewport{};
 	viewport.width = pipelineInfo->ViewportWidth;
-	viewport.height = pipelineInfo->ViewportHeight;
+	viewport.height = -pipelineInfo->ViewportHeight;
 	viewport.x = 0;
-	viewport.y = 0;
+	viewport.y = pipelineInfo->ViewportHeight;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
@@ -749,7 +749,7 @@ void Vulkan::CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* 
 	rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
 	rasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
 	rasterizationStateCreateInfo.lineWidth = 1.0f;
 
 	/* === MULTISAMPLING === */
