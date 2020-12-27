@@ -20,12 +20,12 @@ namespace Euler
 
 			Vector3Template(T px, T py, T pz) : x(px), y(py), z(pz) {}
 
-			float LengthSquared()
+			float LengthSquared() const
 			{
 				return x * x + y * y + z * z;
 			}
 
-			float Length()
+			float Length() const
 			{
 				return sqrtf(LengthSquared());
 			}
@@ -38,14 +38,14 @@ namespace Euler
 				z /= length;
 			}
 
-			Vector3Template Normalized()
+			Vector3Template Normalized() const
 			{
 				Vector3Template normalized(x, y, z);
 				normalized.Normalize();
 				return normalized;
 			}
 
-			Vector3Template Cross(Vector3Template other)
+			Vector3Template Cross(const Vector3Template& other) const
 			{
 				Vector3Template cross;
 				cross.x = y * other.z - z * other.y;
@@ -53,6 +53,11 @@ namespace Euler
 				cross.z = x * other.y - y * other.x;
 
 				return cross;
+			}
+
+			float Dot(const Vector3Template& other) const
+			{
+				return x * other.x + y * other.y + z * other.z;
 			}
 		};
 	}

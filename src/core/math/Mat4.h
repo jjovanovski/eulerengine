@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../API.h"
+#include "Vec3.h"
 
 #include <stdint.h>
 #include <math.h>
@@ -14,7 +15,7 @@ namespace Euler
 		{
 			T m[4][4] = { 0 };
 
-			T Get(int i, int j)
+			T Get(int i, int j) const
 			{
 				return m[i][j];
 			}
@@ -41,7 +42,7 @@ namespace Euler
 				}
 			}
 
-			Mat4t Multiply(Mat4t other)
+			Mat4t Multiply(const Mat4t& other)
 			{
 				Mat4t m;
 				for (int i = 0; i < 4; i++)
@@ -56,6 +57,15 @@ namespace Euler
 				}
 
 				return m;
+			}
+
+			Vec3 Multiply(const Vec3& vec)
+			{
+				return Vec3(
+					Get(0, 0) * vec.x + Get(0, 1) * vec.y + Get(0, 2) * vec.z,
+					Get(1, 0) * vec.x + Get(1, 1) * vec.y + Get(1, 2) * vec.z,
+					Get(2, 0) * vec.x + Get(2, 1) * vec.y + Get(2, 2) * vec.z
+				);
 			}
 		};
 	}
