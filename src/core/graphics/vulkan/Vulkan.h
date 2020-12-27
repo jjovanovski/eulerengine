@@ -153,9 +153,6 @@ namespace Euler
             void DestroyRenderPass();
 
             void Vulkan::CreateShaderModule(std::vector<char> shaderCode, VkShaderModule* shaderModule);
-            
-            void CreatePipelineFixed();
-            void DestroyPipelineFixed();
 
             void CreateFramebuffers();
             void DestroyFramebuffers();
@@ -168,14 +165,6 @@ namespace Euler
 
             void CreateFrameSyncObjects();
             void DestroyFrameSyncObjects();
-
-            void CreateUniformBuffer();
-            void DestroyUniformBuffer();
-            void CreateDescriptorPool();
-            void DestroyDescriptorPool();
-
-            void CreateTexture();
-            void DestroyTexture();
 
             void CreateDepthImage();
             void DestroyDepthImage();
