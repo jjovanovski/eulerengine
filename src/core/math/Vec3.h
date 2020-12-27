@@ -19,6 +19,41 @@ namespace Euler
 			Vector3Template() : x(0), y(0), z(0) {}
 
 			Vector3Template(T px, T py, T pz) : x(px), y(py), z(pz) {}
+
+			float LengthSquared()
+			{
+				return x * x + y * y + z * z;
+			}
+
+			float Length()
+			{
+				return sqrtf(LengthSquared());
+			}
+
+			void Normalize()
+			{
+				float length = Length();
+				x /= length;
+				y /= length;
+				z /= length;
+			}
+
+			Vector3Template Normalized()
+			{
+				Vector3Template normalized(x, y, z);
+				normalized.Normalize();
+				return normalized;
+			}
+
+			Vector3Template Cross(Vector3Template other)
+			{
+				Vector3Template cross;
+				cross.x = y * other.z - z * other.y;
+				cross.y = z * other.x - x * other.z;
+				cross.z = x * other.y - y * other.x;
+
+				return cross;
+			}
 		};
 	}
 }

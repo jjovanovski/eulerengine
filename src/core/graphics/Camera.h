@@ -15,6 +15,8 @@ namespace Euler
 		float _nearZ;
 		float _farZ;
 
+		ViewProj _viewProj;
+
 	public:
 		Vec3 Position;
 		Vec3 Rotation;

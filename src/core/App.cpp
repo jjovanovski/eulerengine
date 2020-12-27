@@ -16,6 +16,7 @@
 #include "math/Matrices.h"
 #include "input/GLFWInputHandler.h"
 #include "input/Input.h"
+#include "util/CameraController.h"
 
 #include "stb_image.h"
 
@@ -52,6 +53,7 @@ App::App()
 	
 	glfwSetWindowUserPointer(Window, this);
 	glfwSetFramebufferSizeCallback(Window, framebufferResized);
+	glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// init input
 	GLFWInputHandler* glfwInputHandler = new GLFWInputHandler(Window);
@@ -167,7 +169,7 @@ App::App()
 	std::vector<Model> models;
 
 	Model m1;
-	m1.Position = Vec3(1.85f, 0, 0);
+	m1.Position = Vec3(0, 0, 0);
 	m1.Scale = Vec3(0.5f, 0.5f, 0.5f);
 	m1.Meshes.push_back(&plane);
 	models.push_back(m1);
@@ -192,6 +194,12 @@ App::App()
 	Camera camera;
 	camera.Init(WIDTH, HEIGHT, 60.0f, 0.01f, 10000.0f);
 	camera.Position = Vec3(0, 0, -3);
+	camera.LookAt(Vec3(0, 0, 0));
+	
+	CameraController cameraController;
+	cameraController.Init(&camera);
+
+	float t = 0.0f;
 	
 	// main loop
 	while (!glfwWindowShouldClose(Window)) {
@@ -211,12 +219,17 @@ App::App()
 
 		if (Input::GetKeyDown(Key::ARROW_LEFT))
 		{
-			modelModel.Position.x -= 0.001f;
+			camera.Position.x -= 0.001f;
 		}
 		else if (Input::GetKeyDown(Key::ARROW_RIGHT))
 		{
-			modelModel.Position.x += 0.001f;
+			camera.Position.x += 0.001f;
 		}
+		//camera.Position.x = sinf(t) * -3;
+		//camera.Position.z = cosf(t) * -3;
+		t += 0.0001f;
+		//camera.LookAt(Vec3(camera.Position.x, camera.Position.y, camera.Position.z + 1));
+		cameraController.Update();
 
 		vulkan.BeginDrawFrame();
 		modelPipeline.RecordCommands(camera.GetViewProj());
