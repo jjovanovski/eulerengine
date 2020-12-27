@@ -24,10 +24,10 @@ void CameraController::Update()
 
 	_yaw += mouseDeltaX * _mouseSensitivityX;
 	_pitch -= mouseDeltaY * _mouseSensitivityY;
-	if (_pitch > 89.0f)
-		_pitch = 89.0f;
-	if (_pitch < -89.0f)
-		_pitch = -89.0f;
+	if (_pitch > 89.0f * (3.14159265359f / 180.0f))
+		_pitch = 89.0f * (3.14159265359f / 180.0f);
+	if (_pitch < -89.0f * (3.14159265359f / 180.0f))
+		_pitch = -89.0f * (3.14159265359f / 180.0f);
 
 	Vec3 direction = _camera->Position;
 	direction.x += cosf(_yaw) * cosf(_pitch);
