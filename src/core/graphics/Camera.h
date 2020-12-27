@@ -2,6 +2,7 @@
 
 #include "../API.h"
 #include "../math/Vec3.h"
+#include "../math/Transform.h"
 #include "Common.h"
 
 namespace Euler
@@ -18,11 +19,9 @@ namespace Euler
 		ViewProj _viewProj;
 
 	public:
-		Vec3 Position;
-		Vec3 Rotation;
+		Transform Transform;
 
 		void Init(uint32_t width, uint32_t height, float fieldOfView, float nearZ, float farZ);
 		ViewProj GetViewProj();
-		void LookAt(Vec3 point);
 	};
 }

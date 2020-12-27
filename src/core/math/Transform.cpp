@@ -78,6 +78,8 @@ void Transform::CheckModelMatrix()
 	_forward = _modelMatrix.Multiply(Vec3(0, 0, 1));
 	_right = _modelMatrix.Multiply(Vec3(1, 0, 0));
 	_top = _modelMatrix.Multiply(Vec3(0, 1, 0));
+
+	_dirty = false;
 }
 
 Vec3 Transform::Forward()
@@ -120,25 +122,32 @@ void Transform::LookAt(Vec3 point, Vec3 up)
 
 	Mat4 modelMatrix;
 
-	modelMatrix.Set(0, 0, X.x * _scale.x);
+	modelMatrix.Set(0, 0, X.x);
 	modelMatrix.Set(1, 0, X.y);
 	modelMatrix.Set(2, 0, X.z);
 
 	modelMatrix.Set(0, 1, Y.x);
-	modelMatrix.Set(1, 1, Y.y * _scale.x);
+	modelMatrix.Set(1, 1, Y.y);
 	modelMatrix.Set(2, 1, Y.z);
 
 	modelMatrix.Set(0, 2, dir.x);
 	modelMatrix.Set(1, 2, dir.y);
-	modelMatrix.Set(2, 2, dir.z * _scale.x);
+	modelMatrix.Set(2, 2, dir.z);
 
-	modelMatrix.Set(0, 3, -_position.x);
-	modelMatrix.Set(1, 3, -_position.y);
-	modelMatrix.Set(2, 3, -_position.z);
+	//modelMatrix.Set(0, 3, -_position.x);
+	//modelMatrix.Set(1, 3, -_position.y);
+	//modelMatrix.Set(2, 3, -_position.z);
 
 	modelMatrix.Set(3, 3, 1);
 
-	_modelMatrix = modelMatrix;
+	Mat4 t = Math::Matrices::Translate(-_position.x, -_position.y, -_position.z);
+	t.Transpose();
+	_modelMatrix = t.Multiply(modelMatrix);
+	_modelMatrix.Transpose();
+
+	_forward = _modelMatrix.Multiply(Vec3(0, 0, 1));
+	_right = _modelMatrix.Multiply(Vec3(1, 0, 0));
+	_top = _modelMatrix.Multiply(Vec3(0, 1, 0));
 
 	// TODO: How to update the quaternion from this matrix?
 }

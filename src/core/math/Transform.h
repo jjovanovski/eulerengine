@@ -10,9 +10,9 @@ namespace Euler
 	class EULER_API Transform
 	{
 	private:
-		Vec3 _position;
+		Vec3 _position = Vec3(0, 0, 0);
 		Quaternion _rotation;
-		Vec3 _scale;
+		Vec3 _scale = Vec3(1, 1, 1);
 
 		bool _dirty = false;
 		Mat4 _modelMatrix = Math::Matrices::Identity();

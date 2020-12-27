@@ -193,8 +193,7 @@ App::App()
 
 	Camera camera;
 	camera.Init(WIDTH, HEIGHT, 60.0f, 0.01f, 10000.0f);
-	camera.Position = Vec3(0, 0, -3);
-	camera.LookAt(Vec3(0, 0, 0));
+	camera.Transform.SetPosition(Vec3(0, 0, 3));
 	
 	CameraController cameraController;
 	cameraController.Init(&camera);
@@ -216,19 +215,7 @@ App::App()
 		m1.Scale.y = m1.Scale.x;
 		
 		m2.Rotation.y += 0.001f;
-
-		if (Input::GetKeyDown(Key::ARROW_LEFT))
-		{
-			camera.Position.x -= 0.001f;
-		}
-		else if (Input::GetKeyDown(Key::ARROW_RIGHT))
-		{
-			camera.Position.x += 0.001f;
-		}
-		//camera.Position.x = sinf(t) * -3;
-		//camera.Position.z = cosf(t) * -3;
-		t += 0.0001f;
-		//camera.LookAt(Vec3(camera.Position.x, camera.Position.y, camera.Position.z + 1));
+	
 		cameraController.Update();
 
 		vulkan.BeginDrawFrame();
