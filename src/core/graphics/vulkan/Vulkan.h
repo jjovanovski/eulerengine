@@ -152,8 +152,6 @@ namespace Euler
             void CreateRenderPass();
             void DestroyRenderPass();
 
-            void Vulkan::CreateShaderModule(std::vector<char> shaderCode, VkShaderModule* shaderModule);
-
             void CreateFramebuffers();
             void DestroyFramebuffers();
 

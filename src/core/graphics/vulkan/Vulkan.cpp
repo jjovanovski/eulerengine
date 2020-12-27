@@ -616,16 +616,6 @@ void Vulkan::DestroyRenderPass()
 	LOG("Create Render Pass", "Destroyed");
 }
 
-void Vulkan::CreateShaderModule(std::vector<char> shaderCode, VkShaderModule* shaderModule)
-{
-	VkShaderModuleCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	createInfo.codeSize = shaderCode.size();
-	createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
-
-	HANDLE_VKRESULT(vkCreateShaderModule(_device, &createInfo, nullptr, shaderModule), "Create Shader Module");
-}
-
 void Vulkan::CreateShaderModule(const char* shaderCode, size_t codeSize, VkShaderModule* shaderModule)
 {
 	VkShaderModuleCreateInfo createInfo{};
