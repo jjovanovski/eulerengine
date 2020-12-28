@@ -90,7 +90,7 @@ App::App()
 
 	// load texture
 	int width, height, channels;
-	stbi_uc* pixels = stbi_load("model/viking_room.png", &width, &height, &channels, STBI_rgb_alpha);
+	stbi_uc* pixels = stbi_load("model/red_soda_texture.png", &width, &height, &channels, STBI_rgb_alpha);
 	
 	Graphics::Texture texture;
 	texture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.ColorTextureLayout);
@@ -111,7 +111,7 @@ App::App()
 	std::vector<tinyobj::material_t> materials;
 	std::string warn, err;
 
-	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, "model/viking_room.obj")) {
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, "model/soda_can.obj")) {
 		throw std::runtime_error(warn + err);
 	}
 
@@ -124,13 +124,13 @@ App::App()
 			Vertex vert{};
 			vert.Position.x = attrib.vertices[3 * index.vertex_index + 0];
 			vert.Position.y = attrib.vertices[3 * index.vertex_index + 1];
-			vert.Position.z = attrib.vertices[3 * index.vertex_index + 2];
+			vert.Position.z = -attrib.vertices[3 * index.vertex_index + 2];
 
 			vert.UV.x = attrib.texcoords[2 * index.texcoord_index + 0];
 			vert.UV.y = 1.0f - attrib.texcoords[2 * index.texcoord_index + 1];
 
 			modelVertices.push_back(vert);
-			modelIndices.push_back(modelIndices.size());
+			modelIndices.insert(modelIndices.begin() , modelIndices.size());
 		}
 	}
 
@@ -181,10 +181,10 @@ App::App()
 	models.push_back(m2);
 
 	Model modelModel;
-	modelModel.Position.y = 0.5f;
+	/*modelModel.Position.y = 0.5f;
 	modelModel.Rotation.x = 270.0f * (3.14159265359f / 180.0f);
-	modelModel.Rotation.y = 45.0f * 5 * (3.14159265359f / 180.0f);
-	//modelModel.Scale = Vec3(0.8f, 0.8f, 0.8f);
+	modelModel.Rotation.y = 45.0f * 5 * (3.14159265359f / 180.0f);*/
+	modelModel.Scale = Vec3(0.8f, 0.8f, 0.8f);
 	modelModel.Meshes.push_back(&model);
 
 	modelPipeline.Models.push_back(&modelModel);
@@ -194,6 +194,7 @@ App::App()
 	Camera camera;
 	camera.Init(WIDTH, HEIGHT, 60.0f, 0.01f, 10000.0f);
 	camera.Transform.SetPosition(Vec3(0, 0, 3));
+	//camera.Transform.SetRotation(Quaternion::Euler(3.14159265359f, 0, 1, 0));
 	
 	CameraController cameraController;
 	cameraController.Init(&camera);
@@ -216,7 +217,9 @@ App::App()
 		
 		m2.Rotation.y += 0.001f;
 	
-		cameraController.Update();
+		t += 0.001f;
+		camera.Transform.SetRotation(Quaternion::Euler(t, 0, 1, 0));
+		//cameraController.Update();
 
 		vulkan.BeginDrawFrame();
 		modelPipeline.RecordCommands(camera.GetViewProj());
