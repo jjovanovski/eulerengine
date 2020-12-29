@@ -10,7 +10,7 @@ float Euler::Math::Deg(float radians)
 
 float Euler::Math::Rad(float degrees)
 {
-	return degrees * Rad2Deg;
+	return degrees * Deg2Rad;
 }
 
 float Euler::Math::Sin(float radians)

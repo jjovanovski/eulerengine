@@ -16,11 +16,18 @@ void Camera::Init(uint32_t width, uint32_t height, float fieldOfView, float near
 
 ViewProj Camera::GetViewProj()
 {
-	_viewProj.View = Transform.GetModelMatrix();
-	_viewProj.View.Transpose();
+	ViewProj viewProj;
 
-	_viewProj.Projection = Matrices::Perspective(_width, _height, _fieldOfView, _nearZ, _farZ);
-	_viewProj.Projection.Transpose();
+	/* === SET VIEW MATRIX === */
+	Mat4 translation = Matrices::Translate(-Transform.GetPosition().x, -Transform.GetPosition().y, -Transform.GetPosition().z);
+	Mat4 rotation = Transform.GetRotation().Conjugate().GetMatrix();
 
-	return _viewProj;
+	viewProj.View = rotation.Multiply(translation);
+	viewProj.View.Transpose();
+
+	/* === SET PERSPECTIVE MATRIX === */
+	viewProj.Projection = Matrices::Perspective(_width, _height, _fieldOfView, _nearZ, _farZ);
+	viewProj.Projection.Transpose();
+
+	return viewProj;
 }

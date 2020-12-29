@@ -14,6 +14,7 @@
 #include "math/Vec3.h"
 #include "math/Vec2.h"
 #include "math/Matrices.h"
+#include "math/Math.h"
 #include "input/GLFWInputHandler.h"
 #include "input/Input.h"
 #include "util/CameraController.h"
@@ -194,7 +195,7 @@ App::App()
 	Camera camera;
 	camera.Init(WIDTH, HEIGHT, 60.0f, 0.01f, 10000.0f);
 	camera.Transform.SetPosition(Vec3(0, 0, 3));
-	//camera.Transform.SetRotation(Quaternion::Euler(3.14159265359f, 0, 1, 0));
+	camera.Transform.SetRotation(Quaternion::Euler(Math::Rad(180.0f), 0, 1, 0));
 	
 	CameraController cameraController;
 	cameraController.Init(&camera);
@@ -208,17 +209,13 @@ App::App()
 			glfwWaitEvents();
 		}
 
-		/*modelModel.Rotation.z = -90.0f * (3.14159265359f / 180.0f);
-		modelModel.Rotation.y = 45.0f * (3.14159265359f / 180.0f);*/
-
 		m1.Rotation.z += 0.0001f;
 		m1.Scale.x = (sinf(3*m1.Rotation.z)*0.5f + 0.5f) * 0.25f + 0.25f;
 		m1.Scale.y = m1.Scale.x;
 		
 		m2.Rotation.y += 0.001f;
 	
-		t += 0.001f;
-		camera.Transform.SetRotation(Quaternion::Euler(t, 0, 1, 0));
+		t += 0.0001f;
 		//cameraController.Update();
 
 		vulkan.BeginDrawFrame();

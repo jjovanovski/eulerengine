@@ -16,8 +16,6 @@ namespace Euler
 		float _nearZ;
 		float _farZ;
 
-		ViewProj _viewProj;
-
 	public:
 		Transform Transform;
 
