@@ -5,6 +5,7 @@
 
 #include "graphics/vulkan/Vulkan.h"
 #include "graphics/Vertex.h"
+#include "graphics/MeshMaterial.h"
 #include "graphics/Mesh.h"
 #include "graphics/Model.h"
 #include "graphics/ModelPipeline.h"
@@ -135,11 +136,12 @@ App::App()
 		}
 	}
 
-	Mesh model;
-	model.Vertices = modelVertices;
-	model.Indices = modelIndices;
-	model.Texture = &texture;
-	model.Create(&vulkan);
+	Mesh modelMesh;
+	modelMesh.Vertices = modelVertices;
+	modelMesh.Indices = modelIndices;
+	modelMesh.Texture = &texture;
+	modelMesh.Create(&vulkan);
+	Graphics::MeshMaterial modelMeshMaterial(&modelMesh, &texture);
 
 	std::vector<Vertex> vertices = {
 		Vertex(Vec3(-1.0f, +1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec2(0.0f, 1.0f)),
@@ -156,11 +158,12 @@ App::App()
 		7, 6, 4
 	};
 
-	Mesh plane;
-	plane.Vertices = vertices;
-	plane.Indices = indices;
-	plane.Texture = &planeTexture;
-	plane.Create(&vulkan);
+	Mesh planeMesh;
+	planeMesh.Vertices = vertices;
+	planeMesh.Indices = indices;
+	planeMesh.Texture = &planeTexture;
+	planeMesh.Create(&vulkan);
+	Graphics::MeshMaterial planeMeshMaterial(&planeMesh, &planeTexture);
 
 	std::vector<VkBuffer> modelBuffers;
 	modelBuffers.resize(vulkan.GetSwapchainImageCount());
@@ -172,13 +175,13 @@ App::App()
 	Model m1;
 	m1.Position = Vec3(0, 0, 0);
 	m1.Scale = Vec3(0.5f, 0.5f, 0.5f);
-	m1.Meshes.push_back(&plane);
+	m1.Drawables.push_back(&planeMeshMaterial);
 	models.push_back(m1);
 
 	Model m2;
 	m2.Position = Vec3(-1.85f, 0, 0);
 	m2.Scale = Vec3(0.5f, 0.5f, 0.5f);
-	m2.Meshes.push_back(&plane);
+	m2.Drawables.push_back(&planeMeshMaterial);
 	models.push_back(m2);
 
 	Model modelModel;
@@ -186,7 +189,7 @@ App::App()
 	modelModel.Rotation.x = 270.0f * (3.14159265359f / 180.0f);
 	modelModel.Rotation.y = 45.0f * 5 * (3.14159265359f / 180.0f);*/
 	modelModel.Scale = Vec3(0.8f, 0.8f, 0.8f);
-	modelModel.Meshes.push_back(&model);
+	modelModel.Drawables.push_back(&modelMeshMaterial);
 
 	modelPipeline.Models.push_back(&modelModel);
 	modelPipeline.Models.push_back(&m1);
@@ -230,7 +233,8 @@ App::App()
 
 	// cleanup
 	texture.Destroy();
-	plane.Destroy(&vulkan);
+	planeMesh.Destroy(&vulkan);
+	modelMesh.Destroy(&vulkan);
 	modelPipeline.Destroy();
 
 	vkDestroySurfaceKHR(vulkan.GetInstance(), surface, nullptr);

@@ -299,7 +299,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 		);
 
 		// draw model meshes
-		for (int j = 0; j < model->Meshes.size(); j++)
+		for (int j = 0; j < model->Drawables.size(); j++)
 		{
 			vkCmdBindDescriptorSets(
 				*_vulkan->GetMainCommandBuffer(),
@@ -307,16 +307,16 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 				_pipelineLayout,
 				2,
 				1,
-				&model->Meshes[j]->Texture->DescriptorSets[_vulkan->_currentImage],
+				&model->Drawables[j]->Texture->DescriptorSets[_vulkan->_currentImage],
 				0,
 				nullptr
 			);
 
 			_vulkan->DrawMesh(
 				*_vulkan->GetMainCommandBuffer(),
-				&model->Meshes[j]->VertexBuffer,
-				&model->Meshes[j]->IndexBuffer,
-				model->Meshes[j]->Indices.size()
+				&model->Drawables[j]->Mesh->VertexBuffer,
+				&model->Drawables[j]->Mesh->IndexBuffer,
+				model->Drawables[j]->Mesh->Indices.size()
 			);
 		}
 	}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../API.h"
-#include "Mesh.h"
+#include "MeshMaterial.h"
 #include "../math/Vec3.h"
 #include "../math/Vec2.h"
 
@@ -16,7 +16,7 @@ namespace Euler
 		Vec3 Rotation;
 		Vec3 Scale;
 
-		std::vector<Mesh*> Meshes;
+		std::vector<Graphics::MeshMaterial*> Drawables;
 
 		Model();
 
