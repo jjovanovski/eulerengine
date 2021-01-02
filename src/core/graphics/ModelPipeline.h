@@ -5,6 +5,7 @@
 #include "Common.h"
 #include "Vertex.h"
 #include "Model.h"
+#include "DirectionalLight.h"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -30,18 +31,22 @@ namespace Euler
 			VkDescriptorPool _descriptorPool;
 			std::vector<VkDescriptorSet> _viewProjDescriptorSets;
 			std::vector<VkDescriptorSet> _modelDescriptorSets;
+			std::vector<VkDescriptorSet> _directionalLightDescriptorSets;
 
 			std::vector<Buffer> _viewProjBuffers;
 			std::vector<Buffer> _modelBuffers;
+			std::vector<Buffer> _directionalLightBuffers;
 
 			uint64_t _modelMatrixAlignment;
 
 		public:
 			std::vector<Model*> Models;
+			DirectionalLight* DirLight;
 
 			VkDescriptorSetLayout ViewProjLayout;
 			VkDescriptorSetLayout ModelLayout;
 			VkDescriptorSetLayout ColorTextureLayout;
+			VkDescriptorSetLayout DirectionalLightLayout;
 
 			void Create(Vulkan* vulkan, float viewportWidth, float viewportHeight);
 			void Destroy();
@@ -55,6 +60,7 @@ namespace Euler
 
 			void CreateViewProjDescriptorSets();
 			void CreateModelDescriptorSets();
+			void CreateDirectionalLightDescriptorSets();
 		};
 	}
 }

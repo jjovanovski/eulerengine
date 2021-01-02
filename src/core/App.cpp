@@ -128,6 +128,10 @@ App::App()
 			vert.Position.y = attrib.vertices[3 * index.vertex_index + 1];
 			vert.Position.z = -attrib.vertices[3 * index.vertex_index + 2];
 
+			vert.Normal.x = attrib.normals[3 * index.normal_index + 0];
+			vert.Normal.y = attrib.normals[3 * index.normal_index + 1];
+			vert.Normal.z = attrib.normals[3 * index.normal_index + 2];
+
 			vert.UV.x = attrib.texcoords[2 * index.texcoord_index + 0];
 			vert.UV.y = 1.0f - attrib.texcoords[2 * index.texcoord_index + 1];
 
@@ -205,6 +209,10 @@ App::App()
 
 	float t = 0.0f;
 	
+	// setup directional light
+	Graphics::DirectionalLight directionalLight(Vec3(1, 1, -1).Normalized(), Vec3(1, 1, 1), 1.0f);
+	modelPipeline.DirLight = &directionalLight;
+
 	// main loop
 	while (!glfwWindowShouldClose(Window)) {
 		while (WindowMinimized)
@@ -220,9 +228,10 @@ App::App()
 	
 		t += 0.0001f;
 		//camera.Transform.SetRotation(Quaternion::Euler(Math::Rad(180.0f + Math::Sin(t)*25.0f), Vec3(0, 1, 0)));
-		camera.Transform.SetPosition(Math::Cos(t + PI/2.0f)*3, 0, Math::Sin(t + PI / 2.0f) * 3);
-		camera.Transform.LookAt(m2.Position, Vec3(0, -1, 0));
+		//camera.Transform.SetPosition(Math::Cos(t + PI/2.0f)*3, 0, Math::Sin(t + PI / 2.0f) * 3);
+		//camera.Transform.LookAt(m2.Position, Vec3(0, -1, 0));
 		//cameraController.Update();
+		directionalLight.Direction = Vec3(Math::Cos(t), 1, Math::Sin(t));
 
 		vulkan.BeginDrawFrame();
 		modelPipeline.RecordCommands(camera.GetViewProj());

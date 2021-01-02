@@ -35,7 +35,7 @@ void ModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float viewportHe
 	pipelineInfo.ViewportHeight = viewportHeight;
 
 	CreateDescriptorSetLayouts();
-	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, ColorTextureLayout };
+	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, ColorTextureLayout, DirectionalLightLayout };
 	pipelineInfo.DescriptorSetLayouts = layouts;
 
 	pipelineInfo.RenderPass = _vulkan->_renderPass;	// TODO: This should be a parameter
@@ -49,8 +49,6 @@ void ModelPipeline::Destroy()
 {
 	_vulkan->DestroyDescriptorPool(_descriptorPool);
 
-	uint32_t vpc = _viewProjBuffers.size();
-	uint32_t mc = _modelBuffers.size();
 	for (int i = 0; i < _viewProjBuffers.size(); i++)
 	{
 		_vulkan->DestroyBuffer(_viewProjBuffers[i].Buffer, _viewProjBuffers[i].Memory);
@@ -59,11 +57,16 @@ void ModelPipeline::Destroy()
 	{
 		_vulkan->DestroyBuffer(_modelBuffers[i].Buffer, _modelBuffers[i].Memory);
 	}
+	for (int i = 0; i < _directionalLightBuffers.size(); i++)
+	{
+		_vulkan->DestroyBuffer(_directionalLightBuffers[i].Buffer, _directionalLightBuffers[i].Memory);
+	}
 
 	_vulkan->DestroyPipeline(_pipelineLayout, _pipeline);
 
 	_vulkan->DestroyDescriptorSetLayout(ViewProjLayout);
 	_vulkan->DestroyDescriptorSetLayout(ModelLayout);
+	_vulkan->DestroyDescriptorSetLayout(DirectionalLightLayout);
 }
 
 std::vector<VertexAttributeInfo> ModelPipeline::GetVertexAttributes()
@@ -90,7 +93,7 @@ std::vector<VertexAttributeInfo> ModelPipeline::GetVertexAttributes()
 
 void ModelPipeline::CreateDescriptorSetLayouts()
 {
-	/* === ViewProj DESCRIPTOR SET LAYOUT */
+	/* === ViewProj DESCRIPTOR SET LAYOUT === */
 	std::vector<VkDescriptorSetLayoutBinding> viewProjBindings(1);
 	viewProjBindings[0].binding = 0;
 	viewProjBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -99,7 +102,7 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 
 	_vulkan->CreateDescriptorSetLayout(viewProjBindings, &ViewProjLayout);
 
-	/* === Model DESCRIPTOR SET LAYOUT */
+	/* === Model DESCRIPTOR SET LAYOUT === */
 	std::vector<VkDescriptorSetLayoutBinding> modelBindings(1);
 	modelBindings[0].binding = 0;
 	modelBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
@@ -108,7 +111,7 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 
 	_vulkan->CreateDescriptorSetLayout(modelBindings, &ModelLayout);
 
-	/* === ColorTexture DESCRIPTOR SET LAYOUT */
+	/* === ColorTexture DESCRIPTOR SET LAYOUT === */
 	std::vector<VkDescriptorSetLayoutBinding> colorTextureBindings(1);
 	colorTextureBindings[0].binding = 0;
 	colorTextureBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -116,6 +119,15 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	colorTextureBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(colorTextureBindings, &ColorTextureLayout);
+
+	/* === DirectionalLight DESCRIPTOR SET LAYOUT === */
+	std::vector<VkDescriptorSetLayoutBinding> directionalLightBindings(1);
+	directionalLightBindings[0].binding = 0;
+	directionalLightBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	directionalLightBindings[0].descriptorCount = 1;
+	directionalLightBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	_vulkan->CreateDescriptorSetLayout(directionalLightBindings, &DirectionalLightLayout);
 }
 
 void ModelPipeline::CreateDescriptorSets()
@@ -124,9 +136,10 @@ void ModelPipeline::CreateDescriptorSets()
 
 	/* === CREATE DESCRIPTOR SET POOL === */
 
-	std::vector<VkDescriptorPoolSize> poolSizes(2);
+	std::vector<VkDescriptorPoolSize> poolSizes(3);
 	poolSizes[0] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// ViewProj
 	poolSizes[1] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };	// Model
+	poolSizes[2] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// DirectionalLight
 
 	_vulkan->CreateDescriptorPool(poolSizes, poolSizes.size() * imageCount, &_descriptorPool);
 
@@ -134,6 +147,7 @@ void ModelPipeline::CreateDescriptorSets()
 
 	CreateViewProjDescriptorSets();
 	CreateModelDescriptorSets();
+	CreateDirectionalLightDescriptorSets();
 }
 
 void ModelPipeline::CreateViewProjDescriptorSets()
@@ -247,6 +261,59 @@ void ModelPipeline::CreateModelDescriptorSets()
 	}
 }
 
+void ModelPipeline::CreateDirectionalLightDescriptorSets()
+{
+	uint32_t imageCount = _vulkan->GetSwapchainImageCount();
+
+	/* === CREATE DirectioanLight BUFFERS === */
+
+	_directionalLightBuffers.resize(imageCount);
+	for (int i = 0; i < imageCount; i++)
+	{
+		_vulkan->CreateBuffer(
+			sizeof(DirLight),
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			_directionalLightBuffers[i].Buffer,
+			_directionalLightBuffers[i].Memory
+		);
+	}
+
+	/* === ALLOCATE DESCRIPTOR SETS === */
+
+	std::vector<VkDescriptorSetLayout> layouts(imageCount, DirectionalLightLayout);
+	_directionalLightDescriptorSets.resize(imageCount);
+
+	VkDescriptorSetAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = _descriptorPool;
+	allocInfo.descriptorSetCount = imageCount;
+	allocInfo.pSetLayouts = layouts.data();
+
+	vkAllocateDescriptorSets(_vulkan->_device, &allocInfo, _directionalLightDescriptorSets.data());
+
+	/* === WRITE DESCRIPTOR SETS === */
+
+	for (int i = 0; i < imageCount; i++)
+	{
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = _directionalLightBuffers[i].Buffer;
+		bufferInfo.offset = 0;
+		bufferInfo.range = VK_WHOLE_SIZE;
+
+		VkWriteDescriptorSet writeUbo{};
+		writeUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeUbo.dstSet = _directionalLightDescriptorSets[i];
+		writeUbo.dstBinding = 0;
+		writeUbo.dstArrayElement = 0;
+		writeUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		writeUbo.descriptorCount = 1;
+		writeUbo.pBufferInfo = &bufferInfo;
+
+		vkUpdateDescriptorSets(_vulkan->_device, 1, &writeUbo, 0, nullptr);
+	}
+}
+
 void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 {
 	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
@@ -264,6 +331,23 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 		0,
 		1,
 		&_viewProjDescriptorSets[_vulkan->_currentImage],
+		0,
+		nullptr
+	);
+
+	// update directional light
+	void* lightData;
+	vkMapMemory(_vulkan->_device, _directionalLightBuffers[_vulkan->_currentImage].Memory, 0, sizeof(DirectionalLight), 0, &lightData);
+	memcpy(lightData, DirLight, sizeof(DirectionalLight));
+	vkUnmapMemory(_vulkan->_device, _directionalLightBuffers[_vulkan->_currentImage].Memory);
+
+	vkCmdBindDescriptorSets(
+		*_vulkan->GetMainCommandBuffer(),
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		_pipelineLayout,
+		3,
+		1,
+		&_directionalLightDescriptorSets[_vulkan->_currentImage],
 		0,
 		nullptr
 	);
