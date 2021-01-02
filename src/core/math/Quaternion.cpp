@@ -95,3 +95,59 @@ Mat4 Quaternion::GetMatrix() const {
 
 	return qmat;
 }
+
+Quaternion Quaternion::FromMatrix(const Mat4& matrix)
+{
+	float m00 = matrix.Get(0, 0);
+	float m01 = matrix.Get(0, 1);
+	float m02 = matrix.Get(0, 2);
+	float m10 = matrix.Get(1, 0);
+	float m11 = matrix.Get(1, 1);
+	float m12 = matrix.Get(1, 2);
+	float m20 = matrix.Get(2, 0);
+	float m21 = matrix.Get(2, 1);
+	float m22 = matrix.Get(2, 2);
+
+	float trace = m00 + m11 + m22;
+
+	if (trace > 0.0f)
+	{
+		float k = 0.5f / Math::Sqrt(1.0f + trace);
+		return Quaternion(
+			k * (m12 - m21), 
+			k * (m20 - m02), 
+			k * (m01 - m10), 
+			0.25f / k
+		);
+	}
+	else if ((m00 > m11) && (m00 > m22))
+	{
+		float k = 0.5f / Math::Sqrt(1.0f + m00 - m11 - m22);
+		return Quaternion(
+			0.25f / k,
+			k * (m10 + m01),
+			k * (m20 + m02),
+			k * (m12 - m21)
+		);
+	}
+	else if (m11 > m22)
+	{
+		float k = 0.5f / Math::Sqrt(1.0f + m11 - m00 - m22);
+		return Quaternion(
+			k * (m10 + m01), 
+			0.25f / k, 
+			k * (m21 + m12), 
+			k * (m20 - m02)
+		);
+	}
+	else
+	{
+		float k = 0.5f / Math::Sqrt(1.0f + m22 - m00 - m11);
+		return Quaternion(
+			k * (m20 + m02), 
+			k * (m21 + m12),
+			0.25f / k, 
+			k * (m01 - m10)
+		);
+	}
+}

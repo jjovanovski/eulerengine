@@ -28,6 +28,8 @@ namespace Euler {
 		void SetEuler(float angle, const Vec3& axis);
 		static Quaternion Euler(float angle, const Vec3& axis);
 		Mat4 GetMatrix() const;
+
+		static Quaternion FromMatrix(const Mat4& matrix);
 	};
 
 }
