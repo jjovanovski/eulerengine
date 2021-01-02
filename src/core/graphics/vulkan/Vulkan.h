@@ -35,15 +35,6 @@ namespace Euler
             VkPhysicalDeviceMemoryProperties MemoryProperties;
         };
 
-        struct EULER_API Vertex
-        {
-            Vec3 Position;
-            Vec3 Color;
-            Vec2 Uv;
-
-            Vertex(Vec3 position, Vec3 color, Vec2 uv) : Position(position), Color(color), Uv(uv) {}
-        };
-
         class EULER_API Buffer
         {
         public:

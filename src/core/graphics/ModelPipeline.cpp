@@ -75,14 +75,14 @@ std::vector<VertexAttributeInfo> ModelPipeline::GetVertexAttributes()
 	vec[0].Offset = 0;
 	vec[0].Format = VK_FORMAT_R32G32B32_SFLOAT;
 
-	// color
+	// normal
 	vec[1].Location = 1;
-	vec[1].Offset = offsetof(Vertex, Color);
+	vec[1].Offset = offsetof(Vertex, Normal);
 	vec[1].Format = VK_FORMAT_R32G32B32_SFLOAT;
 
 	// uv
 	vec[2].Location = 2;
-	vec[2].Offset = offsetof(Vertex, Uv);
+	vec[2].Offset = offsetof(Vertex, UV);
 	vec[2].Format = VK_FORMAT_R32G32_SFLOAT;
 
 	return vec;
