@@ -231,7 +231,7 @@ App::App()
 		//camera.Transform.SetPosition(Math::Cos(t + PI/2.0f)*3, 0, Math::Sin(t + PI / 2.0f) * 3);
 		//camera.Transform.LookAt(m2.Position, Vec3(0, -1, 0));
 		//cameraController.Update();
-		directionalLight.Direction = Vec3(Math::Cos(t), 1, Math::Sin(t));
+		directionalLight.Direction = Vec3(Math::Cos(2*t), 1, Math::Sin(2*t));
 
 		vulkan.BeginDrawFrame();
 		modelPipeline.RecordCommands(camera.GetViewProj());
