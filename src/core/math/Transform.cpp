@@ -114,40 +114,43 @@ Vec3 Transform::Bottom()
 
 void Transform::LookAt(Vec3 point, Vec3 up)
 {
-	// TODO: Is there a better way to implement the LookAt function? Preferably by only modifying the quaternion.
-
 	Vec3 dir = Vec3(point.x - _position.x, point.y - _position.y, point.z - _position.z).Normalized();
+	dir = Vec3(-dir.x, -dir.y, -dir.z);
 	Vec3 X = up.Cross(dir).Normalized();
 	Vec3 Y = dir.Cross(X).Normalized();
 
-	Mat4 modelMatrix;
+	Mat4 rotationMatrix;
 
-	modelMatrix.Set(0, 0, X.x);
-	modelMatrix.Set(1, 0, X.y);
-	modelMatrix.Set(2, 0, X.z);
+	rotationMatrix.Set(0, 0, X.x);
+	rotationMatrix.Set(1, 0, X.y);
+	rotationMatrix.Set(2, 0, X.z);
 
-	modelMatrix.Set(0, 1, Y.x);
-	modelMatrix.Set(1, 1, Y.y);
-	modelMatrix.Set(2, 1, Y.z);
+	rotationMatrix.Set(0, 1, Y.x);
+	rotationMatrix.Set(1, 1, Y.y);
+	rotationMatrix.Set(2, 1, Y.z);
 
-	modelMatrix.Set(0, 2, dir.x);
-	modelMatrix.Set(1, 2, dir.y);
-	modelMatrix.Set(2, 2, dir.z);
+	rotationMatrix.Set(0, 2, dir.x);
+	rotationMatrix.Set(1, 2, dir.y);
+	rotationMatrix.Set(2, 2, dir.z);
 
 	//modelMatrix.Set(0, 3, -_position.x);
 	//modelMatrix.Set(1, 3, -_position.y);
 	//modelMatrix.Set(2, 3, -_position.z);
 
-	modelMatrix.Set(3, 3, 1);
+	rotationMatrix.Set(3, 3, 1);
+	rotationMatrix.Transpose();
 
-	Mat4 t = Math::Matrices::Translate(-_position.x, -_position.y, -_position.z);
-	t.Transpose();
-	_modelMatrix = t.Multiply(modelMatrix);
-	_modelMatrix.Transpose();
+	_rotation = Quaternion::FromMatrix(rotationMatrix);
+	_dirty = true;
 
-	_forward = _modelMatrix.Multiply(Vec3(0, 0, 1));
-	_right = _modelMatrix.Multiply(Vec3(1, 0, 0));
-	_top = _modelMatrix.Multiply(Vec3(0, 1, 0));
+	//Mat4 t = Math::Matrices::Translate(-_position.x, -_position.y, -_position.z);
+	//t.Transpose();
+	//_modelMatrix = t.Multiply(modelMatrix);
+	//_modelMatrix.Transpose();
 
-	// TODO: How to update the quaternion from this matrix?
+	//_forward = _modelMatrix.Multiply(Vec3(0, 0, 1));
+	//_right = _modelMatrix.Multiply(Vec3(1, 0, 0));
+	//_top = _modelMatrix.Multiply(Vec3(0, 1, 0));
+
+	//// TODO: How to update the quaternion from this matrix?
 }

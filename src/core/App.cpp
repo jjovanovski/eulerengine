@@ -216,7 +216,9 @@ App::App()
 		m2.Rotation.y += 0.001f;
 	
 		t += 0.0001f;
-		camera.Transform.SetRotation(Quaternion::Euler(Math::Rad(180.0f + Math::Sin(t)*25.0f), Vec3(0, 1, 0)));
+		//camera.Transform.SetRotation(Quaternion::Euler(Math::Rad(180.0f + Math::Sin(t)*25.0f), Vec3(0, 1, 0)));
+		camera.Transform.SetPosition(Math::Cos(t + PI/2.0f)*3, 0, Math::Sin(t + PI / 2.0f) * 3);
+		camera.Transform.LookAt(m2.Position, Vec3(0, -1, 0));
 		//cameraController.Update();
 
 		vulkan.BeginDrawFrame();

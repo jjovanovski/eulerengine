@@ -20,7 +20,7 @@ ViewProj Camera::GetViewProj()
 
 	/* === SET VIEW MATRIX === */
 	Mat4 translation = Matrices::Translate(-Transform.GetPosition().x, -Transform.GetPosition().y, -Transform.GetPosition().z);
-	Mat4 rotation = Transform.GetRotation().Conjugate().GetMatrix();
+	Mat4 rotation = Transform.GetRotation().GetMatrix();
 
 	viewProj.View = rotation.Multiply(translation);
 	viewProj.View.Transpose();
