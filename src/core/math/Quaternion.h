@@ -19,8 +19,8 @@ namespace Euler {
 		//friend EULER_API Quaternion operator*(const Quaternion& left, const Vec3& right);
 		friend EULER_API Vec3 operator*(const Quaternion& left, const Vec3& right);
 
-		float Len();
-		float Len2();
+		float Length();
+		float LengthSquared();
 		void Normalize();
 		Quaternion Normalized();
 		Quaternion Conjugate();
