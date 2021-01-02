@@ -68,24 +68,19 @@ Quaternion Quaternion::Conjugate() {
 	return q;
 }
 
-void Quaternion::SetEuler(float angle, float x, float y, float z) {
-	float len = Math::Sqrt(x * x + y * y + z * z);
-	x /= len;
-	y /= len;
-	z /= len;
-
+void Quaternion::SetEuler(float angle, const Vec3& axis) {
 	float sinHalfAngle = Math::Sin(angle / 2.0f);
 	float cosHalfAngle = Math::Cos(angle / 2.0f);
 
 	this->w = cosHalfAngle;
-	this->x = x * sinHalfAngle;
-	this->y = y * sinHalfAngle;
-	this->z = z * sinHalfAngle;
+	this->x = axis.x * sinHalfAngle;
+	this->y = axis.y * sinHalfAngle;
+	this->z = axis.z * sinHalfAngle;
 }
 
-Quaternion Euler::Quaternion::Euler(float angle, float x, float y, float z) {
+Quaternion Euler::Quaternion::Euler(float angle, const Vec3& axis) {
 	Quaternion q;
-	q.SetEuler(angle, x, y, z);
+	q.SetEuler(angle, axis);
 	return q;
 }
 

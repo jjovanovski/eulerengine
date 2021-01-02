@@ -25,8 +25,8 @@ namespace Euler {
 		Quaternion Normalized();
 		Quaternion Conjugate();
 
-		void SetEuler(float angle, float x, float y, float z);
-		static Quaternion Euler(float angle, float x, float y, float z);
+		void SetEuler(float angle, const Vec3& axis);
+		static Quaternion Euler(float angle, const Vec3& axis);
 		Mat4 GetMatrix() const;
 	};
 
