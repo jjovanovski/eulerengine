@@ -216,6 +216,7 @@ App::App()
 		m2.Rotation.y += 0.001f;
 	
 		t += 0.0001f;
+		camera.Transform.SetRotation(Quaternion::Euler(Math::Rad(180.0f + Math::Sin(t)*25.0f), 0, 1, 0));
 		//cameraController.Update();
 
 		vulkan.BeginDrawFrame();

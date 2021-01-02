@@ -1,6 +1,6 @@
 #include "Quaternion.h"
 
-#include <cmath>
+#include "Math.h"
 
 using namespace Euler;
 
@@ -41,16 +41,16 @@ Quaternion Euler::operator*(const Quaternion& left, const Quaternion& right) {
 //	return rotated.Normalized();
 //}
 
-float Quaternion::Len() {
-	return sqrt(Len2());
+float Quaternion::Length() {
+	return Math::Sqrt(LengthSquared());
 }
 
-float Quaternion::Len2() {
+float Quaternion::LengthSquared() {
 	return w * w + x * x + y * y + z * z;
 }
 
 void Quaternion::Normalize() {
-	float len = Len();
+	float len = Length();
 	w /= len;
 	x /= len;
 	y /= len;
@@ -69,13 +69,13 @@ Quaternion Quaternion::Conjugate() {
 }
 
 void Quaternion::SetEuler(float angle, float x, float y, float z) {
-	float len = sqrt(x * x + y * y + z * z);
+	float len = Math::Sqrt(x * x + y * y + z * z);
 	x /= len;
 	y /= len;
 	z /= len;
 
-	float sinHalfAngle = sin(angle / 2.0f);
-	float cosHalfAngle = cos(angle / 2.0f);
+	float sinHalfAngle = Math::Sin(angle / 2.0f);
+	float cosHalfAngle = Math::Cos(angle / 2.0f);
 
 	this->w = cosHalfAngle;
 	this->x = x * sinHalfAngle;
