@@ -2,7 +2,7 @@
 
 using namespace Euler::Graphics;
 
-void BufferGroup::Create(Vulkan* vulkan, int count, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
+void BufferGroup::Create(Vulkan* vulkan, uint32_t count, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
 {
 	// TODO: assert count, size
 

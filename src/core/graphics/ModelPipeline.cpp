@@ -49,18 +49,10 @@ void ModelPipeline::Destroy()
 {
 	_vulkan->DestroyDescriptorPool(_descriptorPool);
 
-	for (int i = 0; i < _viewProjBuffers.size(); i++)
-	{
-		_vulkan->DestroyBuffer(_viewProjBuffers[i].Buffer, _viewProjBuffers[i].Memory);
-	}
-	for (int i = 0; i < _modelBuffers.size(); i++)
-	{
-		_vulkan->DestroyBuffer(_modelBuffers[i].Buffer, _modelBuffers[i].Memory);
-	}
-	for (int i = 0; i < _directionalLightBuffers.size(); i++)
-	{
-		_vulkan->DestroyBuffer(_directionalLightBuffers[i].Buffer, _directionalLightBuffers[i].Memory);
-	}
+	_viewProjBuffers.Destroy(_vulkan);
+	_modelBuffers.Destroy(_vulkan);
+	_directionalLightBuffers.Destroy(_vulkan);
+	_ambientLightBuffers.Destroy(_vulkan);
 
 	_vulkan->DestroyPipeline(_pipelineLayout, _pipeline);
 
@@ -161,17 +153,13 @@ void ModelPipeline::CreateViewProjDescriptorSets()
 	
 	/* === CREATE ViewProj BUFFERS === */
 
-	_viewProjBuffers.resize(imageCount);
-	for (int i = 0; i < imageCount; i++)
-	{
-		_vulkan->CreateBuffer(
-			sizeof(ViewProj),
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			_viewProjBuffers[i].Buffer,
-			_viewProjBuffers[i].Memory
-		);
-	}
+	_viewProjBuffers.Create(
+		_vulkan,
+		imageCount,
+		sizeof(ViewProj),
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
 
 	/* === ALLOCATE DESCRIPTOR SETS === */
 
@@ -191,7 +179,7 @@ void ModelPipeline::CreateViewProjDescriptorSets()
 	for (int i = 0; i < imageCount; i++)
 	{
 		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = _viewProjBuffers[i].Buffer;
+		bufferInfo.buffer = _viewProjBuffers.Get(i)->Buffer;
 		bufferInfo.offset = 0;
 		bufferInfo.range = VK_WHOLE_SIZE;
 
@@ -219,17 +207,13 @@ void ModelPipeline::CreateModelDescriptorSets()
 
 	/* === CREATE Model BUFFERS === */
 
-	_modelBuffers.resize(imageCount);
-	for (int i = 0; i < imageCount; i++)
-	{
-		_vulkan->CreateBuffer(
-			INITIAL_MODELS_FOR_BUFFER_SIZE * _modelMatrixAlignment,
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			_modelBuffers[i].Buffer,
-			_modelBuffers[i].Memory
-		);
-	}
+	_modelBuffers.Create(
+		_vulkan,
+		imageCount,
+		INITIAL_MODELS_FOR_BUFFER_SIZE * _modelMatrixAlignment,
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
 
 	/* === ALLOCATE DESCRIPTOR SETS === */
 
@@ -249,7 +233,7 @@ void ModelPipeline::CreateModelDescriptorSets()
 	for (int i = 0; i < imageCount; i++)
 	{
 		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = _modelBuffers[i].Buffer;
+		bufferInfo.buffer = _modelBuffers.Get(i)->Buffer;
 		bufferInfo.offset = 0;
 		bufferInfo.range = VK_WHOLE_SIZE;
 
@@ -272,26 +256,21 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 
 	/* === CREATE DirectioanLight BUFFERS === */
 
-	_directionalLightBuffers.resize(imageCount);
-	_ambientLightBuffers.resize(imageCount);
-	for (int i = 0; i < imageCount; i++)
-	{
-		_vulkan->CreateBuffer(
-			sizeof(DirLight),
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			_directionalLightBuffers[i].Buffer,
-			_directionalLightBuffers[i].Memory
-		);
+	_directionalLightBuffers.Create(
+		_vulkan,
+		imageCount,
+		sizeof(DirLight),
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
 
-		_vulkan->CreateBuffer(
-			sizeof(AmbLight),
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			_ambientLightBuffers[i].Buffer,
-			_ambientLightBuffers[i].Memory
-		);
-	}
+	_ambientLightBuffers.Create(
+		_vulkan,
+		imageCount,
+		sizeof(AmbLight),
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
 
 	/* === ALLOCATE DESCRIPTOR SETS === */
 
@@ -311,12 +290,12 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 	for (int i = 0; i < imageCount; i++)
 	{
 		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = _directionalLightBuffers[i].Buffer;
+		bufferInfo.buffer = _directionalLightBuffers.Get(i)->Buffer;
 		bufferInfo.offset = 0;
 		bufferInfo.range = VK_WHOLE_SIZE;
 
 		VkDescriptorBufferInfo ambientLightBufferInfo{};
-		ambientLightBufferInfo.buffer = _ambientLightBuffers[i].Buffer;
+		ambientLightBufferInfo.buffer = _ambientLightBuffers.Get(i)->Buffer;
 		ambientLightBufferInfo.offset = 0;
 		ambientLightBufferInfo.range = VK_WHOLE_SIZE;
 
@@ -350,9 +329,9 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 
 	// update viewproj
 	void* data;
-	vkMapMemory(_vulkan->_device, _viewProjBuffers[_vulkan->_currentImage].Memory, 0, sizeof(viewProjMatrix), 0, &data);
+	vkMapMemory(_vulkan->_device, _viewProjBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(viewProjMatrix), 0, &data);
 	memcpy(data, &viewProjMatrix, sizeof(viewProjMatrix));
-	vkUnmapMemory(_vulkan->_device, _viewProjBuffers[_vulkan->_currentImage].Memory);
+	vkUnmapMemory(_vulkan->_device, _viewProjBuffers.Get(_vulkan->_currentImage)->Memory);
 
 	vkCmdBindDescriptorSets(
 		*_vulkan->GetMainCommandBuffer(),
@@ -367,14 +346,14 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 
 	// update directional light
 	void* lightData;
-	vkMapMemory(_vulkan->_device, _directionalLightBuffers[_vulkan->_currentImage].Memory, 0, sizeof(DirectionalLight), 0, &lightData);
+	vkMapMemory(_vulkan->_device, _directionalLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(DirectionalLight), 0, &lightData);
 	memcpy(lightData, DirLight, sizeof(DirectionalLight));
-	vkUnmapMemory(_vulkan->_device, _directionalLightBuffers[_vulkan->_currentImage].Memory);
+	vkUnmapMemory(_vulkan->_device, _directionalLightBuffers.Get(_vulkan->_currentImage)->Memory);
 
 	void* ambLightData;
-	vkMapMemory(_vulkan->_device, _ambientLightBuffers[_vulkan->_currentImage].Memory, 0, sizeof(AmbientLight), 0, &ambLightData);
+	vkMapMemory(_vulkan->_device, _ambientLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(AmbientLight), 0, &ambLightData);
 	memcpy(ambLightData, &AmbLight, sizeof(AmbientLight));
-	vkUnmapMemory(_vulkan->_device, _ambientLightBuffers[_vulkan->_currentImage].Memory);
+	vkUnmapMemory(_vulkan->_device, _ambientLightBuffers.Get(_vulkan->_currentImage)->Memory);
 
 	vkCmdBindDescriptorSets(
 		*_vulkan->GetMainCommandBuffer(),
@@ -388,7 +367,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 	);
 
 	void* modelsData;
-	vkMapMemory(_vulkan->_device, _modelBuffers[_vulkan->_currentImage].Memory, 0, Models.size() * _modelMatrixAlignment, 0, &modelsData);
+	vkMapMemory(_vulkan->_device, _modelBuffers.Get(_vulkan->_currentImage)->Memory, 0, Models.size() * _modelMatrixAlignment, 0, &modelsData);
 	for (int i = 0; i < Models.size(); i++)
 	{
 		Mat4 modelMatrix = Models[i]->GetModelMatrix();
@@ -398,7 +377,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 		memcpy(dataOffset + static_cast<char*>(modelsData), &modelMatrix, sizeof(modelMatrix));
 		memset(dataOffset + static_cast<char*>(modelsData) + sizeof(modelMatrix) + 1, 0, _modelMatrixAlignment - sizeof(modelMatrix));
 	}
-	vkUnmapMemory(_vulkan->_device, _modelBuffers[_vulkan->_currentImage].Memory);
+	vkUnmapMemory(_vulkan->_device, _modelBuffers.Get(_vulkan->_currentImage)->Memory);
 
 	for (int i = 0; i < Models.size(); i++)
 	{

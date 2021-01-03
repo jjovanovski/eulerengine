@@ -7,6 +7,7 @@
 #include "Model.h"
 #include "DirectionalLight.h"
 #include "AmbientLight.h"
+#include "BufferGroup.h"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -34,10 +35,15 @@ namespace Euler
 			std::vector<VkDescriptorSet> _modelDescriptorSets;
 			std::vector<VkDescriptorSet> _directionalLightDescriptorSets;
 
-			std::vector<Buffer> _viewProjBuffers;
-			std::vector<Buffer> _modelBuffers;
-			std::vector<Buffer> _directionalLightBuffers;
-			std::vector<Buffer> _ambientLightBuffers;
+			//std::vector<Buffer> _viewProjBuffers;
+			//std::vector<Buffer> _modelBuffers;
+			//std::vector<Buffer> _directionalLightBuffers;
+			//std::vector<Buffer> _ambientLightBuffers;
+
+			BufferGroup _viewProjBuffers;
+			BufferGroup _modelBuffers;
+			BufferGroup _directionalLightBuffers;
+			BufferGroup _ambientLightBuffers;
 
 			uint64_t _modelMatrixAlignment;
 
