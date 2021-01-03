@@ -10,8 +10,8 @@ namespace Euler
 		class EULER_API DirectionalLight
 		{
 		public:
-			Vec3 Direction;
-			Vec3 Color;
+			alignas(16) Vec3 Direction;
+			alignas(16) Vec3 Color;
 			float Intensity;
 
 			DirectionalLight(Vec3 direction, Vec3 color, float intensity);
