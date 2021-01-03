@@ -6,6 +6,7 @@
 #include "Vertex.h"
 #include "Model.h"
 #include "DirectionalLight.h"
+#include "AmbientLight.h"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -36,12 +37,14 @@ namespace Euler
 			std::vector<Buffer> _viewProjBuffers;
 			std::vector<Buffer> _modelBuffers;
 			std::vector<Buffer> _directionalLightBuffers;
+			std::vector<Buffer> _ambientLightBuffers;
 
 			uint64_t _modelMatrixAlignment;
 
 		public:
 			std::vector<Model*> Models;
 			DirectionalLight* DirLight;
+			AmbientLight AmbLight;
 
 			VkDescriptorSetLayout ViewProjLayout;
 			VkDescriptorSetLayout ModelLayout;

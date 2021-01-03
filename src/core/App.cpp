@@ -212,6 +212,8 @@ App::App()
 	// setup directional light
 	Graphics::DirectionalLight directionalLight(Vec3(1, 1, -1).Normalized(), Vec3(1, 1, 1), 1.0f);
 	modelPipeline.DirLight = &directionalLight;
+	modelPipeline.AmbLight.Color = Vec3(1, 1, 1);
+	modelPipeline.AmbLight.Intensity = 0.05f;
 
 	// main loop
 	while (!glfwWindowShouldClose(Window)) {
@@ -231,6 +233,7 @@ App::App()
 		//camera.Transform.SetPosition(Math::Cos(t + PI/2.0f)*3, 0, Math::Sin(t + PI / 2.0f) * 3);
 		//camera.Transform.LookAt(m2.Position, Vec3(0, -1, 0));
 		//cameraController.Update();
+		camera.Transform.LookAt(Vec3(0, 0, 0), Vec3(0, -1, 0));
 		directionalLight.Direction = Vec3(Math::Cos(2*t), 1, Math::Sin(2*t));
 
 		vulkan.BeginDrawFrame();

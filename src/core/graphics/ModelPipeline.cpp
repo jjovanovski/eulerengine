@@ -121,11 +121,16 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	_vulkan->CreateDescriptorSetLayout(colorTextureBindings, &ColorTextureLayout);
 
 	/* === DirectionalLight DESCRIPTOR SET LAYOUT === */
-	std::vector<VkDescriptorSetLayoutBinding> directionalLightBindings(1);
+	std::vector<VkDescriptorSetLayoutBinding> directionalLightBindings(2);
 	directionalLightBindings[0].binding = 0;
 	directionalLightBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	directionalLightBindings[0].descriptorCount = 1;
 	directionalLightBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	directionalLightBindings[1].binding = 1;
+	directionalLightBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	directionalLightBindings[1].descriptorCount = 1;
+	directionalLightBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(directionalLightBindings, &DirectionalLightLayout);
 }
@@ -268,6 +273,7 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 	/* === CREATE DirectioanLight BUFFERS === */
 
 	_directionalLightBuffers.resize(imageCount);
+	_ambientLightBuffers.resize(imageCount);
 	for (int i = 0; i < imageCount; i++)
 	{
 		_vulkan->CreateBuffer(
@@ -276,6 +282,14 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			_directionalLightBuffers[i].Buffer,
 			_directionalLightBuffers[i].Memory
+		);
+
+		_vulkan->CreateBuffer(
+			sizeof(AmbLight),
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			_ambientLightBuffers[i].Buffer,
+			_ambientLightBuffers[i].Memory
 		);
 	}
 
@@ -301,6 +315,11 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 		bufferInfo.offset = 0;
 		bufferInfo.range = VK_WHOLE_SIZE;
 
+		VkDescriptorBufferInfo ambientLightBufferInfo{};
+		ambientLightBufferInfo.buffer = _ambientLightBuffers[i].Buffer;
+		ambientLightBufferInfo.offset = 0;
+		ambientLightBufferInfo.range = VK_WHOLE_SIZE;
+
 		VkWriteDescriptorSet writeUbo{};
 		writeUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		writeUbo.dstSet = _directionalLightDescriptorSets[i];
@@ -310,7 +329,18 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 		writeUbo.descriptorCount = 1;
 		writeUbo.pBufferInfo = &bufferInfo;
 
-		vkUpdateDescriptorSets(_vulkan->_device, 1, &writeUbo, 0, nullptr);
+		VkWriteDescriptorSet ambientLightWriteUbo{};
+		ambientLightWriteUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		ambientLightWriteUbo.dstSet = _directionalLightDescriptorSets[i];
+		ambientLightWriteUbo.dstBinding = 1;
+		ambientLightWriteUbo.dstArrayElement = 0;
+		ambientLightWriteUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		ambientLightWriteUbo.descriptorCount = 1;
+		ambientLightWriteUbo.pBufferInfo = &ambientLightBufferInfo;
+
+		VkWriteDescriptorSet writes[] = { writeUbo, ambientLightWriteUbo };
+
+		vkUpdateDescriptorSets(_vulkan->_device, 2, writes, 0, nullptr);
 	}
 }
 
@@ -340,6 +370,11 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 	vkMapMemory(_vulkan->_device, _directionalLightBuffers[_vulkan->_currentImage].Memory, 0, sizeof(DirectionalLight), 0, &lightData);
 	memcpy(lightData, DirLight, sizeof(DirectionalLight));
 	vkUnmapMemory(_vulkan->_device, _directionalLightBuffers[_vulkan->_currentImage].Memory);
+
+	void* ambLightData;
+	vkMapMemory(_vulkan->_device, _ambientLightBuffers[_vulkan->_currentImage].Memory, 0, sizeof(AmbientLight), 0, &ambLightData);
+	memcpy(ambLightData, &AmbLight, sizeof(AmbientLight));
+	vkUnmapMemory(_vulkan->_device, _ambientLightBuffers[_vulkan->_currentImage].Memory);
 
 	vkCmdBindDescriptorSets(
 		*_vulkan->GetMainCommandBuffer(),
