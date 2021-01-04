@@ -1447,6 +1447,24 @@ void Vulkan::EndDrawFrame()
 	_currentFrame = (_currentFrame + 1) % _framesInFlight;
 }
 
+void Vulkan::MapMemory(VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, void** data)
+{
+	vkMapMemory(_device, memory, offset, size, 0, data);
+}
+
+void Vulkan::UnmapMemory(VkDeviceMemory memory)
+{
+	vkUnmapMemory(_device, memory);
+}
+
+void Vulkan::CopyToMemory(VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, void* sourceData)
+{
+	void* destinationData;
+	MapMemory(memory, offset, size, &destinationData);
+	memcpy(destinationData, sourceData, size);
+	UnmapMemory(memory);
+}
+
 void Vulkan::DrawMesh(VkCommandBuffer commandBuffer, Buffer* vertexBuffer, Buffer* indexBuffer, int indexCount)
 {
 	VkBuffer buffers[] = { vertexBuffer->Buffer };

@@ -202,6 +202,10 @@ namespace Euler
             void CreateVertexBuffer(size_t vertexSize, uint32_t vertexCount, void* data, Buffer* buffer);
             void CreateIndexBuffer(size_t indexSize, uint32_t indexCount, void*data, Buffer* buffer);
 
+            void MapMemory(VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, void** data);
+            void UnmapMemory(VkDeviceMemory memory);
+            void CopyToMemory(VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size, void* sourceData);
+
             void DrawMesh(VkCommandBuffer commandBuffer, Buffer* vertexBuffer, Buffer* indexBuffer, int indexCount);
 
             // ===== ABSTRACTED END =====

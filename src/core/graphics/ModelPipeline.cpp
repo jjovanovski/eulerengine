@@ -328,10 +328,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 
 	// update viewproj
-	void* data;
-	vkMapMemory(_vulkan->_device, _viewProjBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(viewProjMatrix), 0, &data);
-	memcpy(data, &viewProjMatrix, sizeof(viewProjMatrix));
-	vkUnmapMemory(_vulkan->_device, _viewProjBuffers.Get(_vulkan->_currentImage)->Memory);
+	_vulkan->CopyToMemory(_viewProjBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(viewProjMatrix), &viewProjMatrix);
 
 	vkCmdBindDescriptorSets(
 		*_vulkan->GetMainCommandBuffer(),
@@ -345,15 +342,10 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 	);
 
 	// update directional light
-	void* lightData;
-	vkMapMemory(_vulkan->_device, _directionalLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(DirectionalLight), 0, &lightData);
-	memcpy(lightData, DirLight, sizeof(DirectionalLight));
-	vkUnmapMemory(_vulkan->_device, _directionalLightBuffers.Get(_vulkan->_currentImage)->Memory);
+	_vulkan->CopyToMemory(_directionalLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(DirectionalLight), DirLight);
 
-	void* ambLightData;
-	vkMapMemory(_vulkan->_device, _ambientLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(AmbientLight), 0, &ambLightData);
-	memcpy(ambLightData, &AmbLight, sizeof(AmbientLight));
-	vkUnmapMemory(_vulkan->_device, _ambientLightBuffers.Get(_vulkan->_currentImage)->Memory);
+	// update ambient light
+	_vulkan->CopyToMemory(_ambientLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(AmbientLight), &AmbLight);
 
 	vkCmdBindDescriptorSets(
 		*_vulkan->GetMainCommandBuffer(),
@@ -367,7 +359,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 	);
 
 	void* modelsData;
-	vkMapMemory(_vulkan->_device, _modelBuffers.Get(_vulkan->_currentImage)->Memory, 0, Models.size() * _modelMatrixAlignment, 0, &modelsData);
+	_vulkan->MapMemory(_modelBuffers.Get(_vulkan->_currentImage)->Memory, 0, Models.size() * _modelMatrixAlignment, &modelsData);
 	for (int i = 0; i < Models.size(); i++)
 	{
 		Mat4 modelMatrix = Models[i]->GetModelMatrix();
@@ -377,7 +369,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 		memcpy(dataOffset + static_cast<char*>(modelsData), &modelMatrix, sizeof(modelMatrix));
 		memset(dataOffset + static_cast<char*>(modelsData) + sizeof(modelMatrix) + 1, 0, _modelMatrixAlignment - sizeof(modelMatrix));
 	}
-	vkUnmapMemory(_vulkan->_device, _modelBuffers.Get(_vulkan->_currentImage)->Memory);
+	_vulkan->UnmapMemory(_modelBuffers.Get(_vulkan->_currentImage)->Memory);
 
 	for (int i = 0; i < Models.size(); i++)
 	{
