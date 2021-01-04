@@ -165,37 +165,11 @@ void ModelPipeline::CreateViewProjDescriptorSets()
 
 	_viewProjDescriptorSetGroup.Allocate(_vulkan, imageCount, ViewProjLayout, _descriptorPool);
 
-	//std::vector<VkDescriptorSetLayout> layouts(imageCount, ViewProjLayout);
-	//_viewProjDescriptorSets.resize(imageCount);
-
-	//VkDescriptorSetAllocateInfo allocInfo{};
-	//allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	//allocInfo.descriptorPool = _descriptorPool;
-	//allocInfo.descriptorSetCount = imageCount;
-	//allocInfo.pSetLayouts = layouts.data();
-
-	//vkAllocateDescriptorSets(_vulkan->_device, &allocInfo, _viewProjDescriptorSets.data());
-
 	/* === WRITE DESCRIPTOR SETS === */
 
 	for (int i = 0; i < imageCount; i++)
 	{
 		_viewProjDescriptorSetGroup.UpdateUniformBuffer(_vulkan, i, _viewProjBuffers.Get(i)->Buffer, 0);
-		//VkDescriptorBufferInfo bufferInfo{};
-		//bufferInfo.buffer = _viewProjBuffers.Get(i)->Buffer;
-		//bufferInfo.offset = 0;
-		//bufferInfo.range = VK_WHOLE_SIZE;
-
-		//VkWriteDescriptorSet writeUbo{};
-		//writeUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		//writeUbo.dstSet = _viewProjDescriptorSets[i];
-		//writeUbo.dstBinding = 0;
-		//writeUbo.dstArrayElement = 0;
-		//writeUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		//writeUbo.descriptorCount = 1;
-		//writeUbo.pBufferInfo = &bufferInfo;
-
-		//vkUpdateDescriptorSets(_vulkan->_device, 1, &writeUbo, 0, nullptr);
 	}
 }
 
@@ -222,38 +196,11 @@ void ModelPipeline::CreateModelDescriptorSets()
 
 	_modelDescriptorSetGroup.Allocate(_vulkan, imageCount, ModelLayout, _descriptorPool);
 
-	//std::vector<VkDescriptorSetLayout> layouts(imageCount, ModelLayout);
-	//_modelDescriptorSets.resize(imageCount);
-
-	//VkDescriptorSetAllocateInfo allocInfo{};
-	//allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	//allocInfo.descriptorPool = _descriptorPool;
-	//allocInfo.descriptorSetCount = imageCount;
-	//allocInfo.pSetLayouts = layouts.data();
-
-	//vkAllocateDescriptorSets(_vulkan->_device, &allocInfo, _modelDescriptorSets.data());
-
 	/* === WRITE DESCRIPTOR SETS === */
 
 	for (int i = 0; i < imageCount; i++)
 	{
 		_modelDescriptorSetGroup.UpdateUniformBufferDynamic(_vulkan, i, _modelBuffers.Get(i)->Buffer, 0);
-
-		//VkDescriptorBufferInfo bufferInfo{};
-		//bufferInfo.buffer = _modelBuffers.Get(i)->Buffer;
-		//bufferInfo.offset = 0;
-		//bufferInfo.range = VK_WHOLE_SIZE;
-
-		//VkWriteDescriptorSet writeUbo{};
-		//writeUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		//writeUbo.dstSet = _modelDescriptorSets[i];
-		//writeUbo.dstBinding = 0;
-		//writeUbo.dstArrayElement = 0;
-		//writeUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-		//writeUbo.descriptorCount = 1;
-		//writeUbo.pBufferInfo = &bufferInfo;
-
-		//vkUpdateDescriptorSets(_vulkan->_device, 1, &writeUbo, 0, nullptr);
 	}
 }
 
@@ -283,55 +230,12 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 
 	_lightDescriptorSetGroup.Allocate(_vulkan, imageCount, DirectionalLightLayout, _descriptorPool);
 
-	//std::vector<VkDescriptorSetLayout> layouts(imageCount, DirectionalLightLayout);
-	//_directionalLightDescriptorSets.resize(imageCount);
-
-	//VkDescriptorSetAllocateInfo allocInfo{};
-	//allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	//allocInfo.descriptorPool = _descriptorPool;
-	//allocInfo.descriptorSetCount = imageCount;
-	//allocInfo.pSetLayouts = layouts.data();
-
-	//vkAllocateDescriptorSets(_vulkan->_device, &allocInfo, _directionalLightDescriptorSets.data());
-
 	/* === WRITE DESCRIPTOR SETS === */
 
 	for (int i = 0; i < imageCount; i++)
 	{
 		_lightDescriptorSetGroup.UpdateUniformBuffer(_vulkan, i, _directionalLightBuffers.Get(i)->Buffer, 0);
 		_lightDescriptorSetGroup.UpdateUniformBuffer(_vulkan, i, _ambientLightBuffers.Get(i)->Buffer, 1);
-
-		//VkDescriptorBufferInfo bufferInfo{};
-		//bufferInfo.buffer = _directionalLightBuffers.Get(i)->Buffer;
-		//bufferInfo.offset = 0;
-		//bufferInfo.range = VK_WHOLE_SIZE;
-
-		//VkDescriptorBufferInfo ambientLightBufferInfo{};
-		//ambientLightBufferInfo.buffer = _ambientLightBuffers.Get(i)->Buffer;
-		//ambientLightBufferInfo.offset = 0;
-		//ambientLightBufferInfo.range = VK_WHOLE_SIZE;
-
-		//VkWriteDescriptorSet writeUbo{};
-		//writeUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		//writeUbo.dstSet = _directionalLightDescriptorSets[i];
-		//writeUbo.dstBinding = 0;
-		//writeUbo.dstArrayElement = 0;
-		//writeUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		//writeUbo.descriptorCount = 1;
-		//writeUbo.pBufferInfo = &bufferInfo;
-
-		//VkWriteDescriptorSet ambientLightWriteUbo{};
-		//ambientLightWriteUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		//ambientLightWriteUbo.dstSet = _directionalLightDescriptorSets[i];
-		//ambientLightWriteUbo.dstBinding = 1;
-		//ambientLightWriteUbo.dstArrayElement = 0;
-		//ambientLightWriteUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		//ambientLightWriteUbo.descriptorCount = 1;
-		//ambientLightWriteUbo.pBufferInfo = &ambientLightBufferInfo;
-
-		//VkWriteDescriptorSet writes[] = { writeUbo, ambientLightWriteUbo };
-
-		//vkUpdateDescriptorSets(_vulkan->_device, 2, writes, 0, nullptr);
 	}
 }
 
