@@ -32,9 +32,6 @@ namespace Euler
 			VkPipelineLayout _pipelineLayout;
 
 			VkDescriptorPool _descriptorPool;
-			//std::vector<VkDescriptorSet> _viewProjDescriptorSets;
-			//std::vector<VkDescriptorSet> _modelDescriptorSets;
-			//std::vector<VkDescriptorSet> _directionalLightDescriptorSets;
 			DescriptorSetGroup _viewProjDescriptorSetGroup;
 			DescriptorSetGroup _modelDescriptorSetGroup;
 			DescriptorSetGroup _lightDescriptorSetGroup;
