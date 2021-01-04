@@ -95,6 +95,7 @@ App::App()
 	stbi_uc* pixels = stbi_load("model/red_soda_texture.png", &width, &height, &channels, STBI_rgb_alpha);
 	
 	Graphics::Texture texture;
+	texture.Shininess = 2.0f;
 	texture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.MaterialLayout);
 
 	stbi_image_free(pixels);
@@ -102,6 +103,7 @@ App::App()
 	pixels = stbi_load("texture.jpg", &width, &height, &channels, STBI_rgb_alpha);
 
 	Graphics::Texture planeTexture;
+	planeTexture.Shininess = 1.0f;
 	planeTexture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.MaterialLayout);
 
 	stbi_image_free(pixels);
@@ -235,6 +237,8 @@ App::App()
 		//cameraController.Update();
 		camera.Transform.LookAt(Vec3(0, 0, 0), Vec3(0, -1, 0));
 		directionalLight.Direction = Vec3(Math::Cos(2*t), 1, Math::Sin(2*t));
+
+		modelPipeline.AmbLight.CameraPosition = camera.Transform.GetPosition();
 
 		vulkan.BeginDrawFrame();
 		modelPipeline.RecordCommands(camera.GetViewProj());
