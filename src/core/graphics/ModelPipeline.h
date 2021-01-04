@@ -35,11 +35,6 @@ namespace Euler
 			std::vector<VkDescriptorSet> _modelDescriptorSets;
 			std::vector<VkDescriptorSet> _directionalLightDescriptorSets;
 
-			//std::vector<Buffer> _viewProjBuffers;
-			//std::vector<Buffer> _modelBuffers;
-			//std::vector<Buffer> _directionalLightBuffers;
-			//std::vector<Buffer> _ambientLightBuffers;
-
 			BufferGroup _viewProjBuffers;
 			BufferGroup _modelBuffers;
 			BufferGroup _directionalLightBuffers;
