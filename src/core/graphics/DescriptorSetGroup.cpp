@@ -62,3 +62,22 @@ void DescriptorSetGroup::UpdateUniformBufferDynamic(Vulkan* vulkan, uint32_t des
 
 	vkUpdateDescriptorSets(vulkan->_device, 1, &write, 0, nullptr);
 }
+
+void DescriptorSetGroup::UpdateSampler(Vulkan* vulkan, uint32_t descriptorSetIndex, VkImageView imageView, VkSampler sampler, uint32_t dstBinding)
+{
+	VkDescriptorImageInfo imageInfo{};
+	imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	imageInfo.imageView = imageView;
+	imageInfo.sampler = sampler;
+
+	VkWriteDescriptorSet write{};
+	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	write.dstSet = DescriptorSets[descriptorSetIndex];
+	write.dstBinding = dstBinding;
+	write.dstArrayElement = 0;
+	write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	write.descriptorCount = 1;
+	write.pImageInfo = &imageInfo;
+
+	vkUpdateDescriptorSets(vulkan->_device, 1, &write, 0, nullptr);
+}

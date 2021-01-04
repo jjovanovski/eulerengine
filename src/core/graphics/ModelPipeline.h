@@ -50,7 +50,7 @@ namespace Euler
 
 			VkDescriptorSetLayout ViewProjLayout;
 			VkDescriptorSetLayout ModelLayout;
-			VkDescriptorSetLayout ColorTextureLayout;
+			VkDescriptorSetLayout MaterialLayout;
 			VkDescriptorSetLayout DirectionalLightLayout;
 
 			void Create(Vulkan* vulkan, float viewportWidth, float viewportHeight);

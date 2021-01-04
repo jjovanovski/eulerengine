@@ -35,7 +35,7 @@ void ModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float viewportHe
 	pipelineInfo.ViewportHeight = viewportHeight;
 
 	CreateDescriptorSetLayouts();
-	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, ColorTextureLayout, DirectionalLightLayout };
+	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, MaterialLayout, DirectionalLightLayout };
 	pipelineInfo.DescriptorSetLayouts = layouts;
 
 	pipelineInfo.RenderPass = _vulkan->_renderPass;	// TODO: This should be a parameter
@@ -104,13 +104,18 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	_vulkan->CreateDescriptorSetLayout(modelBindings, &ModelLayout);
 
 	/* === ColorTexture DESCRIPTOR SET LAYOUT === */
-	std::vector<VkDescriptorSetLayoutBinding> colorTextureBindings(1);
-	colorTextureBindings[0].binding = 0;
-	colorTextureBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	colorTextureBindings[0].descriptorCount = 1;
-	colorTextureBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	std::vector<VkDescriptorSetLayoutBinding> materialBindings(2);
+	materialBindings[0].binding = 0;
+	materialBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	materialBindings[0].descriptorCount = 1;
+	materialBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-	_vulkan->CreateDescriptorSetLayout(colorTextureBindings, &ColorTextureLayout);
+	materialBindings[1].binding = 1;
+	materialBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	materialBindings[1].descriptorCount = 1;
+	materialBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	_vulkan->CreateDescriptorSetLayout(materialBindings, &MaterialLayout);
 
 	/* === DirectionalLight DESCRIPTOR SET LAYOUT === */
 	std::vector<VkDescriptorSetLayoutBinding> directionalLightBindings(2);
@@ -313,7 +318,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 				_pipelineLayout,
 				2,
 				1,
-				&model->Drawables[j]->Texture->DescriptorSets[_vulkan->_currentImage],
+				&model->Drawables[j]->Texture->DescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
 				0,
 				nullptr
 			);

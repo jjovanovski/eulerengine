@@ -95,14 +95,14 @@ App::App()
 	stbi_uc* pixels = stbi_load("model/red_soda_texture.png", &width, &height, &channels, STBI_rgb_alpha);
 	
 	Graphics::Texture texture;
-	texture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.ColorTextureLayout);
+	texture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.MaterialLayout);
 
 	stbi_image_free(pixels);
 
 	pixels = stbi_load("texture.jpg", &width, &height, &channels, STBI_rgb_alpha);
 
 	Graphics::Texture planeTexture;
-	planeTexture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.ColorTextureLayout);
+	planeTexture.Create(&vulkan, pixels, width, height, width * height * 4, modelPipeline.MaterialLayout);
 
 	stbi_image_free(pixels);
 

@@ -75,34 +75,12 @@ void Texture::Create(Vulkan* vulkan, void* pixels, uint32_t width, uint32_t heig
 		Texture::DescriptorPoolCreated = true;
 	}
 
-	std::vector<VkDescriptorSetLayout> layouts(_vulkan->GetSwapchainImageCount(), descriptorSetLayout);
-	DescriptorSets.resize(_vulkan->GetSwapchainImageCount());
+	uint32_t imageCount = _vulkan->GetSwapchainImageCount();
+	DescriptorSetGroup.Allocate(_vulkan, imageCount, descriptorSetLayout, Texture::DescriptorPool);
 
-	VkDescriptorSetAllocateInfo samplerAllocInfo{};
-	samplerAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	samplerAllocInfo.descriptorPool = Texture::DescriptorPool;
-	samplerAllocInfo.descriptorSetCount = _vulkan->GetSwapchainImageCount();
-	samplerAllocInfo.pSetLayouts = layouts.data();
-
-	vkAllocateDescriptorSets(_vulkan->_device, &samplerAllocInfo, DescriptorSets.data());
-
-	for (int i = 0; i < DescriptorSets.size(); i++)
+	for (int i = 0; i < imageCount; i++)
 	{
-		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo.imageView = _imageView;
-		imageInfo.sampler = _sampler;
-
-		VkWriteDescriptorSet writeSampler{};
-		writeSampler.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeSampler.dstSet = DescriptorSets[i];
-		writeSampler.dstBinding = 0;
-		writeSampler.dstArrayElement = 0;
-		writeSampler.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		writeSampler.descriptorCount = 1;
-		writeSampler.pImageInfo = &imageInfo;
-
-		vkUpdateDescriptorSets(_vulkan->_device, 1, &writeSampler, 0, nullptr);
+		DescriptorSetGroup.UpdateSampler(_vulkan, i, _imageView, _sampler, 0);
 	}
 }
 

@@ -23,7 +23,7 @@ namespace Euler
 
 			void UpdateUniformBuffer(Vulkan* vulkan, uint32_t descriptorSetIndex, VkBuffer buffer, uint32_t dstBinding);
 			void UpdateUniformBufferDynamic(Vulkan* vulkan, uint32_t descriptorSetIndex, VkBuffer buffer, uint32_t dstBinding);
-			// TODO: UpdateSampler
+			void UpdateSampler(Vulkan* vulkan, uint32_t descriptorSetIndex, VkImageView imageView, VkSampler sampler, uint32_t dstBinding);
 		};
 	}
 };

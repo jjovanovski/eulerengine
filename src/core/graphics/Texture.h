@@ -2,6 +2,7 @@
 
 #include "../API.h"
 #include "vulkan/Vulkan.h"
+#include "DescriptorSetGroup.h"
 
 #include <stdint.h>
 
@@ -23,7 +24,8 @@ namespace Euler
 			static VkDescriptorPool DescriptorPool;
 
 		public:
-			std::vector<VkDescriptorSet> DescriptorSets;
+			//std::vector<VkDescriptorSet> DescriptorSets;
+			DescriptorSetGroup DescriptorSetGroup;
 
 			void Create(Vulkan* vulkan, void* pixels, uint32_t width, uint32_t height, size_t size, VkDescriptorSetLayout descriptorSetLayout);
 			void Destroy();
