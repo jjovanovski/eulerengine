@@ -724,9 +724,9 @@ void Vulkan::CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* 
 	
 	VkViewport viewport{};
 	viewport.width = pipelineInfo->ViewportWidth;
-	viewport.height = pipelineInfo->ViewportHeight;
+	viewport.height = -pipelineInfo->ViewportHeight;
 	viewport.x = 0;
-	viewport.y = 0;
+	viewport.y = pipelineInfo->ViewportHeight;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 

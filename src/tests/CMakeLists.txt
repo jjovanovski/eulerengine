@@ -3,6 +3,7 @@ add_executable(Tests main.cpp)
 target_link_libraries(Tests PUBLIC 
 	EulerCore
 	gtest
+	gtest_main
 )
 
 target_include_directories(Tests PUBLIC
