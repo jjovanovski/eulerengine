@@ -10,7 +10,7 @@ namespace Euler
 {
 	namespace Graphics
 	{
-		class EULER_API DescriptorSet
+		class EULER_API DescriptorSetGroup
 		{
 		private:
 			VkDescriptorPool _pool;

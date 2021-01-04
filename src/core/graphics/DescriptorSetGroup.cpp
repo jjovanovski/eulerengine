@@ -2,7 +2,7 @@
 
 using namespace Euler::Graphics;
 
-void DescriptorSet::Allocate(Vulkan* vulkan, uint32_t count, VkDescriptorSetLayout layout, VkDescriptorPool pool)
+void DescriptorSetGroup::Allocate(Vulkan* vulkan, uint32_t count, VkDescriptorSetLayout layout, VkDescriptorPool pool)
 {
 	DescriptorSets.resize(count);
 
@@ -20,12 +20,12 @@ void DescriptorSet::Allocate(Vulkan* vulkan, uint32_t count, VkDescriptorSetLayo
 	_pool = pool;
 }
 
-void DescriptorSet::Free(Vulkan* vulkan)
+void DescriptorSetGroup::Free(Vulkan* vulkan)
 {
 	vkFreeDescriptorSets(vulkan->_device, _pool, DescriptorSets.size(), DescriptorSets.data());
 }
 
-void DescriptorSet::UpdateUniformBuffer(Vulkan* vulkan, uint32_t descriptorSetIndex, VkBuffer buffer, uint32_t dstBinding)
+void DescriptorSetGroup::UpdateUniformBuffer(Vulkan* vulkan, uint32_t descriptorSetIndex, VkBuffer buffer, uint32_t dstBinding)
 {
 	VkDescriptorBufferInfo bufferInfo{};
 	bufferInfo.buffer = buffer;
@@ -44,7 +44,7 @@ void DescriptorSet::UpdateUniformBuffer(Vulkan* vulkan, uint32_t descriptorSetIn
 	vkUpdateDescriptorSets(vulkan->_device, 1, &write, 0, nullptr);
 }
 
-void DescriptorSet::UpdateUniformBufferDynamic(Vulkan* vulkan, uint32_t descriptorSetIndex, VkBuffer buffer, uint32_t dstBinding)
+void DescriptorSetGroup::UpdateUniformBufferDynamic(Vulkan* vulkan, uint32_t descriptorSetIndex, VkBuffer buffer, uint32_t dstBinding)
 {
 	VkDescriptorBufferInfo bufferInfo{};
 	bufferInfo.buffer = buffer;
