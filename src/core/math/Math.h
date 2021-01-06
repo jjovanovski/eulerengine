@@ -10,6 +10,10 @@ namespace Euler
 {
 	namespace Math
 	{
+		/* === Epsilon and epsilon-comparison */
+		float Epsilon();
+		bool AlmostEqual(float a, float b);
+
 		/* === Angle unit conversion === */
 		float Deg(float radians);
 		float Rad(float degrees);

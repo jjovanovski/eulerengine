@@ -3,6 +3,16 @@
 #include <math.h>
 #include <algorithm>
 
+float Euler::Math::Epsilon()
+{
+	return FLT_EPSILON;
+}
+
+bool Euler::Math::AlmostEqual(float a, float b)
+{
+	return Abs(a - b) <= Epsilon();
+}
+
 float Euler::Math::Deg(float radians)
 {
 	return radians * Rad2Deg;
