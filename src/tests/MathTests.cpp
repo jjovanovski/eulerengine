@@ -3,6 +3,7 @@
 #include "math/Math.h"
 #include "math/Matrices.h"
 #include "math/Vec4.h"
+#include "math/Quaternion.h"
 #include <iostream>
 
 using namespace Euler::Math;
@@ -164,5 +165,41 @@ TEST(MathTests, MatrixVectorMultiplicationRotateX) {
 	ASSERT_TRUE(AlmostEqual(r.x, 0.0f));
 	ASSERT_TRUE(AlmostEqual(r.y, 0.0f));
 	ASSERT_TRUE(AlmostEqual(r.z, 1.0f));
+	ASSERT_TRUE(AlmostEqual(r.w, v.w));
+}
+
+TEST(MathTests, QuaternionRotateX) {
+	Euler::Quaternion q = Euler::Quaternion::Euler(Rad(90.0f), Vec3(1, 0, 0));
+	Vec4 v(0, 1, 0, 1);
+
+	Vec4 r = q.GetMatrix() * v;
+
+	ASSERT_TRUE(AlmostEqual(r.x, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.y, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.z, 1.0f));
+	ASSERT_TRUE(AlmostEqual(r.w, v.w));
+}
+
+TEST(MathTests, QuaternionRotateY) {
+	Euler::Quaternion q = Euler::Quaternion::Euler(Rad(90.0f), Vec3(0, 1, 0));
+	Vec4 v(0.0f, 0.0f, 1.0f, 1.0f);
+
+	Vec4 r = q.GetMatrix() * v;
+
+	ASSERT_TRUE(AlmostEqual(r.x, 1.0f));
+	ASSERT_TRUE(AlmostEqual(r.y, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.z, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.w, v.w));
+}
+
+TEST(MathTests, QuaternionRotateZ) {
+	Euler::Quaternion q = Euler::Quaternion::Euler(Rad(90.0f), Vec3(0, 0, 1));
+	Vec4 v(1.0f, 0.0f, 0.0f, 1.0f);
+
+	Vec4 r = q.GetMatrix() * v;
+
+	ASSERT_TRUE(AlmostEqual(r.x, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.y, 1.0f));
+	ASSERT_TRUE(AlmostEqual(r.z, 0.0f));
 	ASSERT_TRUE(AlmostEqual(r.w, v.w));
 }
