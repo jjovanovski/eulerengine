@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 
 #include "math/Math.h"
+#include "math/Matrices.h"
+#include "math/Vec4.h"
 #include <iostream>
 
 using namespace Euler::Math;
@@ -72,4 +74,59 @@ TEST(MathTests, ClampInt) {
 	ASSERT_EQ(Clamp(-2, -3, -1), -2);
 	ASSERT_EQ(Clamp(-4, -3, -1), -3);
 	ASSERT_EQ(Clamp(-1, -3, -1), -1);
+}
+
+TEST(MathTests, MatrixVectorMultiplicationIdentity) {
+	Mat4 m = Matrices::Identity();
+	Vec4 v(1, 2, 3, 1);
+
+	Vec4 r = m * v;
+
+	ASSERT_EQ(r.x, v.x);
+	ASSERT_EQ(r.y, v.y);
+	ASSERT_EQ(r.z, v.z);
+	ASSERT_EQ(r.w, v.w);
+}
+
+TEST(MathTests, MatrixVectorMultiplicationTranslation) {
+	float tx = 1;
+	float ty = -2;
+	float tz = 3;
+	Mat4 m = Matrices::Translate(tx, ty, tz);
+	Vec4 v(4, 5, 6, 1);
+
+	Vec4 r = m * v;
+
+	ASSERT_EQ(r.x, v.x + tx);
+	ASSERT_EQ(r.y, v.y + ty);
+	ASSERT_EQ(r.z, v.z + tz);
+	ASSERT_EQ(r.w, v.w + 0);
+}
+
+TEST(MathTests, MatrixVectorMultiplicationScale) {
+	float sx = 1.0f;
+	float sy = -2.0f;
+	float sz = 3.0f;
+	Mat4 m = Matrices::Scale(sx, sy, sz);
+	Vec4 v(4, 5, 6, 1);
+
+	Vec4 r = m * v;
+
+	ASSERT_EQ(r.x, v.x * sx);
+	ASSERT_EQ(r.y, v.y * sy);
+	ASSERT_EQ(r.z, v.z * sz);
+	ASSERT_EQ(r.w, v.w);
+}
+
+TEST(MathTests, MatrixVectorMultiplicationScaleUniform) {
+	float s = 0.5f;
+	Mat4 m = Matrices::Scale(s);
+	Vec4 v(4, 5, 6, 1);
+
+	Vec4 r = m * v;
+
+	ASSERT_EQ(r.x, v.x * s);
+	ASSERT_EQ(r.y, v.y * s);
+	ASSERT_EQ(r.z, v.z * s);
+	ASSERT_EQ(r.w, v.w);
 }

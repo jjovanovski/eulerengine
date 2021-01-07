@@ -2,6 +2,7 @@
 
 #include "../API.h"
 #include "Vec3.h"
+#include "Vec4.h"
 
 #include <stdint.h>
 #include <math.h>
@@ -66,6 +67,26 @@ namespace Euler
 					Get(1, 0) * vec.x + Get(1, 1) * vec.y + Get(1, 2) * vec.z,
 					Get(2, 0) * vec.x + Get(2, 1) * vec.y + Get(2, 2) * vec.z
 				);
+			}
+
+			Vec4 Multiply(const Vec4& vec)
+			{
+				return Vec4(
+					Get(0, 0) * vec.x + Get(0, 1) * vec.y + Get(0, 2) * vec.z + Get(0, 3) * vec.w,
+					Get(1, 0) * vec.x + Get(1, 1) * vec.y + Get(1, 2) * vec.z + Get(1, 3) * vec.w,
+					Get(2, 0) * vec.x + Get(2, 1) * vec.y + Get(2, 2) * vec.z + Get(2, 3) * vec.w,
+					Get(3, 0) * vec.x + Get(3, 1) * vec.y + Get(3, 2) * vec.z + Get(3, 3) * vec.w
+				);
+			}
+
+			friend Vec3 operator*(Mat4t lhs, const Vec3& rhs)
+			{
+				return lhs.Multiply(rhs);
+			}
+
+			friend Vec4 operator*(Mat4t lhs, const Vec4& rhs)
+			{
+				return lhs.Multiply(rhs);
 			}
 		};
 	}
