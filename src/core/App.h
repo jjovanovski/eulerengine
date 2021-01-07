@@ -17,5 +17,14 @@ namespace Euler
 		bool WindowMinimized = false;
 
 		App();
+
+		void Run();
+
+		virtual void OnStart() {}
+		virtual void OnCreate() {}
+		virtual void OnUpdate() {}
+		virtual void OnDraw() {}
+		virtual void OnDestroy() {}
+		virtual void OnComplete() {}
 	};
 }
