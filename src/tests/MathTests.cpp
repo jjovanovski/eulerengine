@@ -51,3 +51,14 @@ TEST(MathTests, RadToDeg) {
 	ASSERT_TRUE(AlmostEqual(Deg(2.0f * PI), 360.0f));
 	ASSERT_TRUE(AlmostEqual(Deg(-PI / 4.0f), -45.0f));
 }
+
+TEST(MathTests, Clamp) {
+	ASSERT_EQ(Clamp(0.5f, 0.0f, 1.0f), 0.5f);
+	ASSERT_EQ(Clamp(-0.5f, 0.0f, 1.0f), 0.0f);
+	ASSERT_EQ(Clamp(1.5f, 0.0f, 1.0f), 1.0f);
+	ASSERT_EQ(Clamp(0.0f, 0.0f, 1.0f), 0.0f);
+	ASSERT_EQ(Clamp(1.0f, 0.0f, 1.0f), 1.0f);
+	ASSERT_EQ(Clamp(-1.5f, -2.0f, -1.0f), -1.5f);
+	ASSERT_EQ(Clamp(-2.5f, -2.0f, -1.0f), -2.0f);
+	ASSERT_EQ(Clamp(-0.5f, -2.0f, -1.0f), -1.0f);
+}
