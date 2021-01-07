@@ -130,3 +130,39 @@ TEST(MathTests, MatrixVectorMultiplicationScaleUniform) {
 	ASSERT_EQ(r.z, v.z * s);
 	ASSERT_EQ(r.w, v.w);
 }
+
+TEST(MathTests, MatrixVectorMultiplicationRotateZ) {
+	Mat4 m = Matrices::RotateZ(Rad(90.0f));
+	Vec4 v(1.0f, 0.0f, 0.0f, 1.0f);
+	
+	Vec4 r = m * v;
+
+	ASSERT_TRUE(AlmostEqual(r.x, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.y, 1.0f));
+	ASSERT_TRUE(AlmostEqual(r.z, v.z));
+	ASSERT_TRUE(AlmostEqual(r.w, v.w));
+}
+
+TEST(MathTests, MatrixVectorMultiplicationRotateY) {
+	Mat4 m = Matrices::RotateY(Rad(90.0f));
+	Vec4 v(0.0f, 0.0f, 1.0f, 1.0f);
+
+	Vec4 r = m * v;
+
+	ASSERT_TRUE(AlmostEqual(r.x, 1.0f));
+	ASSERT_TRUE(AlmostEqual(r.y, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.z, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.w, v.w));
+}
+
+TEST(MathTests, MatrixVectorMultiplicationRotateX) {
+	Mat4 m = Matrices::RotateX(Rad(90.0f));
+	Vec4 v(0.0f, 1.0f, 0.0f, 1.0f);
+
+	Vec4 r = m * v;
+
+	ASSERT_TRUE(AlmostEqual(r.x, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.y, 0.0f));
+	ASSERT_TRUE(AlmostEqual(r.z, 1.0f));
+	ASSERT_TRUE(AlmostEqual(r.w, v.w));
+}
