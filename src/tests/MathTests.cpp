@@ -203,3 +203,38 @@ TEST(MathTests, QuaternionRotateZ) {
 	ASSERT_TRUE(AlmostEqual(r.z, 0.0f));
 	ASSERT_TRUE(AlmostEqual(r.w, v.w));
 }
+
+TEST(MathTests, PerspectiveTests) {
+	Mat4 m = Matrices::Perspective(800, 800, 60.0f, 0.01f, 10.0f);
+	Vec4 p1(1.0f, -1.0f, 0.5f, 1.0f);		// point inside frustam
+	Vec4 p2(-1.0f, 1.0f, 1.0f, 1.0f);		// point inside frustam, after p1 (greater z than p1)
+	Vec4 p3(-1.0f, 1.0f, 11.0f, 1.0f);		// point outside frustam (too far away, greater z)
+	Vec4 p4(-1.0f, 1.0f, -1.0f, 1.0f);		// point outside frustam (behind camera, lower z)
+
+	Vec4 r1 = m * p1;
+	r1.x /= r1.w; r1.y /= r1.w; r1.z /= r1.w; r1.w /= r1.w;
+	
+	Vec4 r2 = m * p2;
+	r2.x /= r2.w; r2.y /= r2.w; r2.z /= r2.w; r2.w /= r2.w;
+	
+	Vec4 r3 = m * p3;
+	r3.x /= r3.w; r3.y /= r3.w; r3.z /= r3.w; r3.w /= r3.w;
+
+	Vec4 r4 = m * p4;
+	r3.x /= r3.w; r3.y /= r3.w; r3.z /= r3.w; r3.w /= r3.w;
+
+	ASSERT_GT(r1.x, 0.0f);
+	ASSERT_LT(r1.y, 0.0f);
+	ASSERT_GE(r1.z, 0.0f);
+	ASSERT_LE(r1.z, 1.0f);
+
+	ASSERT_LT(r2.x, 0.0f);
+	ASSERT_GT(r2.y, 0.0f);
+	ASSERT_GE(r2.z, 0.0f);
+	ASSERT_LE(r2.z, 1.0f);
+
+	ASSERT_LT(r1.z, r2.z);
+
+	ASSERT_GT(r3.z, 1.0f);
+	ASSERT_LT(r4.z, 0.0f);
+}
