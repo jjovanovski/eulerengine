@@ -10,7 +10,7 @@ float Euler::Math::Epsilon()
 
 bool Euler::Math::AlmostEqual(float a, float b)
 {
-	return Abs(a - b) <= Epsilon();
+	return Abs(a - b) <= Epsilon() * 4;
 }
 
 float Euler::Math::Deg(float radians)

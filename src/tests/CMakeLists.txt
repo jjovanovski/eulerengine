@@ -1,4 +1,8 @@
-add_executable(Tests main.cpp)
+add_executable(
+	Tests 
+	main.cpp
+	MathTests.cpp
+)
 
 target_link_libraries(Tests PUBLIC 
 	EulerCore
