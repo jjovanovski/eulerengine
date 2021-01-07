@@ -14,6 +14,7 @@ namespace Euler
 			alignas(16) Vec3 Color;
 			float Intensity;
 
+			DirectionalLight();
 			DirectionalLight(Vec3 direction, Vec3 color, float intensity);
 		};
 	}
