@@ -168,6 +168,18 @@ TEST(MathTests, MatrixVectorMultiplicationRotateX) {
 	ASSERT_TRUE(AlmostEqual(r.w, v.w));
 }
 
+TEST(MathTests, QuaternionIdentity) {
+	Euler::Quaternion q = Euler::Quaternion(1, 0, 0, 0);
+	Vec4 v(1, 2, 3, 1);
+
+	Vec4 r = q.GetMatrix() * v;
+
+	ASSERT_EQ(v.x, r.x);
+	ASSERT_EQ(v.y, r.y);
+	ASSERT_EQ(v.z, r.z);
+	ASSERT_EQ(v.w, r.w);
+}
+
 TEST(MathTests, QuaternionRotateX) {
 	Euler::Quaternion q = Euler::Quaternion::Euler(Rad(90.0f), Vec3(1, 0, 0));
 	Vec4 v(0, 1, 0, 1);
