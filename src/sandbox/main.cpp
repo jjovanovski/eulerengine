@@ -68,7 +68,7 @@ public:
 		//};
 
 		ModelResource modelResource;
-		modelResource.Load("model/man.eulermodel");
+		modelResource.Load("model/man.bem");
 
 		_mesh.Vertices = modelResource.Vertices;
 		_mesh.Indices = modelResource.Indices;

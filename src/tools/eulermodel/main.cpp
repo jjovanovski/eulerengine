@@ -79,33 +79,50 @@ int main(int argc, char** argv)
 
 	/* === write the .eulermodel file === */
 
-	std::ofstream fs("man.eulermodel");
+	//std::ofstream fs("man.eulermodel");
 
-	uint32_t vertexCount = mesh.Vertices.size();
-	uint32_t indexCount = mesh.Indices.size();
-	fs << vertexCount << " ";
-	fs << indexCount << " ";
+	//uint32_t vertexCount = mesh.Vertices.size();
+	//uint32_t indexCount = mesh.Indices.size();
+	//fs << vertexCount << " ";
+	//fs << indexCount << " ";
 
-	std::cout << "Writing... (vertices: " << vertexCount << ", indices: " << indexCount << ")" << std::endl;
+	//std::cout << "Writing... (vertices: " << vertexCount << ", indices: " << indexCount << ")" << std::endl;
 
-	for (int i = 0; i < mesh.Vertices.size(); i++)
-	{
-		fs << mesh.Vertices[i].Position.x << " ";
-		fs << mesh.Vertices[i].Position.y << " ";
-		fs << mesh.Vertices[i].Position.z << " ";
+	//for (int i = 0; i < mesh.Vertices.size(); i++)
+	//{
+	//	fs << mesh.Vertices[i].Position.x << " ";
+	//	fs << mesh.Vertices[i].Position.y << " ";
+	//	fs << mesh.Vertices[i].Position.z << " ";
 
-		fs << mesh.Vertices[i].Normal.x << " ";
-		fs << mesh.Vertices[i].Normal.y << " ";
-		fs << mesh.Vertices[i].Normal.z << " ";
+	//	fs << mesh.Vertices[i].Normal.x << " ";
+	//	fs << mesh.Vertices[i].Normal.y << " ";
+	//	fs << mesh.Vertices[i].Normal.z << " ";
 
-		fs << mesh.Vertices[i].UV.x << " ";
-		fs << mesh.Vertices[i].UV.y << " ";
-	}
+	//	fs << mesh.Vertices[i].UV.x << " ";
+	//	fs << mesh.Vertices[i].UV.y << " ";
+	//}
 
-	for (int i = 0; i < mesh.Indices.size(); i++)
-	{
-		fs << mesh.Indices[i] << " ";
-	}
+	//for (int i = 0; i < mesh.Indices.size(); i++)
+	//{
+	//	fs << mesh.Indices[i] << " ";
+	//}
 
-	fs.close();
+	//fs.close();
+
+	/* === write the .bem (binary euler model) file === */
+
+	std::ofstream bfs("man.bem", std::ios::out | std::ios::binary);
+
+	uint32_t bvertexCount = mesh.Vertices.size();
+	uint32_t bindexCount = mesh.Indices.size();
+
+	bfs.write((const char*)(&bvertexCount), sizeof(bvertexCount));
+	bfs.write((const char*)(&bindexCount), sizeof(bindexCount));
+
+	std::cout << "Writing binary... (vertices: " << bvertexCount << ", indices: " << bindexCount << ")" << std::endl;
+
+	bfs.write((const char*)mesh.Vertices.data(), mesh.Vertices.size() * sizeof(Euler::Vertex));
+	bfs.write((const char*)mesh.Indices.data(), mesh.Indices.size() * sizeof(uint32_t));
+
+	bfs.close();
 }
