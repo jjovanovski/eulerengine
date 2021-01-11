@@ -9,6 +9,7 @@
 #include "graphics/DirectionalLight.h"
 #include "math/Math.h"
 #include "resources/TextureResource.h"
+#include "resources/ModelResource.h"
 
 #include "stb_image.h"
 
@@ -39,7 +40,7 @@ public:
 		_dirLight.Intensity = 1.0f;
 		_modelPipeline.DirLight = &_dirLight;
 		_modelPipeline.AmbLight.Color = Vec3(1, 1, 1);
-		_modelPipeline.AmbLight.Intensity = 0.05f;
+		_modelPipeline.AmbLight.Intensity = 0.5f;
 
 		// create camera
 		_camera.Init(1920, 1080, 60.0f, 0.01f, 100.0f);
@@ -48,7 +49,7 @@ public:
 
 		// load texture
 		TextureResource textureResource;
-		textureResource.Load("texture.jpg", TEXTURE_CHANNELS_RGBA);
+		textureResource.Load("model/man.jpg", TEXTURE_CHANNELS_RGBA);
 
 		_texture.Shininess = 2.0f;
 		_texture.Create(Vulkan, &textureResource, _modelPipeline.MaterialLayout);
@@ -56,18 +57,21 @@ public:
 		textureResource.Unload();
 
 		// create mesh
-		std::vector<Vertex> triangleVertices = {
-			Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(0.0f, 1.0f)),
-			Vertex(Vec3(0.0f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(0.5f, 0.0f)),
-			Vertex(Vec3(0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(1.0f, 1.0f))
-		};
+		//std::vector<Vertex> triangleVertices = {
+		//	Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(0.0f, 1.0f)),
+		//	Vertex(Vec3(0.0f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(0.5f, 0.0f)),
+		//	Vertex(Vec3(0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(1.0f, 1.0f))
+		//};
 
-		std::vector<uint32_t> triangleIndices = {
-			2, 1, 0
-		};
+		//std::vector<uint32_t> triangleIndices = {
+		//	2, 1, 0
+		//};
 
-		_mesh.Vertices = triangleVertices;
-		_mesh.Indices = triangleIndices;
+		ModelResource modelResource;
+		modelResource.Load("model/man.eulermodel");
+
+		_mesh.Vertices = modelResource.Vertices;
+		_mesh.Indices = modelResource.Indices;
 		_mesh.Texture = &_texture;
 		_mesh.Create(Vulkan);
 
@@ -76,7 +80,9 @@ public:
 		_meshMaterial.Texture = &_texture;
 
 		// create model
-		_model.Position = Vec3(0, 0, 0);
+		_model.Position = Vec3(0, -1, 0);
+		_model.Scale = Vec3(0.01f, 0.01f, 0.01f);
+		_model.Rotation = Vec3(0, PI, 0);
 		_model.Drawables.push_back(&_meshMaterial);
 		_modelPipeline.Models.push_back(&_model);
 	}
