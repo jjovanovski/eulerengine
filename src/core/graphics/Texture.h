@@ -4,6 +4,7 @@
 #include "vulkan/Vulkan.h"
 #include "DescriptorSetGroup.h"
 #include "BufferGroup.h"
+#include "../resources/TextureResource.h"
 
 #include <stdint.h>
 
@@ -33,6 +34,7 @@ namespace Euler
 			float Shininess;
 
 			void Create(Vulkan* vulkan, void* pixels, uint32_t width, uint32_t height, size_t size, VkDescriptorSetLayout descriptorSetLayout);
+			void Create(Vulkan* vulkan, TextureResource* textureResource, VkDescriptorSetLayout descriptorSetLayout);
 			void Destroy();
 
 		private:

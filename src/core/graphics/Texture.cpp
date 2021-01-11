@@ -94,6 +94,11 @@ void Texture::Create(Vulkan* vulkan, void* pixels, uint32_t width, uint32_t heig
 	}
 }
 
+void Texture::Create(Vulkan* vulkan, TextureResource* textureResource, VkDescriptorSetLayout descriptorSetLayout)
+{
+	Create(vulkan, textureResource->GetData(), textureResource->GetWidth(), textureResource->GetHeight(), textureResource->GetWidth() * textureResource->GetHeight() * 4, descriptorSetLayout);
+}
+
 void Texture::Destroy()
 {
 

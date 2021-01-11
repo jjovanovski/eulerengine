@@ -8,6 +8,7 @@
 #include "graphics/Texture.h"
 #include "graphics/DirectionalLight.h"
 #include "math/Math.h"
+#include "resources/TextureResource.h"
 
 #include "stb_image.h"
 
@@ -46,13 +47,13 @@ public:
 		_camera.Transform.SetRotation(Quaternion::Euler(Math::Rad(180.0f), Vec3(0, 1, 0)));
 
 		// load texture
-		int width, height, channels;
-		stbi_uc* pixels = stbi_load("texture.jpg", &width, &height, &channels, STBI_rgb_alpha);
+		TextureResource textureResource;
+		textureResource.Load("texture.jpg", TEXTURE_CHANNELS_RGBA);
 
 		_texture.Shininess = 2.0f;
-		_texture.Create(Vulkan, pixels, width, height, width * height * 4, _modelPipeline.MaterialLayout);
+		_texture.Create(Vulkan, &textureResource, _modelPipeline.MaterialLayout);
 
-		stbi_image_free(pixels);
+		textureResource.Unload();
 
 		// create mesh
 		std::vector<Vertex> triangleVertices = {
