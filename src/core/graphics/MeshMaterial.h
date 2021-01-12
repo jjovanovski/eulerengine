@@ -2,6 +2,7 @@
 
 #include "../API.h"
 #include "Mesh.h"
+#include "AnimatedMesh.h"
 #include "Texture.h"
 
 namespace Euler
@@ -12,10 +13,12 @@ namespace Euler
 		{
 		public:
 			Mesh* Mesh;
+			AnimatedMesh* AnimatedMesh;
 			Texture* Texture;
 
 			MeshMaterial();
 			MeshMaterial(Euler::Mesh* mesh, Euler::Graphics::Texture* texture);
+			MeshMaterial(Euler::AnimatedMesh* mesh, Euler::Graphics::Texture* texture);
 		};
 	}
 }

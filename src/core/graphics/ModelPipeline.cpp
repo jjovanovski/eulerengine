@@ -11,8 +11,8 @@ void ModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float viewportHe
 
 	/* === READ SHADER CODE === */
 
-	std::vector<char> vertexShaderCode = ReadFile("shaders/vertex.spv");
-	std::vector<char> fragmentShaderCode = ReadFile("shaders/fragment.spv");
+	std::vector<char> vertexShaderCode = ReadFile("shaders/out/vertex.spv");
+	std::vector<char> fragmentShaderCode = ReadFile("shaders/out/fragment.spv");
 
 	/* === CREATE PIPELINE === */
 

@@ -11,8 +11,8 @@ void AnimatedModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float vi
 
 	/* === READ SHADER CODE === */
 
-	std::vector<char> vertexShaderCode = ReadFile("shaders/vertex.spv");
-	std::vector<char> fragmentShaderCode = ReadFile("shaders/fragment.spv");
+	std::vector<char> vertexShaderCode = ReadFile("shaders/out/vertex.spv");
+	std::vector<char> fragmentShaderCode = ReadFile("shaders/out/fragment.spv");
 
 	/* === CREATE PIPELINE === */
 
@@ -63,7 +63,7 @@ void AnimatedModelPipeline::Destroy()
 
 std::vector<VertexAttributeInfo> AnimatedModelPipeline::GetVertexAttributes()
 {
-	std::vector<VertexAttributeInfo> vec(3);
+	std::vector<VertexAttributeInfo> vec(5);
 
 	// position
 	vec[0].Location = 0;
@@ -72,13 +72,23 @@ std::vector<VertexAttributeInfo> AnimatedModelPipeline::GetVertexAttributes()
 
 	// normal
 	vec[1].Location = 1;
-	vec[1].Offset = offsetof(Vertex, Normal);
+	vec[1].Offset = offsetof(AnimatedVertex, Normal);
 	vec[1].Format = VK_FORMAT_R32G32B32_SFLOAT;
 
 	// uv
 	vec[2].Location = 2;
-	vec[2].Offset = offsetof(Vertex, UV);
+	vec[2].Offset = offsetof(AnimatedVertex, UV);
 	vec[2].Format = VK_FORMAT_R32G32_SFLOAT;
+
+	// bone ids
+	vec[3].Location = 3;
+	vec[3].Offset = offsetof(AnimatedVertex, BoneIds);
+	vec[3].Format = VK_FORMAT_R32G32B32A32_SINT;
+
+	// bone weights
+	vec[4].Location = 4;
+	vec[4].Offset = offsetof(AnimatedVertex, BoneWeights);
+	vec[4].Format = VK_FORMAT_R32G32B32_SFLOAT;
 
 	return vec;
 }
