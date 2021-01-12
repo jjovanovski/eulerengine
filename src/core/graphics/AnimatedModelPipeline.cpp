@@ -35,7 +35,7 @@ void AnimatedModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float vi
 	pipelineInfo.ViewportHeight = viewportHeight;
 
 	CreateDescriptorSetLayouts();
-	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, MaterialLayout, DirectionalLightLayout };
+	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, MaterialLayout, DirectionalLightLayout, BoneTransformsLayout };
 	pipelineInfo.DescriptorSetLayouts = layouts;
 
 	pipelineInfo.RenderPass = _vulkan->_renderPass;	// TODO: This should be a parameter
@@ -140,6 +140,15 @@ void AnimatedModelPipeline::CreateDescriptorSetLayouts()
 	directionalLightBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(directionalLightBindings, &DirectionalLightLayout);
+
+	/* === BoneTransforms DESCRIPTOR SET LAYOUT === */
+	std::vector<VkDescriptorSetLayoutBinding> boneTransformBindings(1);
+	boneTransformBindings[0].binding = 0;
+	boneTransformBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+	boneTransformBindings[0].descriptorCount = 1;
+	boneTransformBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	_vulkan->CreateDescriptorSetLayout(boneTransformBindings, &BoneTransformsLayout);
 }
 
 void AnimatedModelPipeline::CreateDescriptorSets()
@@ -148,10 +157,11 @@ void AnimatedModelPipeline::CreateDescriptorSets()
 
 	/* === CREATE DESCRIPTOR SET POOL === */
 
-	std::vector<VkDescriptorPoolSize> poolSizes(3);
-	poolSizes[0] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// ViewProj
-	poolSizes[1] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };	// Model
-	poolSizes[2] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// DirectionalLight
+	std::vector<VkDescriptorPoolSize> poolSizes(4);
+	poolSizes[0] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };					// ViewProj
+	poolSizes[1] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };			// Model
+	poolSizes[2] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };					// DirectionalLight
+	poolSizes[3] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };			// BoneTransforms
 
 	_vulkan->CreateDescriptorPool(poolSizes, poolSizes.size() * imageCount, &_descriptorPool);
 
@@ -160,6 +170,7 @@ void AnimatedModelPipeline::CreateDescriptorSets()
 	CreateViewProjDescriptorSets();
 	CreateModelDescriptorSets();
 	CreateDirectionalLightDescriptorSets();
+	CreateBoneTransformDescriptorSets();
 }
 
 void AnimatedModelPipeline::CreateViewProjDescriptorSets()
@@ -254,6 +265,38 @@ void AnimatedModelPipeline::CreateDirectionalLightDescriptorSets()
 	}
 }
 
+void AnimatedModelPipeline::CreateBoneTransformDescriptorSets()
+{
+	uint32_t imageCount = _vulkan->GetSwapchainImageCount();
+
+	/* === CALCULATE ALLIGNMENT IN THE UNIFORM BUFFER === */
+
+	uint64_t boneTransformsSize = sizeof(Mat4) * 32;		// TODO: 32 is the maximum number of bones per mesh. Extract constant from this.
+	auto minOffset = _vulkan->GetPhysicalDevice()->Properties.limits.minUniformBufferOffsetAlignment;
+	_boneTransformMatrixAlignment = (boneTransformsSize + minOffset - 1) & ~(minOffset - 1);
+
+	/* === CREATE Model BUFFERS === */
+
+	_boneTransformBuffers.Create(
+		_vulkan,
+		imageCount,
+		INITIAL_MODELS_FOR_BUFFER_SIZE * boneTransformsSize,
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
+
+	/* === ALLOCATE DESCRIPTOR SETS === */
+
+	_boneTransformDescriptorSetGroup.Allocate(_vulkan, imageCount, BoneTransformsLayout, _descriptorPool);
+
+	/* === WRITE DESCRIPTOR SETS === */
+
+	for (int i = 0; i < imageCount; i++)
+	{
+		_boneTransformDescriptorSetGroup.UpdateUniformBufferDynamic(_vulkan, i, _boneTransformBuffers.Get(i)->Buffer, 0);
+	}
+}
+
 void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 {
 	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
@@ -317,6 +360,29 @@ void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 			&_modelDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
 			1,
 			&offset
+		);
+
+		// bind bone transforms descriptor set
+		void* boneTransformsData;
+		_vulkan->MapMemory(_boneTransformBuffers.Get(_vulkan->_currentImage)->Memory, i * _boneTransformMatrixAlignment, _boneTransformMatrixAlignment, &boneTransformsData);
+		std::vector<Mat4> matrices(32);
+		for (int k = 0; k < 32; k++)
+		{
+			matrices[k] = Math::Matrices::Identity();
+		}
+		memcpy(boneTransformsData, matrices.data(), sizeof(Mat4) * 32);
+		_vulkan->UnmapMemory(_boneTransformBuffers.Get(_vulkan->_currentImage)->Memory);
+
+		uint32_t boneTransformsOffset = _boneTransformMatrixAlignment * i;
+		vkCmdBindDescriptorSets(
+			*_vulkan->GetMainCommandBuffer(),
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			_pipelineLayout,
+			4,
+			1,
+			&_boneTransformDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+			1,
+			&boneTransformsOffset
 		);
 
 		// draw model meshes

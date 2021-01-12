@@ -35,13 +35,16 @@ namespace Euler
 			DescriptorSetGroup _viewProjDescriptorSetGroup;
 			DescriptorSetGroup _modelDescriptorSetGroup;
 			DescriptorSetGroup _lightDescriptorSetGroup;
+			DescriptorSetGroup _boneTransformDescriptorSetGroup;
 
 			BufferGroup _viewProjBuffers;
 			BufferGroup _modelBuffers;
 			BufferGroup _directionalLightBuffers;
 			BufferGroup _ambientLightBuffers;
+			BufferGroup _boneTransformBuffers;
 
 			uint64_t _modelMatrixAlignment;
+			uint64_t _boneTransformMatrixAlignment;
 
 		public:
 			std::vector<AnimatedModel*> Models;
@@ -52,6 +55,7 @@ namespace Euler
 			VkDescriptorSetLayout ModelLayout;
 			VkDescriptorSetLayout MaterialLayout;
 			VkDescriptorSetLayout DirectionalLightLayout;
+			VkDescriptorSetLayout BoneTransformsLayout;
 
 			void Create(Vulkan* vulkan, float viewportWidth, float viewportHeight);
 			void Destroy();
@@ -66,6 +70,7 @@ namespace Euler
 			void CreateViewProjDescriptorSets();
 			void CreateModelDescriptorSets();
 			void CreateDirectionalLightDescriptorSets();
+			void CreateBoneTransformDescriptorSets();
 		};
 	}
 }
