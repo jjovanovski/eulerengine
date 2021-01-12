@@ -283,7 +283,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 	_vulkan->MapMemory(_modelBuffers.Get(_vulkan->_currentImage)->Memory, 0, Models.size() * _modelMatrixAlignment, &modelsData);
 	for (int i = 0; i < Models.size(); i++)
 	{
-		Mat4 modelMatrix = Models[i]->GetModelMatrix();
+		Mat4 modelMatrix = Models[i]->Transform.GetModelMatrix();
 		modelMatrix.Transpose();
 		
 		size_t dataOffset = _modelMatrixAlignment * i;

@@ -4,6 +4,7 @@
 #include "MeshMaterial.h"
 #include "../math/Vec3.h"
 #include "../math/Vec2.h"
+#include "../math/Transform.h"
 
 #include <vector>
 
@@ -12,14 +13,10 @@ namespace Euler
 	class EULER_API Model
 	{
 	public:
-		Vec3 Position;
-		Vec3 Rotation;
-		Vec3 Scale;
+		Transform Transform;
 
 		std::vector<Graphics::MeshMaterial*> Drawables;
 
 		Model();
-
-		Mat4 GetModelMatrix();
 	};
 };
