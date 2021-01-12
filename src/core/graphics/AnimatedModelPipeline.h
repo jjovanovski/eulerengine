@@ -4,7 +4,7 @@
 #include "vulkan/Vulkan.h"
 #include "Common.h"
 #include "Vertex.h"
-#include "Model.h"
+#include "AnimatedModel.h"
 #include "DirectionalLight.h"
 #include "AmbientLight.h"
 #include "BufferGroup.h"
@@ -44,7 +44,7 @@ namespace Euler
 			uint64_t _modelMatrixAlignment;
 
 		public:
-			std::vector<Model*> Models;
+			std::vector<AnimatedModel*> Models;
 			DirectionalLight* DirLight;
 			AmbientLight AmbLight;
 

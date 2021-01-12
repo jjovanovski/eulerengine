@@ -24,7 +24,7 @@ void AnimatedModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float vi
 	pipelineInfo.FragmentShaderCode = fragmentShaderCode.data();
 	pipelineInfo.FragmentShaderCodeSize = fragmentShaderCode.size();
 
-	pipelineInfo.VertexStride = sizeof(Vertex);
+	pipelineInfo.VertexStride = sizeof(AnimatedVertex);
 	pipelineInfo.VertexAttributes = GetVertexAttributes();
 
 	pipelineInfo.Topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -304,7 +304,7 @@ void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 
 	for (int i = 0; i < Models.size(); i++)
 	{
-		Model* model = Models[i];
+		AnimatedModel* model = Models[i];
 
 		// set model matrix
 		uint32_t offset = _modelMatrixAlignment * i;
@@ -335,9 +335,9 @@ void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 
 			_vulkan->DrawMesh(
 				*_vulkan->GetMainCommandBuffer(),
-				&model->Drawables[j]->Mesh->VertexBuffer,
-				&model->Drawables[j]->Mesh->IndexBuffer,
-				model->Drawables[j]->Mesh->Indices.size()
+				&model->Drawables[j]->AnimatedMesh->VertexBuffer,
+				&model->Drawables[j]->AnimatedMesh->IndexBuffer,
+				model->Drawables[j]->AnimatedMesh->Indices.size()
 			);
 		}
 	}
