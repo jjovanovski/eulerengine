@@ -52,6 +52,7 @@ int main(int argc, char** argv)
 
 	std::cout << "File loaded" << std::endl;
 	std::cout << "Meshes: " << scene->mNumMeshes << std::endl;
+	std::cout << "Animations: " << scene->HasAnimations() << std::endl;
 
 	/* === convert model to our data structures === */
 	std::vector<Mesh> meshes(scene->mNumMeshes);
@@ -67,6 +68,7 @@ int main(int argc, char** argv)
 		std::cout << "Has UVs: " << aiMesh->HasTextureCoords(0) << std::endl;
 		std::cout << "Faces (triangles): " << aiMesh->mNumFaces << std::endl;
 		std::cout << "Bones: " << aiMesh->mNumBones << std::endl;
+		std::cout << "Anim meshes: " << aiMesh->mNumAnimMeshes << std::endl;
 
 		Mesh* mesh = &meshes[meshIndex];
 
