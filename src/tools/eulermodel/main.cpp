@@ -3,13 +3,17 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+#include <algorithm>
 #include <fstream>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <graphics/Vertex.h>
 #include <graphics/AnimatedVertex.h>
+#include <graphics/Animation.h>
 #include <math/Mat4.h>
+#include <math/Quaternion.h>
 
 struct Mesh
 {
@@ -165,6 +169,8 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 	/* === convert model to our data structures === */
 	std::vector<AnimatedMesh> meshes(scene->mNumMeshes);
 
+	std::map<std::string, int> boneNameToIndex;
+
 	for (int meshIndex = 0; meshIndex < scene->mNumMeshes; meshIndex++)
 	{
 		aiMesh* aiMesh = scene->mMeshes[meshIndex];
@@ -219,6 +225,12 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 		for (int i = 0; i < aiMesh->mNumBones; i++)
 		{
 			aiBone* aiBone = aiMesh->mBones[i];
+			
+			std::string boneName(aiBone->mName.C_Str());
+			if (boneNameToIndex.find(boneName) == boneNameToIndex.end())
+			{
+				boneNameToIndex[boneName] = i;
+			}
 
 			for (int j = 0; j < aiBone->mNumWeights; j++)
 			{
@@ -228,6 +240,7 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 		}
 	}
 
+	std::vector<Euler::Animation*> animations;
 	for (int animIndex = 0; animIndex < scene->mNumAnimations; animIndex++)
 	{
 		aiAnimation* animation = scene->mAnimations[animIndex];
@@ -238,15 +251,57 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 		std::cout << "Channels: " << animation->mNumChannels << std::endl;
 		std::cout << "Mesh channels: " << animation->mNumMeshChannels << std::endl;
 
+
+		//for (int i = 0; i < animation->mNumChannels; i++)
+		//{
+		//	aiNodeAnim* nodeAnim = animation->mChannels[i];
+		//	std::cout << nodeAnim->mNodeName.C_Str() << " ";
+
+		//	for (int j = 0; j < nodeAnim->mNumPositionKeys && j < 25; j++)
+		//	{
+		//		std::cout << nodeAnim->mPositionKeys[j].mTime << " ";
+		//	}
+
+		//	std::cout << std::endl;
+		//}
+
+		unsigned int maxKeyFrames = 1;
 		for (int i = 0; i < animation->mNumChannels; i++)
 		{
 			aiNodeAnim* nodeAnim = animation->mChannels[i];
-			aiNode* node = scene->mRootNode->FindNode(nodeAnim->mNodeName);
+			maxKeyFrames = std::max(maxKeyFrames, nodeAnim->mNumPositionKeys);
+			maxKeyFrames = std::max(maxKeyFrames, nodeAnim->mNumRotationKeys);
+		}
+		std::cout << "Key frames: " << maxKeyFrames << std::endl;
+
+		Euler::Animation* anim = new Euler::Animation(maxKeyFrames);
+		anim->Duration = animation->mDuration;
+		animations.push_back(anim);
+
+		for (int i = 0; i < maxKeyFrames; i++)
+		{
+			Euler::KeyFrame* keyFrame = &anim->KeyFrames[i];
+
+			for (int j = 0; j < animation->mNumChannels; j++)
+			{
+				aiNodeAnim* nodeAnim = animation->mChannels[j];
+				std::string boneName(nodeAnim->mNodeName.C_Str());
+
+				if (boneNameToIndex.find(boneName) != boneNameToIndex.end())
+				{
+					int boneIndex = boneNameToIndex[boneName];
+
+					auto pos = nodeAnim->mPositionKeys[i].mValue;
+					keyFrame->BoneTransforms[boneIndex].Position = Vec3(pos.x, pos.y, pos.z);
+
+					auto rot = nodeAnim->mRotationKeys[i].mValue;
+					keyFrame->BoneTransforms[boneIndex].Rotation = Euler::Quaternion(rot.w, rot.x, rot.y, rot.z);
+				}
+			}
 		}
 	}
 
 	/* === write the .beam (binary euler animated model) file === */
-
 
 	std::string fileName = filePath.substr(0, filePath.length() - filePath.find_last_of(".") + 1) + ".beam";
 	std::cout << "Writing output file " << fileName << std::endl;
@@ -266,11 +321,40 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 		bfs.write((const char*)(&vertexCount), sizeof(vertexCount));
 		bfs.write((const char*)(&indexCount), sizeof(indexCount));
 
-		bfs.write((const char*)mesh->Vertices.data(), mesh->Vertices.size() * sizeof(Euler::Vertex));
+		bfs.write((const char*)mesh->Vertices.data(), mesh->Vertices.size() * sizeof(Euler::AnimatedVertex));
 		bfs.write((const char*)mesh->Indices.data(), mesh->Indices.size() * sizeof(uint32_t));
 	}
 
+	uint32_t numberOfAnimations = animations.size();
+	bfs.write((const char*)(&numberOfAnimations), sizeof(numberOfAnimations));
+
+	/*
+	* animation_duration
+	* keyframe_count
+	* [
+	*	
+	* ]
+	*/
+
+	for (Euler::Animation* animation : animations)
+	{
+		bfs.write((const char*)(&animation->Duration), sizeof(animation->Duration));
+		bfs.write((const char*)(&animation->KeyFrameCount), sizeof(animation->KeyFrameCount));
+
+		for (int i = 0; i < animation->KeyFrameCount; i++)
+		{
+			Euler::KeyFrame* keyFrame = &animation->KeyFrames[i];
+			bfs.write((const char*)keyFrame, sizeof(Euler::KeyFrame));
+		}
+	}
+
 	bfs.close();
+
+	// delete animations
+	for (Euler::Animation* animation : animations)
+	{
+		delete animation;
+	}
 }
 
 struct VertexBoneData
