@@ -30,6 +30,8 @@ namespace Euler {
 		Mat4 GetMatrix() const;
 
 		static Quaternion FromMatrix(const Mat4& matrix);
+
+		static Quaternion Slerp(Quaternion& q1, Quaternion& q2, float t);
 	};
 
 }

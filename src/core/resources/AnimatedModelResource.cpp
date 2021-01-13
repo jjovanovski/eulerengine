@@ -1,11 +1,11 @@
-#include "ModelResource.h"
+#include "AnimatedModelResource.h"
 
 #include <iostream>
 #include <fstream>
 
 using namespace Euler;
 
-void ModelResource::Load(const char* filePath)
+void AnimatedModelResource::Load(const char* filePath)
 {
 	//std::ifstream fs;
 	//fs.open(filePath);
@@ -52,15 +52,31 @@ void ModelResource::Load(const char* filePath)
 	Vertices.resize(vertexCount);
 	Indices.resize(indexCount);
 
-	fs.read((char*)Vertices.data(), vertexCount * sizeof(Vertex));
+	fs.read((char*)Vertices.data(), vertexCount * sizeof(AnimatedVertex));
 	fs.read((char*)Indices.data(), indexCount * sizeof(uint32_t));
+
+	uint32_t animationCount;
+	fs.read((char*)(&animationCount), sizeof(uint32_t));
+
+	for (int i = 0; i < animationCount; i++)
+	{
+		float animationDuration;
+		int keyFrameCount;
+
+		fs.read((char*)(&animationDuration), sizeof(float));
+		fs.read((char*)(&keyFrameCount), sizeof(int));
+
+		Animation* animation = new Animation(keyFrameCount);
+		fs.read((char*)animation->KeyFrames, sizeof(KeyFrame) * keyFrameCount);
+		Animations.push_back(animation);
+	}
 
 	fs.close();
 }
 
-void ModelResource::Unload()
+void AnimatedModelResource::Unload()
 {
 	// trick to force the vectors to free-up the memory
-	std::vector<Vertex>().swap(Vertices);
+	std::vector<AnimatedVertex>().swap(Vertices);
 	std::vector<uint32_t>().swap(Indices);
 }

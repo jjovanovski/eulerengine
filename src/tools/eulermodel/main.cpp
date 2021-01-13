@@ -281,12 +281,13 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 		for (int i = 0; i < maxKeyFrames; i++)
 		{
 			Euler::KeyFrame* keyFrame = &anim->KeyFrames[i];
+			keyFrame->Timestamp = (float) animation->mChannels[0]->mPositionKeys[i].mTime;
 
 			for (int j = 0; j < animation->mNumChannels; j++)
 			{
 				aiNodeAnim* nodeAnim = animation->mChannels[j];
 				std::string boneName(nodeAnim->mNodeName.C_Str());
-
+				
 				if (boneNameToIndex.find(boneName) != boneNameToIndex.end())
 				{
 					int boneIndex = boneNameToIndex[boneName];
@@ -331,9 +332,7 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 	/*
 	* animation_duration
 	* keyframe_count
-	* [
-	*	
-	* ]
+	* [keyframes]
 	*/
 
 	for (Euler::Animation* animation : animations)
@@ -393,12 +392,12 @@ void AddBoneToVertex(Euler::AnimatedVertex* vertex, int boneId, float weight)
 	boneData.push_back({ boneId, weight });
 	std::sort(boneData.begin(), boneData.end());
 
-	vertex->BoneIds.x = boneData[0].boneId;
-	vertex->BoneWeights.x = boneData[0].weight;
+	vertex->BoneIds.x = boneData[boneData.size() - 1].boneId;
+	vertex->BoneWeights.x = boneData[boneData.size() - 1].weight;
 
-	vertex->BoneIds.y = boneData[1].boneId;
-	vertex->BoneWeights.y = boneData[1].weight;
+	vertex->BoneIds.y = boneData[boneData.size() - 2].boneId;
+	vertex->BoneWeights.y = boneData[boneData.size() - 2].weight;
 
-	vertex->BoneIds.z = boneData[2].boneId;
-	vertex->BoneWeights.z = boneData[2].weight;
+	vertex->BoneIds.z = boneData[boneData.size() - 3].boneId;
+	vertex->BoneWeights.z = boneData[boneData.size() - 3].weight;
 }

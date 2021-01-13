@@ -151,3 +151,15 @@ Quaternion Quaternion::FromMatrix(const Mat4& matrix)
 		);
 	}
 }
+
+Quaternion Quaternion::Slerp(Quaternion& a, Quaternion& b, float t)
+{
+	Quaternion r;
+	float t_ = 1 - t;
+	r.x = t_ * a.x + t * b.x;
+	r.y = t_ * a.y + t * b.y;
+	r.z = t_ * a.z + t * b.z;
+	r.w = t_ * a.w + t * b.w;
+	r.Normalize();
+	return r;
+}

@@ -7,9 +7,10 @@
 #include "graphics/Vertex.h"
 #include "graphics/Texture.h"
 #include "graphics/DirectionalLight.h"
+#include "graphics/Animator.h"
 #include "math/Math.h"
 #include "resources/TextureResource.h"
-#include "resources/ModelResource.h"
+#include "resources/AnimatedModelResource.h"
 
 #include "stb_image.h"
 
@@ -27,6 +28,8 @@ private:
 	AnimatedMesh _mesh;
 	Graphics::MeshMaterial _meshMaterial;
 	AnimatedModel _model;
+	AnimatedModelResource _modelResource;
+	Animator _animator;
 	
 
 public:
@@ -37,7 +40,7 @@ public:
 		// setup light
 		_dirLight.Direction = Vec3(1, 1, -1);
 		_dirLight.Color = Vec3(1, 1, 1);
-		_dirLight.Intensity = 1.0f;
+		_dirLight.Intensity = 0.5f;
 		_modelPipeline.DirLight = &_dirLight;
 		_modelPipeline.AmbLight.Color = Vec3(1, 1, 1);
 		_modelPipeline.AmbLight.Intensity = 0.5f;
@@ -49,7 +52,7 @@ public:
 
 		// load texture
 		TextureResource textureResource;
-		textureResource.Load("texture.jpg", TEXTURE_CHANNELS_RGBA);
+		textureResource.Load("diffuse.png", TEXTURE_CHANNELS_RGBA);
 
 		_texture.Shininess = 2.0f;
 		_texture.Create(Vulkan, &textureResource, _modelPipeline.MaterialLayout);
@@ -57,18 +60,10 @@ public:
 		textureResource.Unload();
 
 		// create mesh
-		std::vector<AnimatedVertex> triangleVertices = {
-			AnimatedVertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(0.0f, 1.0f), Vec3i(), Vec3()),
-			AnimatedVertex(Vec3(0.0f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(0.5f, 0.0f), Vec3i(), Vec3()),
-			AnimatedVertex(Vec3(0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(1.0f, 1.0f), Vec3i(), Vec3())
-		};
+		_modelResource.Load("model.beam");
 
-		std::vector<uint32_t> triangleIndices = {
-			2, 1, 0
-		};
-
-		_mesh.Vertices = triangleVertices;
-		_mesh.Indices = triangleIndices;
+		_mesh.Vertices = _modelResource.Vertices;
+		_mesh.Indices = _modelResource.Indices;
 		_mesh.Texture = &_texture;
 		_mesh.Create(Vulkan);
 
@@ -77,8 +72,14 @@ public:
 		_meshMaterial.Texture = &_texture;
 
 		// create model
+		_model.Transform.SetPosition(Vec3(0, -0.5f, 1));
+		_model.Transform.SetScale(0.1f);
+		_model.Transform.SetRotation(Quaternion::Euler(1.15f * PI, Vec3(0, 1, 0)) * Quaternion::Euler(PI / 2.0f, Vec3(1, 0, 0)));
 		_model.Drawables.push_back(&_meshMaterial);
 		_modelPipeline.Models.push_back(&_model);
+
+		_animator.Animation = _modelResource.Animations[0];
+		_animator.Start();
 	}
 
 	void OnUpdate() override
@@ -88,12 +89,14 @@ public:
 
 	void OnDraw() override
 	{
-		_modelPipeline.RecordCommands(_camera.GetViewProj());
+		_animator.Update();
+		_modelPipeline.RecordCommands(_camera.GetViewProj(), _animator.BoneMatrices);
 	}
 
 	void OnDestroy() override
 	{
 		_mesh.Destroy(Vulkan);
+		_modelResource.Unload();
 		_modelPipeline.Destroy();
 	}
 };

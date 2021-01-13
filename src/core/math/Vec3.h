@@ -59,6 +59,22 @@ namespace Euler
 			{
 				return x * other.x + y * other.y + z * other.z;
 			}
+
+			friend Vector3Template operator+(Vector3Template lhs, const Vector3Template& rhs)
+			{
+				return Vector3Template(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+			}
+
+			friend Vector3Template operator*(const float& scalar, const Vector3Template& vector)
+			{
+				Vector3Template r(vector.x * scalar, vector.y * scalar, vector.z * scalar);
+				return r;
+			}
+
+			static Vector3Template Lerp(const Vector3Template& a, const Vector3Template& b, float t)
+			{
+				return (1.0f - t) * a + t * b;
+			}
 		};
 	}
 }

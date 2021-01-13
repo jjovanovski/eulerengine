@@ -297,7 +297,7 @@ void AnimatedModelPipeline::CreateBoneTransformDescriptorSets()
 	}
 }
 
-void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix)
+void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix, std::vector<Mat4> boneMatrices)
 {
 	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 
@@ -365,12 +365,7 @@ void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 		// bind bone transforms descriptor set
 		void* boneTransformsData;
 		_vulkan->MapMemory(_boneTransformBuffers.Get(_vulkan->_currentImage)->Memory, i * _boneTransformMatrixAlignment, _boneTransformMatrixAlignment, &boneTransformsData);
-		std::vector<Mat4> matrices(32);
-		for (int k = 0; k < 32; k++)
-		{
-			matrices[k] = Math::Matrices::Identity();
-		}
-		memcpy(boneTransformsData, matrices.data(), sizeof(Mat4) * 32);
+		memcpy(boneTransformsData, boneMatrices.data(), sizeof(Mat4) * 32);
 		_vulkan->UnmapMemory(_boneTransformBuffers.Get(_vulkan->_currentImage)->Memory);
 
 		uint32_t boneTransformsOffset = _boneTransformMatrixAlignment * i;
