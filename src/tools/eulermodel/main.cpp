@@ -26,6 +26,8 @@ struct AnimatedMesh
 	std::vector<Euler::AnimatedVertex> Vertices;
 	std::vector<uint32_t> Indices;
 	std::vector<Mat4> BoneTransforms;
+	std::vector<int> BoneParents;
+	std::vector<Mat4> BoneOffsetMatrices;
 };
 
 void ProcessScene(std::string filePath, const aiScene* scene);
@@ -238,6 +240,48 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 				AddBoneToVertex(&mesh->Vertices[weight->mVertexId], i, weight->mWeight);
 			}
 		}
+
+		mesh->BoneParents.resize(MAX_BONES, -1);
+		mesh->BoneOffsetMatrices.resize(MAX_BONES);
+		for (int i = 0; i < aiMesh->mNumBones; i++)
+		{
+			aiBone* bone = aiMesh->mBones[i];
+			aiNode* node = scene->mRootNode->FindNode(bone->mName);
+			aiNode* parent = node->mParent;
+
+			auto m = bone->mOffsetMatrix;
+			Mat4 offsetMatrix;
+			offsetMatrix.Set(0, 0, m.a1);
+			offsetMatrix.Set(0, 1, m.a2);
+			offsetMatrix.Set(0, 2, m.a3);
+			offsetMatrix.Set(0, 3, m.a4);
+
+			offsetMatrix.Set(1, 0, m.b1);
+			offsetMatrix.Set(1, 1, m.b2);
+			offsetMatrix.Set(1, 2, m.b3);
+			offsetMatrix.Set(1, 3, m.b4);
+
+			offsetMatrix.Set(2, 0, m.c1);
+			offsetMatrix.Set(2, 1, m.c2);
+			offsetMatrix.Set(2, 2, m.c3);
+			offsetMatrix.Set(2, 3, m.c4);
+
+			offsetMatrix.Set(3, 0, m.d1);
+			offsetMatrix.Set(3, 1, m.d2);
+			offsetMatrix.Set(3, 2, m.d3);
+			offsetMatrix.Set(3, 3, m.d4);
+
+			mesh->BoneOffsetMatrices[i] = offsetMatrix;
+			
+			if (parent != NULL)
+			{
+				int idx = boneNameToIndex[parent->mName.C_Str()];
+				if (idx != i)
+				{
+					mesh->BoneParents[i] = idx;
+				}
+			}
+		}
 	}
 
 	std::vector<Euler::Animation*> animations;
@@ -324,6 +368,9 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 
 		bfs.write((const char*)mesh->Vertices.data(), mesh->Vertices.size() * sizeof(Euler::AnimatedVertex));
 		bfs.write((const char*)mesh->Indices.data(), mesh->Indices.size() * sizeof(uint32_t));
+
+		bfs.write((const char*)mesh->BoneParents.data(), MAX_BONES * sizeof(int));
+		bfs.write((const char*)mesh->BoneOffsetMatrices.data(), MAX_BONES * sizeof(Mat4));
 	}
 
 	uint32_t numberOfAnimations = animations.size();

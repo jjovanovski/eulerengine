@@ -154,12 +154,47 @@ Quaternion Quaternion::FromMatrix(const Mat4& matrix)
 
 Quaternion Quaternion::Slerp(Quaternion& a, Quaternion& b, float t)
 {
-	Quaternion r;
-	float t_ = 1 - t;
-	r.x = t_ * a.x + t * b.x;
-	r.y = t_ * a.y + t * b.y;
-	r.z = t_ * a.z + t * b.z;
-	r.w = t_ * a.w + t * b.w;
-	r.Normalize();
-	return r;
+	//Quaternion r;
+	//float t_ = 1 - t;
+	//r.x = t_ * a.x + t * b.x;
+	//r.y = t_ * a.y + t * b.y;
+	//r.z = t_ * a.z + t * b.z;
+	//r.w = t_ * a.w + t * b.w;
+	//r.Normalize();
+
+	float w1, x1, y1, z1, w2, x2, y2, z2, w3, x3, y3, z3;
+	Quaternion q2New;
+	float theta, mult1, mult2;
+
+	w1 = a.w; x1 = a.x; y1 = a.y; z1 = a.z;
+	w2 = b.w; x2 = b.x; y2 = b.y; z2 = b.z;
+
+	// Reverse the sign of q2 if q1.q2 < 0.
+	if (w1 * w2 + x1 * x2 + y1 * y2 + z1 * z2 < 0)
+	{
+		w2 = -w2; x2 = -x2; y2 = -y2; z2 = -z2;
+	}
+
+	theta = acos(w1 * w2 + x1 * x2 + y1 * y2 + z1 * z2);
+
+	if (theta > 0.000001)
+	{
+		mult1 = sin((1 - t) * theta) / sin(theta);
+		mult2 = sin(t * theta) / sin(theta);
+	}
+
+	// To avoid division by 0 and by very small numbers the approximation of sin(angle)
+	// by angle is used when theta is small (0.000001 is chosen arbitrarily).
+	else
+	{
+		mult1 = 1 - t;
+		mult2 = t;
+	}
+
+	w3 = mult1 * w1 + mult2 * w2;
+	x3 = mult1 * x1 + mult2 * x2;
+	y3 = mult1 * y1 + mult2 * y2;
+	z3 = mult1 * z1 + mult2 * z2;
+
+	return Quaternion(w3, x3, y3, z3);
 }

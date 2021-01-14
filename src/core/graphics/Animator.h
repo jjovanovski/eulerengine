@@ -17,8 +17,12 @@ namespace Euler
 		std::chrono::steady_clock::time_point TimeAtStart;
 		int CurrentFrameIndex;
 		std::vector<Mat4> BoneMatrices;
+		std::vector<int> BoneParents;
+		std::vector<Mat4> BoneOffsetMatrices;
 
 		void Start();
 		void Update();
+
+		void CalculateMatrix(int index, std::vector<bool> visited, KeyFrame* prevFrame, KeyFrame* currentFrame, float t);
 	};
 }

@@ -41,21 +41,47 @@ void Animator::Update()
 
 	// interpolate between two last frames
 	BoneMatrices.clear();
+	BoneMatrices.resize(MAX_BONES);
+	std::vector<bool> visited(MAX_BONES, false);
 	for (int i = 0; i < currentFrame.BoneTransformCount; i++)
 	{
-		Vec3 pos = Vec3::Lerp(prevFrame.BoneTransforms[i].Position, currentFrame.BoneTransforms[i].Position, t);
+		if(!visited[i])
+			CalculateMatrix(i, visited, &prevFrame, &currentFrame, t);
+	}
 
-		Mat4 translate = Math::Matrices::Translate(pos.x, pos.y, pos.z);
-		Quaternion q1 = prevFrame.BoneTransforms[i].Rotation;
-		Quaternion q2 = currentFrame.BoneTransforms[i].Rotation;
-		Quaternion q = Quaternion::Slerp(q1, q2, t);
-		Mat4 rotate = q.GetMatrix();
-		Mat4 m = translate.Multiply(rotate);
-		m.Transpose();
-
-		BoneMatrices.push_back(m);
-
+	for (int i = 0; i < BoneMatrices.size(); i++)
+	{
+		BoneMatrices[i] = BoneMatrices[i].Multiply(BoneOffsetMatrices[i]);
+		BoneMatrices[i].Transpose();
 	}
 
 	// write interpolated transform to buffers
+}
+
+void Animator::CalculateMatrix(int index, std::vector<bool> visited, KeyFrame* prevFrame, KeyFrame* currentFrame, float t)
+{
+	Vec3 pos = Vec3::Lerp(prevFrame->BoneTransforms[index].Position, currentFrame->BoneTransforms[index].Position, t);
+
+	Mat4 translate = Math::Matrices::Translate(pos.x, pos.y, pos.z);
+	//Mat4 translate = Math::Matrices::Translate(currentFrame->BoneTransforms[index].Position.x, currentFrame->BoneTransforms[index].Position.y, currentFrame->BoneTransforms[index].Position.z);
+	Quaternion q1 = prevFrame->BoneTransforms[index].Rotation;
+	Quaternion q2 = currentFrame->BoneTransforms[index].Rotation;
+	Quaternion q = Quaternion::Slerp(q1, q2, t);
+	Mat4 rotate = q.GetMatrix();
+	Mat4 scale = Math::Matrices::Scale(1.0f);
+	Mat4 m = translate.Multiply(rotate);
+
+	if (BoneParents[index] >= 0)
+	{
+		int parentIndex = BoneParents[index];
+		if (!visited[parentIndex])
+		{
+			CalculateMatrix(parentIndex, visited, prevFrame, currentFrame, t);
+		}
+
+		m = BoneMatrices[parentIndex].Multiply(m);
+	}
+
+	BoneMatrices[index] = m;
+	visited[index] = true;
 }

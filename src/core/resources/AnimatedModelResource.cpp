@@ -51,9 +51,13 @@ void AnimatedModelResource::Load(const char* filePath)
 
 	Vertices.resize(vertexCount);
 	Indices.resize(indexCount);
+	BoneParents.resize(MAX_BONES);
+	BoneOffsetMatrices.resize(MAX_BONES);
 
 	fs.read((char*)Vertices.data(), vertexCount * sizeof(AnimatedVertex));
 	fs.read((char*)Indices.data(), indexCount * sizeof(uint32_t));
+	fs.read((char*)BoneParents.data(), MAX_BONES * sizeof(int));
+	fs.read((char*)BoneOffsetMatrices.data(), MAX_BONES * sizeof(Mat4));
 
 	uint32_t animationCount;
 	fs.read((char*)(&animationCount), sizeof(uint32_t));

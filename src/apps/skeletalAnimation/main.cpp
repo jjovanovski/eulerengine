@@ -79,6 +79,8 @@ public:
 		_modelPipeline.Models.push_back(&_model);
 
 		_animator.Animation = _modelResource.Animations[0];
+		_animator.BoneParents = _modelResource.BoneParents;
+		_animator.BoneOffsetMatrices = _modelResource.BoneOffsetMatrices;
 		_animator.Start();
 	}
 

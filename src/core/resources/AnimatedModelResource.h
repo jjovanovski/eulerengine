@@ -14,6 +14,8 @@ namespace Euler
 		std::vector<AnimatedVertex> Vertices;
 		std::vector<uint32_t> Indices;
 		std::vector<Animation*> Animations;
+		std::vector<int> BoneParents;
+		std::vector<Mat4> BoneOffsetMatrices;
 
 		void Load(const char* filePath);
 		void Unload();
