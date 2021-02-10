@@ -1,0 +1,6 @@
+﻿  Building Custom Rule E:/dev/googletest/googlemock/CMakeLists.txt
+  gtest-all.cc
+  gmock-all.cc
+  Generating Code...
+     Creating library E:/dev/googletest/out/lib/Debug/gmockd.lib and object E:/dev/googletest/out/lib/Debug/gmockd.exp
+  gmock.vcxproj -> E:\dev\googletest\out\bin\Debug\gmockd.dll

@@ -1,0 +1,4 @@
+﻿  Building Custom Rule E:/dev/googletest/googletest/CMakeLists.txt
+  gtest_main.cc
+     Creating library E:/dev/googletest/out/lib/Debug/gtest_maind.lib and object E:/dev/googletest/out/lib/Debug/gtest_maind.exp
+  gtest_main.vcxproj -> E:\dev\googletest\out\bin\Debug\gtest_maind.dll

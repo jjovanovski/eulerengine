@@ -1,0 +1,47 @@
+# pack-refs with: peeled fully-peeled sorted 
+2a5ac9a6d6cbe9f4113c0f17158cb13ab7f263bf refs/remotes/origin/3.3-stable
+1d9406b0b27160534fdd92574fd1d8788850cd18 refs/remotes/origin/attach-win32-window
+315674da90d39a7343568f88e10a270adb3b9f7b refs/remotes/origin/capturecursor
+fd2d985af8f0e1a1736c01d4232438f9dc888b88 refs/remotes/origin/captured-cursor-mode-r2
+5cf9eaf602a38f7ed38820bc11a953e4770ea7b9 refs/remotes/origin/ci
+d79056fc27ff693ba0968d626574e421707845c0 refs/remotes/origin/context-renderer
+8e51c4a577cad8c7b9f5128d6db7a24588ea0bbc refs/remotes/origin/damage-tracking
+cad8f2f7d56db4c499bb26fc6b99f193a4fe5f1f refs/remotes/origin/drag-window
+4e1d7e92661bb1461b85fdbd4466905e01612dd2 refs/remotes/origin/egldevice
+8429402f9e285b94a95b2193b61f36d87f4e475f refs/remotes/origin/get-event-time
+761d7e7c4e6a4297f090b5f377862258981dc538 refs/remotes/origin/keyboard-layout-r2
+0a49ef0a00baa3ab520ddc452f0e3b1e099c5589 refs/remotes/origin/latest
+0ef149c8f2451fbc8e866834675a075cfc295b6c refs/remotes/origin/master
+70297aeb493541072545760c379dd170ba54acbb refs/remotes/origin/metal-guide
+1a965d22304cdf6ec31bbeabd17069a2b2729810 refs/remotes/origin/new-cursors-on-3.3-stable
+ed59b80cc7e52db318453934755b1b2c661191a2 refs/remotes/origin/preedit-ime
+14a18c8288c3c4f78e5013877340b74eb1ae50d5 refs/remotes/origin/touch
+3fb01bbebefe1cbce5192ae9ecef8e01859f41a5 refs/remotes/origin/wayland-tablet
+0a9038f47a74c088614872eb56e452a72dca08b6 refs/remotes/origin/x11-event-time
+c702cdd1c80c4e156dd5c985440da9d5f5f1cfeb refs/remotes/origin/x11-inhibit-screensaver
+f862285d18269320f3c875aebb5810e92b8619e0 refs/tags/3.0
+^5da6a903f9a533063a77400b0a8873d5c9753f99
+f11013299afeaf4b273573d0c67c8693588ba5b7 refs/tags/3.0.1
+^22e1aa6cfcb93779040d5b465dc077aa2f3a8245
+e30b82a93ef05a8928146f4e54ddf326cceb9e00 refs/tags/3.0.2
+^58aef89521f22b8aa389b43037b60b44e959471c
+610e293c65d8be495eb367559e17b7ffc2da941b refs/tags/3.0.3
+^fd4ea8bc254d76eabe05c5380f419400cb6936a0
+e4d3f860977baa314f022d7db5ed3420389ba372 refs/tags/3.0.4
+^eab31f228fd1872753c55fb438e3d88e51c0e9b2
+3c3f404f3491443bb71f387caa8fe803786cbce4 refs/tags/3.1
+^4188c263e31ec3d5da99a77d939ab56bc199fda6
+3e3e40e7b292cd30357ed238840f5bcf6006d955 refs/tags/3.1.1
+^29b40112c234c3021648ea42a5e74cc122ba08b4
+2d8790fe0214f536b52bb2005ca259c26a270978 refs/tags/3.1.2
+^30306e54705c3adae9fe082c816a3be71963485c
+99ab656443ffd83f6a6ee2027ecb8de5f6814cce refs/tags/3.2
+^f6ec835599123c3c970d34534ed7ddc69a1fc6af
+1b8e3fdeae93df6d211529140439c644fcc45f87 refs/tags/3.2.1
+^999f3556fdd80983b10051746264489f2cb1ef16
+b42da9f09d6732784223ba5f9a0bda6433366ba8 refs/tags/3.3
+^b0796109629931b6fa6e449c15a177845256a407
+fd22f0cb5accc7d94ca57bbdcd89a4d7e77b2a2e refs/tags/3.3.1
+^ecda86fa4f89ecdd364e5a1a22645030fe0ced6e
+76dfe13e4ee7c739156260053bc40c938679c754 refs/tags/3.3.2
+^0a49ef0a00baa3ab520ddc452f0e3b1e099c5589
