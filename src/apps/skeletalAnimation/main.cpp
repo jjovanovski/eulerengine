@@ -38,7 +38,7 @@ public:
 		_modelPipeline.Create(Vulkan, 1920, 1080);
 
 		// setup light
-		_dirLight.Direction = Vec3(1, 1, -1);
+		_dirLight.Direction = Vec3(1, 1, 1);
 		_dirLight.Color = Vec3(1, 1, 1);
 		_dirLight.Intensity = 0.5f;
 		_modelPipeline.DirLight = &_dirLight;
