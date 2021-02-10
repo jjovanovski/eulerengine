@@ -15,5 +15,7 @@ target_include_directories(SkeletalAnimation PUBLIC
 )
 
 set_target_properties( SkeletalAnimation PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-	"${PROJECT_SOURCE_DIR}/out"
+	"${CMAKE_SOURCE_DIR}/bin/SkeletalAnimation"
 )
+
+set_target_properties( SkeletalAnimation PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/SkeletalAnimation")

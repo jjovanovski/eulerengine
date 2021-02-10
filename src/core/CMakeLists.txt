@@ -23,7 +23,7 @@ target_link_libraries(EulerCore PUBLIC
 )
 
 set_target_properties( EulerCore PROPERTIES LIBRARY_OUTPUT_DIRECTORY
-	"${PROJECT_SOURCE_DIR}/out"
+	"${CMAKE_SOURCE_DIR}/bin"
 )
 
 target_compile_definitions(EulerCore PUBLIC -DEULER_EXPORTS)

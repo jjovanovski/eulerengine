@@ -15,5 +15,7 @@ target_include_directories(Sandbox PUBLIC
 )
 
 set_target_properties( Sandbox PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-	"${PROJECT_SOURCE_DIR}/out"
+	"${PROJECT_SOURCE_DIR}/bin/Sandbox"
 )
+
+set_target_properties( Sandbox PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/Sandbox")
