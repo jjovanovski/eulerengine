@@ -244,7 +244,7 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 	}
 }
 
-void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
+void ModelPipeline::Update(ViewProj viewProjMatrix)
 {
 	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 
@@ -285,12 +285,17 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 	{
 		Mat4 modelMatrix = Models[i]->Transform.GetModelMatrix();
 		modelMatrix.Transpose();
-		
+
 		size_t dataOffset = _modelMatrixAlignment * i;
 		memcpy(dataOffset + static_cast<char*>(modelsData), &modelMatrix, sizeof(modelMatrix));
 		memset(dataOffset + static_cast<char*>(modelsData) + sizeof(modelMatrix) + 1, 0, _modelMatrixAlignment - sizeof(modelMatrix));
 	}
 	_vulkan->UnmapMemory(_modelBuffers.Get(_vulkan->_currentImage)->Memory);
+}
+
+void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
+{
+	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 
 	for (int i = 0; i < Models.size(); i++)
 	{

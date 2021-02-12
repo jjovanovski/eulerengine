@@ -793,7 +793,7 @@ void Vulkan::CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* 
 	viewport.maxDepth = 1.0f;
 
 	VkRect2D scissor{};
-	scissor.extent = _extent;
+	scissor.extent = {(uint32_t)pipelineInfo->ViewportWidth, (uint32_t)pipelineInfo->ViewportHeight};
 	scissor.offset = { 0, 0 };
 
 	VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};

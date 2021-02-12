@@ -11,6 +11,7 @@
 #include "math/Math.h"
 #include "resources/TextureResource.h"
 #include "resources/ModelResource.h"
+#include "graphics/Shadows.h"
 
 #include "stb_image.h"
 
@@ -35,6 +36,10 @@ private:
 
 	Model _cubeModel;
 	Model _floorModel;
+
+	Graphics::Shadows _shadows;
+
+	float _rot = 0;
 
 public:
 	void OnCreate() override
@@ -83,19 +88,28 @@ public:
 		_floorModel.Transform.SetScale(10.0f, 0.1f, 10.0f);
 		_floorModel.Drawables.push_back(&_cubeMeshMat);
 		_modelPipeline.Models.push_back(&_floorModel);
+
+		// setup shadows
+		_shadows.Create(Vulkan, &_modelPipeline, 1920, 1080);
 	}
 
 	void OnUpdate() override
 	{
+		_rot += 0.001f;
+		_cubeModel.Transform.SetRotation(Quaternion::Euler(_rot, Vec3(-1, 1, -1).Normalized()));
 	}
 
 	void OnDraw() override
 	{
+		_modelPipeline.Update(_camera.GetViewProj());
+		//_shadows.RecordCommands();
 		_modelPipeline.RecordCommands(_camera.GetViewProj());
 	}
 
 	void OnDestroy() override
 	{
+		_shadows.Destroy();
+
 		_cubeModelRes.Unload();
 		_planeModelRes.Unload();
 

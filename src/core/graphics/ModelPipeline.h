@@ -32,16 +32,11 @@ namespace Euler
 			VkPipelineLayout _pipelineLayout;
 
 			VkDescriptorPool _descriptorPool;
-			DescriptorSetGroup _viewProjDescriptorSetGroup;
-			DescriptorSetGroup _modelDescriptorSetGroup;
-			DescriptorSetGroup _lightDescriptorSetGroup;
 
 			BufferGroup _viewProjBuffers;
 			BufferGroup _modelBuffers;
 			BufferGroup _directionalLightBuffers;
 			BufferGroup _ambientLightBuffers;
-
-			uint64_t _modelMatrixAlignment;
 
 		public:
 			std::vector<Model*> Models;
@@ -53,13 +48,21 @@ namespace Euler
 			VkDescriptorSetLayout MaterialLayout;
 			VkDescriptorSetLayout DirectionalLightLayout;
 
+			DescriptorSetGroup _viewProjDescriptorSetGroup;
+			DescriptorSetGroup _modelDescriptorSetGroup;
+			DescriptorSetGroup _lightDescriptorSetGroup;
+
+			uint64_t _modelMatrixAlignment;
+
 			void Create(Vulkan* vulkan, float viewportWidth, float viewportHeight);
 			void Destroy();
 
+			void Update(ViewProj viewProjMatrix);
 			void RecordCommands(ViewProj viewProjMatrix);
 
-		private:
 			std::vector<VertexAttributeInfo> GetVertexAttributes();
+
+		private:
 			void CreateDescriptorSetLayouts();
 			void CreateDescriptorSets();
 
