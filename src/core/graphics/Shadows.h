@@ -6,6 +6,8 @@
 #include "Vertex.h"
 #include "ModelPipeline.h"
 
+#include <vector>
+
 namespace Euler
 {
 	namespace Graphics
@@ -22,9 +24,24 @@ namespace Euler
 
 			ModelPipeline* _modelPipeline;
 
+			VkDescriptorSetLayout ViewProjLayout;
+			VkDescriptorSetLayout ModelLayout;
+
+			float _viewportWidth;
+			float _viewportHeight;
+
+			std::vector<VkImage> _depthImages;
+			std::vector<VkDeviceMemory> _depthImageMemories;
+			std::vector<VkImageView> _depthImageViews;
+
+			std::vector<VkFramebuffer> _framebuffers;
+
 		public:
 			void Create(Vulkan* vulkan, ModelPipeline* modelPipeline, float viewportWidth, float viewportHeight);
 			void Destroy();
+
+			void CreateFramebuffers();
+			void CreateDescriptorSetLayouts();
 
 			void RecordCommands();
 		};

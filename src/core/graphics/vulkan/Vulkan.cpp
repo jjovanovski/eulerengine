@@ -1438,21 +1438,6 @@ void Vulkan::BeginDrawFrame()
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
 	vkBeginCommandBuffer(_commandBuffers[_currentImage], &beginInfo);
-	
-		VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-		VkClearValue clearDepth = { 1.0f, 0.0f, 0.0f, 0.0f };
-		VkClearValue clearValues[] = { clearColor, clearDepth };
-
-		VkRenderPassBeginInfo renderPassBeginInfo{};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.renderPass = _renderPass;
-		renderPassBeginInfo.framebuffer = _swapchainFramebuffers[_currentImage];
-		renderPassBeginInfo.renderArea.extent = _extent;
-		renderPassBeginInfo.renderArea.offset = { 0, 0 };
-		renderPassBeginInfo.clearValueCount = 2;
-		renderPassBeginInfo.pClearValues = clearValues;
-
-		vkCmdBeginRenderPass(_commandBuffers[_currentImage], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 VkCommandBuffer* Vulkan::GetMainCommandBuffer()
@@ -1463,7 +1448,6 @@ VkCommandBuffer* Vulkan::GetMainCommandBuffer()
 void Vulkan::EndDrawFrame()
 {
 	// end recording the main command buffer
-	vkCmdEndRenderPass(_commandBuffers[_currentImage]);
 	vkEndCommandBuffer(_commandBuffers[_currentImage]);
 
 	if (_imageFences[_currentImage] != VK_NULL_HANDLE)

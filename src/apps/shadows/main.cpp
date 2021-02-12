@@ -102,7 +102,7 @@ public:
 	void OnDraw() override
 	{
 		_modelPipeline.Update(_camera.GetViewProj());
-		//_shadows.RecordCommands();
+		_shadows.RecordCommands();
 		_modelPipeline.RecordCommands(_camera.GetViewProj());
 	}
 

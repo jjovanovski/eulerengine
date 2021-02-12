@@ -246,38 +246,14 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 
 void ModelPipeline::Update(ViewProj viewProjMatrix)
 {
-	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-
 	// update viewproj
 	_vulkan->CopyToMemory(_viewProjBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(viewProjMatrix), &viewProjMatrix);
-
-	vkCmdBindDescriptorSets(
-		*_vulkan->GetMainCommandBuffer(),
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		_pipelineLayout,
-		0,
-		1,
-		&_viewProjDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
-		0,
-		nullptr
-	);
 
 	// update directional light
 	_vulkan->CopyToMemory(_directionalLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(DirectionalLight), DirLight);
 
 	// update ambient light
 	_vulkan->CopyToMemory(_ambientLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(AmbientLight), &AmbLight);
-
-	vkCmdBindDescriptorSets(
-		*_vulkan->GetMainCommandBuffer(),
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		_pipelineLayout,
-		3,
-		1,
-		&_lightDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
-		0,
-		nullptr
-	);
 
 	void* modelsData;
 	_vulkan->MapMemory(_modelBuffers.Get(_vulkan->_currentImage)->Memory, 0, Models.size() * _modelMatrixAlignment, &modelsData);
@@ -295,7 +271,44 @@ void ModelPipeline::Update(ViewProj viewProjMatrix)
 
 void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 {
+	VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	VkClearValue clearDepth = { 1.0f, 0.0f, 0.0f, 0.0f };
+	VkClearValue clearValues[] = { clearColor, clearDepth };
+
+	VkRenderPassBeginInfo renderPassBeginInfo{};
+	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassBeginInfo.renderPass = _vulkan->_renderPass;
+	renderPassBeginInfo.framebuffer = _vulkan->_swapchainFramebuffers[_vulkan->_currentImage];
+	renderPassBeginInfo.renderArea.extent = _vulkan->_extent;
+	renderPassBeginInfo.renderArea.offset = { 0, 0 };
+	renderPassBeginInfo.clearValueCount = 2;
+	renderPassBeginInfo.pClearValues = clearValues;
+
+	vkCmdBeginRenderPass(*_vulkan->GetMainCommandBuffer(), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
 	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+
+	vkCmdBindDescriptorSets(
+		*_vulkan->GetMainCommandBuffer(),
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		_pipelineLayout,
+		0,
+		1,
+		&_viewProjDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+		0,
+		nullptr
+	);
+
+	vkCmdBindDescriptorSets(
+		*_vulkan->GetMainCommandBuffer(),
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		_pipelineLayout,
+		3,
+		1,
+		&_lightDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+		0,
+		nullptr
+	);
 
 	for (int i = 0; i < Models.size(); i++)
 	{
@@ -336,4 +349,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 			);
 		}
 	}
+
+
+	vkCmdEndRenderPass(*_vulkan->GetMainCommandBuffer());
 }
