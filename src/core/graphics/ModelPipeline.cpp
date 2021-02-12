@@ -118,7 +118,7 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	_vulkan->CreateDescriptorSetLayout(materialBindings, &MaterialLayout);
 
 	/* === DirectionalLight DESCRIPTOR SET LAYOUT === */
-	std::vector<VkDescriptorSetLayoutBinding> directionalLightBindings(2);
+	std::vector<VkDescriptorSetLayoutBinding> directionalLightBindings(3);
 	directionalLightBindings[0].binding = 0;
 	directionalLightBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	directionalLightBindings[0].descriptorCount = 1;
@@ -129,6 +129,11 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	directionalLightBindings[1].descriptorCount = 1;
 	directionalLightBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
+	directionalLightBindings[2].binding = 2;
+	directionalLightBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	directionalLightBindings[2].descriptorCount = 1;
+	directionalLightBindings[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
 	_vulkan->CreateDescriptorSetLayout(directionalLightBindings, &DirectionalLightLayout);
 }
 
@@ -138,10 +143,11 @@ void ModelPipeline::CreateDescriptorSets()
 
 	/* === CREATE DESCRIPTOR SET POOL === */
 
-	std::vector<VkDescriptorPoolSize> poolSizes(3);
+	std::vector<VkDescriptorPoolSize> poolSizes(4);
 	poolSizes[0] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// ViewProj
 	poolSizes[1] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };	// Model
 	poolSizes[2] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// DirectionalLight
+	poolSizes[3] = { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageCount };	// shadows
 
 	_vulkan->CreateDescriptorPool(poolSizes, poolSizes.size() * imageCount, &_descriptorPool);
 

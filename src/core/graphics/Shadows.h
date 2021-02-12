@@ -36,12 +36,16 @@ namespace Euler
 
 			std::vector<VkFramebuffer> _framebuffers;
 
+			VkSampler _sampler;
+
 		public:
 			void Create(Vulkan* vulkan, ModelPipeline* modelPipeline, float viewportWidth, float viewportHeight);
 			void Destroy();
 
 			void CreateFramebuffers();
 			void CreateDescriptorSetLayouts();
+
+			void UpdateDescriptorSets();
 
 			void RecordCommands();
 		};

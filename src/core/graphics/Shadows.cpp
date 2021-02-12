@@ -46,10 +46,12 @@ void Shadows::Create(Vulkan* vulkan, ModelPipeline* modelPipeline, float viewpor
 	_vulkan->CreatePipeline(&pipelineInfo, &_pipelineLayout, &_pipeline);
 
 	CreateFramebuffers();
+	UpdateDescriptorSets();
 }
 
 void Shadows::Destroy()
 {
+	_vulkan->DestroySampler(_sampler);
 	_vulkan->DestroyPipeline(_pipelineLayout, _pipeline);
 	vkDestroyRenderPass(_vulkan->_device, _shadowRenderPass, nullptr);
 }
@@ -133,6 +135,22 @@ void Shadows::CreateDescriptorSetLayouts()
 	modelBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(modelBindings, &ModelLayout);
+}
+
+void Shadows::UpdateDescriptorSets()
+{
+	_vulkan->CreateSampler(&_sampler);
+
+	for (int i = 0; i < _vulkan->GetSwapchainImageCount(); i++)
+	{
+		_modelPipeline->_lightDescriptorSetGroup.UpdateSampler(
+			_vulkan,
+			i,
+			_depthImageViews[i],
+			_sampler,
+			2
+		);
+	}
 }
 
 void Shadows::RecordCommands()
