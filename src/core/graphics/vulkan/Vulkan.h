@@ -143,6 +143,8 @@ namespace Euler
             void CreateRenderPass();
             void DestroyRenderPass();
 
+            void CreateShadowRenderPass(VkRenderPass* renderPass);
+
             void CreateFramebuffers();
             void DestroyFramebuffers();
 
