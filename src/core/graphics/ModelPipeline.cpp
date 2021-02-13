@@ -35,7 +35,7 @@ void ModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float viewportHe
 	pipelineInfo.ViewportHeight = viewportHeight;
 
 	CreateDescriptorSetLayouts();
-	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, MaterialLayout, DirectionalLightLayout };
+	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, MaterialLayout, DirectionalLightLayout, LightViewProjLayout };
 	pipelineInfo.DescriptorSetLayouts = layouts;
 
 	pipelineInfo.RenderPass = _vulkan->_renderPass;	// TODO: This should be a parameter
@@ -135,6 +135,16 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	directionalLightBindings[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(directionalLightBindings, &DirectionalLightLayout);
+
+	/* === LightViewProj DESCRIPTOR SET LAYOUT === */
+
+	std::vector<VkDescriptorSetLayoutBinding> lightViewProjBindings(1);
+	lightViewProjBindings[0].binding = 0;
+	lightViewProjBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	lightViewProjBindings[0].descriptorCount = 1;
+	lightViewProjBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	_vulkan->CreateDescriptorSetLayout(lightViewProjBindings, &LightViewProjLayout);
 }
 
 void ModelPipeline::CreateDescriptorSets()
@@ -143,11 +153,12 @@ void ModelPipeline::CreateDescriptorSets()
 
 	/* === CREATE DESCRIPTOR SET POOL === */
 
-	std::vector<VkDescriptorPoolSize> poolSizes(4);
+	std::vector<VkDescriptorPoolSize> poolSizes(5);
 	poolSizes[0] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount*2 };			// ViewProj
 	poolSizes[1] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };	// Model
 	poolSizes[2] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// DirectionalLight
 	poolSizes[3] = { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageCount };	// shadows
+	poolSizes[4] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// LightViewProj
 
 	_vulkan->CreateDescriptorPool(poolSizes, poolSizes.size() * imageCount, &_descriptorPool);
 
@@ -156,6 +167,7 @@ void ModelPipeline::CreateDescriptorSets()
 	CreateViewProjDescriptorSets();
 	CreateModelDescriptorSets();
 	CreateDirectionalLightDescriptorSets();
+	CreateLightViewProjDescriptorSets();
 }
 
 void ModelPipeline::CreateViewProjDescriptorSets()
@@ -250,7 +262,33 @@ void ModelPipeline::CreateDirectionalLightDescriptorSets()
 	}
 }
 
-void ModelPipeline::Update(ViewProj viewProjMatrix)
+void ModelPipeline::CreateLightViewProjDescriptorSets()
+{
+	uint32_t imageCount = _vulkan->GetSwapchainImageCount();
+
+	/* === CREATE LightViewProj BUFFERS === */
+
+	_lightViewProjBuffers.Create(
+		_vulkan,
+		imageCount,
+		sizeof(ViewProj),
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
+
+	/* === ALLOCATE DESCRIPTOR SETS === */
+
+	_lightViewProjDescriptorSetGroup.Allocate(_vulkan, imageCount, LightViewProjLayout, _descriptorPool);
+
+	/* === WRITE DESCRIPTOR SETS === */
+
+	for (int i = 0; i < imageCount; i++)
+	{
+		_lightViewProjDescriptorSetGroup.UpdateUniformBuffer(_vulkan, i, _lightViewProjBuffers.Get(i)->Buffer, 0);
+	}
+}
+
+void ModelPipeline::Update(Camera* camera, ViewProj viewProjMatrix)
 {
 	// update viewproj
 	_vulkan->CopyToMemory(_viewProjBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(viewProjMatrix), &viewProjMatrix);
@@ -273,6 +311,21 @@ void ModelPipeline::Update(ViewProj viewProjMatrix)
 		memset(dataOffset + static_cast<char*>(modelsData) + sizeof(modelMatrix) + 1, 0, _modelMatrixAlignment - sizeof(modelMatrix));
 	}
 	_vulkan->UnmapMemory(_modelBuffers.Get(_vulkan->_currentImage)->Memory);
+
+	// update light viewproj
+	auto campos = camera->Transform.GetPosition();
+	Mat4 view = Math::Matrices::Translate(campos.x, campos.y, campos.z);
+	view = Math::Matrices::RotateX(Math::Rad(-90.0f));
+	view.Transpose();
+
+	Mat4 proj = Math::Matrices::Orthographic(1920, 1080, 3.0f);
+	proj.Transpose();
+
+	ViewProj camViewProj;
+	camViewProj.View = view;
+	camViewProj.Projection = proj;
+
+	_vulkan->CopyToMemory(_lightViewProjBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(camViewProj), &camViewProj);
 }
 
 void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
@@ -312,6 +365,17 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 		3,
 		1,
 		&_lightDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+		0,
+		nullptr
+	);
+
+	vkCmdBindDescriptorSets(
+		*_vulkan->GetMainCommandBuffer(),
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		_pipelineLayout,
+		4,
+		1,
+		&_lightViewProjDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
 		0,
 		nullptr
 	);

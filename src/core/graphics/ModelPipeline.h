@@ -9,6 +9,8 @@
 #include "AmbientLight.h"
 #include "BufferGroup.h"
 #include "DescriptorSetGroup.h"
+#include "Camera.h"
+#include "../math/Math.h"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -31,12 +33,6 @@ namespace Euler
 			VkPipeline _pipeline;
 			VkPipelineLayout _pipelineLayout;
 
-
-			BufferGroup _viewProjBuffers;
-			BufferGroup _modelBuffers;
-			BufferGroup _directionalLightBuffers;
-			BufferGroup _ambientLightBuffers;
-
 		public:
 			std::vector<Model*> Models;
 			DirectionalLight* DirLight;
@@ -44,21 +40,29 @@ namespace Euler
 
 			VkDescriptorPool _descriptorPool;
 
+			BufferGroup _viewProjBuffers;
+			BufferGroup _modelBuffers;
+			BufferGroup _directionalLightBuffers;
+			BufferGroup _ambientLightBuffers;
+			BufferGroup _lightViewProjBuffers;
+
 			VkDescriptorSetLayout ViewProjLayout;
 			VkDescriptorSetLayout ModelLayout;
 			VkDescriptorSetLayout MaterialLayout;
 			VkDescriptorSetLayout DirectionalLightLayout;
+			VkDescriptorSetLayout LightViewProjLayout;
 
 			DescriptorSetGroup _viewProjDescriptorSetGroup;
 			DescriptorSetGroup _modelDescriptorSetGroup;
 			DescriptorSetGroup _lightDescriptorSetGroup;
+			DescriptorSetGroup _lightViewProjDescriptorSetGroup;
 
 			uint64_t _modelMatrixAlignment;
 
 			void Create(Vulkan* vulkan, float viewportWidth, float viewportHeight);
 			void Destroy();
 
-			void Update(ViewProj viewProjMatrix);
+			void Update(Camera* camera, ViewProj viewProjMatrix);
 			void RecordCommands(ViewProj viewProjMatrix);
 
 			std::vector<VertexAttributeInfo> GetVertexAttributes();
@@ -70,6 +74,7 @@ namespace Euler
 			void CreateViewProjDescriptorSets();
 			void CreateModelDescriptorSets();
 			void CreateDirectionalLightDescriptorSets();
+			void CreateLightViewProjDescriptorSets();
 		};
 	}
 }

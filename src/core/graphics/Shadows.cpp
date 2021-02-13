@@ -142,25 +142,18 @@ void Shadows::UpdateDescriptorSets()
 {
 	uint32_t imageCount = _vulkan->GetSwapchainImageCount();
 
-	/* === CREATE ViewProj BUFFERS === */
-
-	_viewProjBuffers.Create(
-		_vulkan,
-		imageCount,
-		sizeof(ViewProj),
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	);
-
-	/* === ALLOCATE DESCRIPTOR SETS === */
-
-	_viewProjDescriptorSetGroup.Allocate(_vulkan, imageCount, ViewProjLayout, _modelPipeline->_descriptorPool);
-
 	/* === WRITE DESCRIPTOR SETS === */
+	
+	_viewProjDescriptorSetGroup.Allocate(_vulkan, imageCount, ViewProjLayout, _modelPipeline->_descriptorPool);
 
 	for (int i = 0; i < imageCount; i++)
 	{
-		_viewProjDescriptorSetGroup.UpdateUniformBuffer(_vulkan, i, _viewProjBuffers.Get(i)->Buffer, 0);
+		_viewProjDescriptorSetGroup.UpdateUniformBuffer(
+			_vulkan, 
+			i,
+			_modelPipeline->_lightViewProjBuffers.Get(i)->Buffer,
+			0
+		);
 	}
 
 	/* === UPDATE SHADOW MAP === */
@@ -181,22 +174,6 @@ void Shadows::UpdateDescriptorSets()
 
 void Shadows::RecordCommands(Camera camera)
 {
-	// update viewproj
-	auto campos = camera.Transform.GetPosition();
-	Mat4 view = Math::Matrices::Translate(campos.x, campos.y, campos.z);
-	view = Math::Matrices::RotateX(Math::Rad(-90.0f));
-	view.Transpose();
-	
-	Mat4 proj = Math::Matrices::Orthographic(1920, 1080, 4.0f);
-	proj.Transpose();
-
-	ViewProj viewProj;
-	viewProj.View = view;
-	viewProj.Projection = proj;
-	
-	_vulkan->CopyToMemory(_viewProjBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(viewProj), &viewProj);
-
-
 	VkClearValue clearDepth = { 1.0f, 0.0f, 0.0f, 0.0f };
 
 	VkRenderPassBeginInfo renderPassBeginInfo{};
