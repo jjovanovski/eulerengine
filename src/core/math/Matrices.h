@@ -24,6 +24,7 @@ namespace Euler
 			static Mat4 RotateZ(float deg);
 
 			static Mat4 Perspective(uint32_t width, uint32_t height, float fieldOfView, float nearZ, float farZ);
+			static Mat4 Orthographic(uint32_t width, uint32_t height, float size);
 		};
 	}
 }

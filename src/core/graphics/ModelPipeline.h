@@ -31,7 +31,6 @@ namespace Euler
 			VkPipeline _pipeline;
 			VkPipelineLayout _pipelineLayout;
 
-			VkDescriptorPool _descriptorPool;
 
 			BufferGroup _viewProjBuffers;
 			BufferGroup _modelBuffers;
@@ -42,6 +41,8 @@ namespace Euler
 			std::vector<Model*> Models;
 			DirectionalLight* DirLight;
 			AmbientLight AmbLight;
+
+			VkDescriptorPool _descriptorPool;
 
 			VkDescriptorSetLayout ViewProjLayout;
 			VkDescriptorSetLayout ModelLayout;

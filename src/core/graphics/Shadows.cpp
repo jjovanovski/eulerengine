@@ -1,6 +1,7 @@
 #include "Shadows.h"
 
 #include "../io/Utils.h"
+#include "../math/Math.h"
 
 using namespace Euler::Graphics;
 
@@ -139,6 +140,31 @@ void Shadows::CreateDescriptorSetLayouts()
 
 void Shadows::UpdateDescriptorSets()
 {
+	uint32_t imageCount = _vulkan->GetSwapchainImageCount();
+
+	/* === CREATE ViewProj BUFFERS === */
+
+	_viewProjBuffers.Create(
+		_vulkan,
+		imageCount,
+		sizeof(ViewProj),
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
+
+	/* === ALLOCATE DESCRIPTOR SETS === */
+
+	_viewProjDescriptorSetGroup.Allocate(_vulkan, imageCount, ViewProjLayout, _modelPipeline->_descriptorPool);
+
+	/* === WRITE DESCRIPTOR SETS === */
+
+	for (int i = 0; i < imageCount; i++)
+	{
+		_viewProjDescriptorSetGroup.UpdateUniformBuffer(_vulkan, i, _viewProjBuffers.Get(i)->Buffer, 0);
+	}
+
+	/* === UPDATE SHADOW MAP === */
+
 	_vulkan->CreateSampler(&_sampler);
 
 	for (int i = 0; i < _vulkan->GetSwapchainImageCount(); i++)
@@ -153,8 +179,24 @@ void Shadows::UpdateDescriptorSets()
 	}
 }
 
-void Shadows::RecordCommands()
+void Shadows::RecordCommands(Camera camera)
 {
+	// update viewproj
+	auto campos = camera.Transform.GetPosition();
+	Mat4 view = Math::Matrices::Translate(campos.x, campos.y, campos.z);
+	view = Math::Matrices::RotateX(Math::Rad(-90.0f));
+	view.Transpose();
+	
+	Mat4 proj = Math::Matrices::Orthographic(1920, 1080, 4.0f);
+	proj.Transpose();
+
+	ViewProj viewProj;
+	viewProj.View = view;
+	viewProj.Projection = proj;
+	
+	_vulkan->CopyToMemory(_viewProjBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(viewProj), &viewProj);
+
+
 	VkClearValue clearDepth = { 1.0f, 0.0f, 0.0f, 0.0f };
 
 	VkRenderPassBeginInfo renderPassBeginInfo{};
@@ -176,7 +218,7 @@ void Shadows::RecordCommands()
 		_pipelineLayout,
 		0,
 		1,
-		&_modelPipeline->_viewProjDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+		&_viewProjDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
 		0,
 		nullptr
 	);

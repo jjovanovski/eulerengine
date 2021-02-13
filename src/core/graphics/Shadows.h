@@ -5,6 +5,7 @@
 #include "Common.h"
 #include "Vertex.h"
 #include "ModelPipeline.h"
+#include "Camera.h"
 
 #include <vector>
 
@@ -38,6 +39,9 @@ namespace Euler
 
 			VkSampler _sampler;
 
+			BufferGroup _viewProjBuffers;
+			DescriptorSetGroup _viewProjDescriptorSetGroup;
+
 		public:
 			void Create(Vulkan* vulkan, ModelPipeline* modelPipeline, float viewportWidth, float viewportHeight);
 			void Destroy();
@@ -47,7 +51,7 @@ namespace Euler
 
 			void UpdateDescriptorSets();
 
-			void RecordCommands();
+			void RecordCommands(Camera camera);
 		};
 	}
 }

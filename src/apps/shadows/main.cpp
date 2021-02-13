@@ -35,6 +35,7 @@ private:
 	Graphics::MeshMaterial _cubeMeshMat;
 
 	Model _cubeModel;
+	Model _nearCubeModel;
 	Model _floorModel;
 
 	Graphics::Shadows _shadows;
@@ -83,6 +84,12 @@ public:
 		_cubeModel.Transform.SetRotation(Quaternion::Euler(Math::Rad(45.0f), Vec3(0, 1, 1)));
 		_cubeModel.Drawables.push_back(&_cubeMeshMat);
 		_modelPipeline.Models.push_back(&_cubeModel);
+
+		_nearCubeModel.Transform.SetPosition(Vec3(-0.5f, -0.5f, 0.5f));
+		_nearCubeModel.Transform.SetScale(0.1f);
+		_nearCubeModel.Transform.SetRotation(Quaternion::Euler(Math::Rad(45.0f), Vec3(0, 1, 1)));
+		_nearCubeModel.Drawables.push_back(&_cubeMeshMat);
+		_modelPipeline.Models.push_back(&_nearCubeModel);
 		
 		_floorModel.Transform.SetPosition(Vec3(0, -1, 0));
 		_floorModel.Transform.SetScale(10.0f, 0.1f, 10.0f);
@@ -97,12 +104,13 @@ public:
 	{
 		_rot += 0.001f;
 		_cubeModel.Transform.SetRotation(Quaternion::Euler(_rot, Vec3(-1, 1, -1).Normalized()));
+		_nearCubeModel.Transform.SetRotation(Quaternion::Euler(_rot/2.0f, Vec3(1, -1, 1).Normalized()));
 	}
 
 	void OnDraw() override
 	{
 		_modelPipeline.Update(_camera.GetViewProj());
-		_shadows.RecordCommands();
+		_shadows.RecordCommands(_camera);
 		_modelPipeline.RecordCommands(_camera.GetViewProj());
 	}
 

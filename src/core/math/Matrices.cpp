@@ -131,3 +131,27 @@ Mat4 Matrices::Perspective(uint32_t width, uint32_t height, float fieldOfView, f
 
 	return mat;
 }
+
+Mat4 Matrices::Orthographic(uint32_t width, uint32_t height, float size)
+{
+	float aspectRatio = (float)width / height;
+	float top = size;
+	float bottom = -size;
+	float left = -size * aspectRatio;
+	float right = size * aspectRatio;
+	float far = 20.0f;
+	float near = 0.01f;
+
+	Mat4 mat;
+
+	mat.Set(0, 0, 2.0f / (right - left));
+	mat.Set(1, 1, 2.0f / (top - bottom));
+	mat.Set(2, 2, 1.0f / (far - near));
+	mat.Set(3, 3, 1.0f);
+
+	mat.Set(0, 3, -(2.0f * left) / (right - left) - 1.0f);
+	mat.Set(1, 3, -(2.0f * bottom) / (top - bottom) - 1.0f);
+	mat.Set(2, 3, -near / (far - near));
+
+	return mat;
+}
