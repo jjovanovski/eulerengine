@@ -37,6 +37,9 @@ public:
 	std::vector<VkDescriptorSetLayout> DescriptorSetLayouts;
 
 	VkRenderPass RenderPass;
+
+	VkCullModeFlags CullMode = VK_CULL_MODE_BACK_BIT;
+	VkFrontFace FrontFace = VK_FRONT_FACE_CLOCKWISE;
 };
 
 class EULER_API ViewProj

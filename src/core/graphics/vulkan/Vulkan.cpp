@@ -810,8 +810,8 @@ void Vulkan::CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* 
 	rasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
 	rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
 	rasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizationStateCreateInfo.cullMode = pipelineInfo->CullMode;
+	rasterizationStateCreateInfo.frontFace = pipelineInfo->FrontFace;
 	rasterizationStateCreateInfo.lineWidth = 1.0f;
 
 	/* === MULTISAMPLING === */

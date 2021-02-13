@@ -91,7 +91,7 @@ public:
 		_nearCubeModel.Drawables.push_back(&_cubeMeshMat);
 		_modelPipeline.Models.push_back(&_nearCubeModel);
 		
-		_floorModel.Transform.SetPosition(Vec3(0, -0.8f, 0));
+		_floorModel.Transform.SetPosition(Vec3(0, -0.85f, 0));
 		_floorModel.Transform.SetScale(1.0f, 0.1f, 1.0f);
 		_floorModel.Drawables.push_back(&_cubeMeshMat);
 		_modelPipeline.Models.push_back(&_floorModel);

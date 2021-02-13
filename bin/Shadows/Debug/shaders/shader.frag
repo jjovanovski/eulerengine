@@ -4,6 +4,7 @@
 layout(location = 0) in vec3 fragNormal;
 layout(location = 1) in vec2 fragUv;
 layout(location = 2) in vec3 fragPos;
+layout(location = 3) in vec3 lightFragPos;
 
 layout(location = 0) out vec4 outColor;
 
@@ -26,6 +27,20 @@ layout(binding = 1, set = 3) uniform AmbientLight {
 
 layout(binding = 2, set = 3) uniform sampler2D shadowMap;
 
+float ShadowCalc() {
+	vec3 tmp = lightFragPos;
+	tmp.x = tmp.x * 0.5 + 0.5;
+	tmp.y = -(tmp.y * 0.5 + 0.5);
+	
+	float closestDepth = texture(shadowMap, tmp.xy).r;
+	
+	float currentDepth = tmp.z;
+	
+	float bias = 0.005;
+	float shadow = currentDepth - bias < closestDepth ? 1.0 : 0.0;
+	
+	return shadow;
+}
 
 void main() {
 	vec3 ambLight = ambientLight.color * ambientLight.intensity;
@@ -38,5 +53,5 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = directionalLight.color * spec * 0.5; 
 	
-    outColor = vec4(texture(tex, fragUv).xyz * (dirLight + ambLight), 1) + texture(shadowMap, fragUv)*0.0001;
+    outColor = vec4(texture(tex, fragUv).xyz * (dirLight * (ShadowCalc()) + ambLight), 1);
 }
