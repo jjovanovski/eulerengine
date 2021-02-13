@@ -24,6 +24,8 @@ layout(binding = 1, set = 3) uniform AmbientLight {
 	float intensity;
 } ambientLight;
 
+layout(binding = 2, set = 3) uniform sampler2D shadowMap;
+
 
 void main() {
 	vec3 ambLight = ambientLight.color * ambientLight.intensity;
@@ -36,5 +38,5 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = directionalLight.color * spec * 0.5; 
 	
-    outColor = vec4(texture(tex, fragUv).xyz * (dirLight + ambLight), 1);
+    outColor = vec4(texture(tex, fragUv).xyz * (dirLight + ambLight), 1) + texture(shadowMap, fragUv)*0.0001;
 }
