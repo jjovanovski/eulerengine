@@ -91,7 +91,8 @@ public:
 
 	void OnDraw() override
 	{
-		_animator.Update();
+		_animator.Update(); 
+		//_modelPipeline.Update(&_camera, _camera.GetViewProj());
 		_modelPipeline.RecordCommands(_camera.GetViewProj(), _animator.BoneMatrices);
 	}
 

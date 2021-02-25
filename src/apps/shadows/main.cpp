@@ -105,6 +105,8 @@ public:
 		_rot += 0.001f;
 		_cubeModel.Transform.SetRotation(Quaternion::Euler(_rot, Vec3(-1, 1, -1).Normalized()));
 		_nearCubeModel.Transform.SetRotation(Quaternion::Euler(_rot/2.0f, Vec3(1, -1, 1).Normalized()));
+
+		_dirLight.Direction.x = Math::Sin(_rot/6.0f);
 	}
 
 	void OnDraw() override

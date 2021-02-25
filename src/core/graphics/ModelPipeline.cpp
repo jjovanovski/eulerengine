@@ -313,9 +313,30 @@ void ModelPipeline::Update(Camera* camera, ViewProj viewProjMatrix)
 	_vulkan->UnmapMemory(_modelBuffers.Get(_vulkan->_currentImage)->Memory);
 
 	// update light viewproj
+	Vec3 X = Vec3(0, 1, 0).Cross(DirLight->Direction).Normalized();
+	Vec3 Y = DirLight->Direction.Cross(X).Normalized();
+
+	Mat4 rotationMatrix;
+
+	rotationMatrix.Set(0, 0, X.x);
+	rotationMatrix.Set(1, 0, X.y);
+	rotationMatrix.Set(2, 0, X.z);
+
+	rotationMatrix.Set(0, 1, Y.x);
+	rotationMatrix.Set(1, 1, Y.y);
+	rotationMatrix.Set(2, 1, Y.z);
+
+	rotationMatrix.Set(0, 2, DirLight->Direction.x);
+	rotationMatrix.Set(1, 2, DirLight->Direction.y);
+	rotationMatrix.Set(2, 2, DirLight->Direction.z);
+
+	rotationMatrix.Set(3, 3, 1);
+
+	Quaternion camrot = Quaternion::FromMatrix(rotationMatrix);
+
 	auto campos = camera->Transform.GetPosition();
 	Mat4 view = Math::Matrices::Translate(campos.x, campos.y, campos.z);
-	view = Math::Matrices::RotateX(Math::Rad(-90.0f));
+	view = rotationMatrix.Multiply(view);
 	view.Transpose();
 
 	Mat4 proj = Math::Matrices::Orthographic(1920, 1080, 3.0f);

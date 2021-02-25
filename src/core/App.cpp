@@ -114,7 +114,7 @@ void App::Run()
 
 	Input::Dispose();
 
-	OnDestroy();
+	//OnDestroy();
 
 	glfwDestroyWindow(Window);
 	glfwTerminate();

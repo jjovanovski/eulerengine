@@ -88,6 +88,7 @@ public:
 
 	void OnDraw() override
 	{
+		_modelPipeline.Update(&_camera, _camera.GetViewProj());
 		_modelPipeline.RecordCommands(_camera.GetViewProj());
 	}
 
