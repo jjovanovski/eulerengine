@@ -10,6 +10,8 @@
 #include "math/Math.h"
 #include "resources/TextureResource.h"
 #include "resources/ModelResource.h"
+#include "input/Input.h"
+#include "math/Math.h"
 
 #include "stb_image.h"
 
@@ -27,6 +29,13 @@ private:
 	Mesh _mesh;
 	Graphics::MeshMaterial _meshMaterial;
 	Model _model;
+
+	float _cameraYaw = 0.0f;
+	float _cameraPitch = 0.0f;
+	float _lastMouseX = 0;
+	float _lastMouseY = 0;
+	bool _firstMouse = true;
+	Quaternion _originalCameraRotation;
 	
 
 public:
@@ -46,6 +55,7 @@ public:
 		_camera.Init(1920, 1080, 60.0f, 0.01f, 100.0f);
 		_camera.Transform.SetPosition(Vec3(0, 0, 2));
 		_camera.Transform.SetRotation(Quaternion::Euler(Math::Rad(180.0f), Vec3(0, 1, 0)));
+		_originalCameraRotation = _camera.Transform.GetRotation();
 
 		// load texture
 		TextureResource textureResource;
@@ -83,7 +93,51 @@ public:
 
 	void OnUpdate() override
 	{
+		float mouseX = Input::GetMouseX();
+		float mouseY = Input::GetMouseY();
+		
+		if (_firstMouse && mouseX != 0 && mouseY != 0)
+		{
+			_lastMouseX = mouseX;
+			_lastMouseY = mouseY;
+			_firstMouse = false;
+		}
 
+		float xoffset = mouseX - _lastMouseX;
+		float yoffset = _lastMouseY - mouseY;
+		_lastMouseX = mouseX;
+		_lastMouseY = mouseY;
+
+		float mouseSensitivity = 0.2f;
+		xoffset *= mouseSensitivity;
+		yoffset *= mouseSensitivity;
+
+		_cameraYaw -= xoffset;
+		_cameraPitch += yoffset;
+
+		_camera.Transform.SetRotation(Quaternion::Euler(Math::Rad(_cameraPitch), Vec3(1, 0, 0)) * Quaternion::Euler(Math::Rad(_cameraYaw), Vec3(0, 1, 0)) * _originalCameraRotation);
+		
+		float movementSpeed = 0.001f;
+
+		if (Input::GetKeyDown(Key::A))
+		{
+			_camera.Transform.SetPosition(_camera.Transform.GetPosition() - movementSpeed * _camera.Transform.Right());
+		}
+
+		if (Input::GetKeyDown(Key::D))
+		{
+			_camera.Transform.SetPosition(_camera.Transform.GetPosition() + movementSpeed * _camera.Transform.Right());
+		}
+
+		if (Input::GetKeyDown(Key::W))
+		{
+			_camera.Transform.SetPosition(_camera.Transform.GetPosition() + movementSpeed * _camera.Transform.Forward());
+		}
+
+		if (Input::GetKeyDown(Key::S))
+		{
+			_camera.Transform.SetPosition(_camera.Transform.GetPosition() - movementSpeed * _camera.Transform.Forward());
+		}
 	}
 
 	void OnDraw() override

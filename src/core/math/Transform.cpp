@@ -74,41 +74,49 @@ void Transform::CheckModelMatrix()
 	Mat4 rotate = _rotation.GetMatrix();
 
 	_modelMatrix = translate.Multiply(scale.Multiply(rotate));
+	_modelMatrix.Transpose();
 
-	_forward = _modelMatrix.Multiply(Vec3(0, 0, 1));
-	_right = _modelMatrix.Multiply(Vec3(1, 0, 0));
-	_top = _modelMatrix.Multiply(Vec3(0, 1, 0));
+	_forward = _modelMatrix.Multiply(Vec3(0, 0, 1)).Normalized();
+	_right = _modelMatrix.Multiply(Vec3(1, 0, 0)).Normalized();
+	_top = _modelMatrix.Multiply(Vec3(0, 1, 0)).Normalized();
 
+	_modelMatrix.Transpose();
 	_dirty = false;
 }
 
 Vec3 Transform::Forward()
 {
+	CheckModelMatrix();
 	return _forward;
 }
 
 Vec3 Transform::Bacward()
 {
+	CheckModelMatrix();
 	return Vec3(-_forward.x, -_forward.y, -_forward.z);
 }
 
 Vec3 Transform::Right()
 {
+	CheckModelMatrix();
 	return _right;
 }
 
 Vec3 Transform::Left()
 {
+	CheckModelMatrix();
 	return Vec3(-_right.x, -_right.y, -_right.z);
 }
 
 Vec3 Transform::Top()
 {
+	CheckModelMatrix();
 	return _top;
 }
 
 Vec3 Transform::Bottom()
 {
+	CheckModelMatrix();
 	return Vec3(-_top.x, -_top.y, -_top.z);
 }
 

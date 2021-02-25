@@ -16,6 +16,8 @@ void Camera::Init(uint32_t width, uint32_t height, float fieldOfView, float near
 
 ViewProj Camera::GetViewProj()
 {
+	Transform.CheckModelMatrix();
+
 	ViewProj viewProj;
 
 	/* === SET VIEW MATRIX === */

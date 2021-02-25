@@ -59,7 +59,7 @@ void App::Run()
 
 	glfwSetWindowUserPointer(Window, this);
 	glfwSetFramebufferSizeCallback(Window, framebufferResized);
-	//glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// init input
 	GLFWInputHandler* glfwInputHandler = new GLFWInputHandler(Window);
