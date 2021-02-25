@@ -11,9 +11,11 @@ namespace Euler
 	public:
 		Vec3 Position;
 		Vec3 Normal;
+		Vec3 Tangent;
+		Vec3 Bitangent;
 		Vec2 UV;
 
 		Vertex();
-		Vertex(Vec3 position, Vec3 normal, Vec2 uv);
+		Vertex(Vec3 position, Vec3 normal, Vec3 tangent, Vec3 bitangent, Vec2 uv);
 	};
 };

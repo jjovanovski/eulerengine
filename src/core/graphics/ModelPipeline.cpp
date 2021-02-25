@@ -63,7 +63,7 @@ void ModelPipeline::Destroy()
 
 std::vector<VertexAttributeInfo> ModelPipeline::GetVertexAttributes()
 {
-	std::vector<VertexAttributeInfo> vec(3);
+	std::vector<VertexAttributeInfo> vec(5);
 
 	// position
 	vec[0].Location = 0;
@@ -75,10 +75,20 @@ std::vector<VertexAttributeInfo> ModelPipeline::GetVertexAttributes()
 	vec[1].Offset = offsetof(Vertex, Normal);
 	vec[1].Format = VK_FORMAT_R32G32B32_SFLOAT;
 
-	// uv
+	// tangent
 	vec[2].Location = 2;
-	vec[2].Offset = offsetof(Vertex, UV);
-	vec[2].Format = VK_FORMAT_R32G32_SFLOAT;
+	vec[2].Offset = offsetof(Vertex, Tangent);
+	vec[2].Format = VK_FORMAT_R32G32B32_SFLOAT;
+
+	// bitangent
+	vec[3].Location = 3;
+	vec[3].Offset = offsetof(Vertex, Bitangent);
+	vec[3].Format = VK_FORMAT_R32G32B32_SFLOAT;
+
+	// uv
+	vec[4].Location = 4;
+	vec[4].Offset = offsetof(Vertex, UV);
+	vec[4].Format = VK_FORMAT_R32G32_SFLOAT;
 
 	return vec;
 }

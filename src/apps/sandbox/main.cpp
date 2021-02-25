@@ -58,9 +58,9 @@ public:
 
 		// create mesh
 		std::vector<Vertex> triangleVertices = {
-			Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(0.0f, 1.0f)),
-			Vertex(Vec3(0.0f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(0.5f, 0.0f)),
-			Vertex(Vec3(0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec2(1.0f, 1.0f))
+			Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(), Vec3(), Vec2(0.0f, 1.0f)),
+			Vertex(Vec3(0.0f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(), Vec3(), Vec2(0.5f, 0.0f)),
+			Vertex(Vec3(0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(), Vec3(), Vec2(1.0f, 1.0f))
 		};
 
 		std::vector<uint32_t> triangleIndices = {
