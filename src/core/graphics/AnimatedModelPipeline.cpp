@@ -404,7 +404,7 @@ void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix, std::vector<
 				_pipelineLayout,
 				2,
 				1,
-				&model->Drawables[j]->Texture->DescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+				&model->Drawables[j]->ColorTexture->DescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
 				0,
 				nullptr
 			);

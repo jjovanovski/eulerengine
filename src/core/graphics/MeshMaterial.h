@@ -14,7 +14,9 @@ namespace Euler
 		public:
 			Mesh* Mesh;
 			AnimatedMesh* AnimatedMesh;
-			Texture* Texture;
+			Texture* NormalMap;
+			Texture* ColorTexture;
+
 
 			MeshMaterial();
 			MeshMaterial(Euler::Mesh* mesh, Euler::Graphics::Texture* texture);

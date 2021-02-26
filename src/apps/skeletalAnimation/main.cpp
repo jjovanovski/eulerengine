@@ -24,7 +24,7 @@ private:
 	Graphics::AnimatedModelPipeline _modelPipeline;
 	Graphics::DirectionalLight _dirLight;
 	Camera _camera;
-	Graphics::Texture _texture;
+	Graphics::Texture _brickTexture;
 	AnimatedMesh _mesh;
 	Graphics::MeshMaterial _meshMaterial;
 	AnimatedModel _model;
@@ -54,8 +54,8 @@ public:
 		TextureResource textureResource;
 		textureResource.Load("diffuse.png", TEXTURE_CHANNELS_RGBA);
 
-		_texture.Shininess = 2.0f;
-		_texture.Create(Vulkan, &textureResource, _modelPipeline.MaterialLayout);
+		_brickTexture.Shininess = 2.0f;
+		_brickTexture.Create(Vulkan, &textureResource, _modelPipeline.MaterialLayout);
 
 		textureResource.Unload();
 
@@ -64,12 +64,12 @@ public:
 
 		_mesh.Vertices = _modelResource.Vertices;
 		_mesh.Indices = _modelResource.Indices;
-		_mesh.Texture = &_texture;
+		_mesh.Texture = &_brickTexture;
 		_mesh.Create(Vulkan);
 
 		// create mesh material
 		_meshMaterial.AnimatedMesh = &_mesh;
-		_meshMaterial.Texture = &_texture;
+		_meshMaterial.ColorTexture = &_brickTexture;
 
 		// create model
 		_model.Transform.SetPosition(Vec3(0, -0.5f, 1));

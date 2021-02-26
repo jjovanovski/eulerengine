@@ -25,7 +25,7 @@ private:
 	Graphics::ModelPipeline _modelPipeline;
 	Graphics::DirectionalLight _dirLight;
 	Camera _camera;
-	Graphics::Texture _texture;
+	Graphics::Texture _brickTexture, _brickNormalMap;
 	Mesh _mesh;
 	Graphics::MeshMaterial _meshMaterial;
 	Model _model;
@@ -59,32 +59,41 @@ public:
 
 		// load texture
 		TextureResource textureResource;
-		textureResource.Load("texture.jpg", TEXTURE_CHANNELS_RGBA);
+		textureResource.Load("3d/brick_diffuse.png", TEXTURE_CHANNELS_RGBA);
 
-		_texture.Shininess = 2.0f;
-		_texture.Create(Vulkan, &textureResource, _modelPipeline.MaterialLayout);
+		_brickTexture.Shininess = 2.0f;
+		_brickTexture.Create(Vulkan, &textureResource, _modelPipeline.MaterialLayout);
+
+		textureResource.Unload();
+
+		textureResource.Load("3d/brick_normal.png", TEXTURE_CHANNELS_RGBA);
+
+		_brickNormalMap.Create(Vulkan, &textureResource, _modelPipeline.NormalMapLayout);
 
 		textureResource.Unload();
 
 		// create mesh
 		std::vector<Vertex> triangleVertices = {
-			Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(), Vec3(), Vec2(0.0f, 1.0f)),
-			Vertex(Vec3(0.0f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(), Vec3(), Vec2(0.5f, 0.0f)),
-			Vertex(Vec3(0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(), Vec3(), Vec2(1.0f, 1.0f))
+			Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(0.0f, 1.0f)),
+			Vertex(Vec3(-0.5f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(0.0f, 0.0f)),
+			Vertex(Vec3(0.5f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(1.0f, 0.0f)),
+			Vertex(Vec3(0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(1.0f, 1.0f))
 		};
 
 		std::vector<uint32_t> triangleIndices = {
-			2, 1, 0
+			2, 1, 0,
+			2, 0, 3
 		};
 
 		_mesh.Vertices = triangleVertices;
 		_mesh.Indices = triangleIndices;
-		_mesh.Texture = &_texture;
+		_mesh.Texture = &_brickTexture;
 		_mesh.Create(Vulkan);
 
 		// create mesh material
 		_meshMaterial.Mesh = &_mesh;
-		_meshMaterial.Texture = &_texture;
+		_meshMaterial.ColorTexture = &_brickTexture;
+		_meshMaterial.NormalMap = &_brickNormalMap;
 
 		// create model
 		_model.Drawables.push_back(&_meshMaterial);

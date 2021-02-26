@@ -77,7 +77,7 @@ public:
 		_cubeMesh.Create(Vulkan);
 
 		_cubeMeshMat.Mesh = &_cubeMesh;
-		_cubeMeshMat.Texture = &_woodTexture;
+		_cubeMeshMat.ColorTexture = &_woodTexture;
 
 		_cubeModel.Transform.SetPosition(Vec3(0, -0.5f, 0));
 		_cubeModel.Transform.SetScale(0.1f);
