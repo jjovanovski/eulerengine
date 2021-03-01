@@ -12,10 +12,10 @@ namespace Euler
 		class EULER_API MeshMaterial
 		{
 		public:
-			Mesh* Mesh;
-			AnimatedMesh* AnimatedMesh;
-			Texture* NormalMap;
-			Texture* ColorTexture;
+			Mesh* Mesh = nullptr;
+			AnimatedMesh* AnimatedMesh = nullptr;
+			Texture* NormalMap = nullptr;
+			Texture* ColorTexture = nullptr;
 
 
 			MeshMaterial();

@@ -452,16 +452,19 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 				nullptr
 			);
 
-			vkCmdBindDescriptorSets(
-				*_vulkan->GetMainCommandBuffer(),
-				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				_pipelineLayout,
-				5,
-				1,
-				&model->Drawables[j]->NormalMap->DescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
-				0,
-				nullptr
-			);
+			if (model->Drawables[j]->NormalMap != nullptr)
+			{
+				vkCmdBindDescriptorSets(
+					*_vulkan->GetMainCommandBuffer(),
+					VK_PIPELINE_BIND_POINT_GRAPHICS,
+					_pipelineLayout,
+					5,
+					1,
+					&model->Drawables[j]->NormalMap->DescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+					0,
+					nullptr
+				);
+			}
 
 			_vulkan->DrawMesh(
 				*_vulkan->GetMainCommandBuffer(),
