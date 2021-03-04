@@ -82,16 +82,6 @@ void Texture::Create(Vulkan* vulkan, void* pixels, uint32_t width, uint32_t heig
 	{
 		DescriptorSetGroup.UpdateSampler(_vulkan, i, _imageView, _sampler, 0);
 	}
-
-	/* === CREATE SHININESS === */
-
-	_shininessBufferGroup.Create(_vulkan, imageCount, sizeof(float), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-	for (int i = 0; i < imageCount; i++)
-	{
-		_vulkan->CopyToMemory(_shininessBufferGroup.Get(i)->Memory, 0, sizeof(float), &Shininess);
-		DescriptorSetGroup.UpdateUniformBuffer(_vulkan, i, _shininessBufferGroup.Get(i)->Buffer, 1);
-	}
 }
 
 void Texture::Create(Vulkan* vulkan, TextureResource* textureResource, VkDescriptorSetLayout descriptorSetLayout)
@@ -101,8 +91,6 @@ void Texture::Create(Vulkan* vulkan, TextureResource* textureResource, VkDescrip
 
 void Texture::Destroy()
 {
-
-
 	if (Texture::DescriptorPoolCreated)
 	{
 		DestroyDescriptorPool();

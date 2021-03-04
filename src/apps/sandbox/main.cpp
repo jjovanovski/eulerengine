@@ -6,6 +6,7 @@
 #include "graphics/Camera.h"
 #include "graphics/Vertex.h"
 #include "graphics/Texture.h"
+#include "graphics/Material.h"
 #include "graphics/DirectionalLight.h"
 #include "math/Math.h"
 #include "resources/TextureResource.h"
@@ -29,6 +30,7 @@ private:
 	Mesh _mesh;
 	Graphics::MeshMaterial _meshMaterial;
 	Model _model;
+	Graphics::Material _testMaterial;
 
 	float _cameraYaw = 0.0f;
 	float _cameraPitch = 0.0f;
@@ -44,12 +46,12 @@ public:
 		_modelPipeline.Create(Vulkan, 1920, 1080);
 
 		// setup light
-		_dirLight.Direction = Vec3(1, 1, -1);
+		_dirLight.Direction = Vec3(0, 0, -1);
 		_dirLight.Color = Vec3(1, 1, 1);
-		_dirLight.Intensity = 1.0f;
+		_dirLight.Intensity = 0.8f;
 		_modelPipeline.DirLight = &_dirLight;
 		_modelPipeline.AmbLight.Color = Vec3(1, 1, 1);
-		_modelPipeline.AmbLight.Intensity = 0.5f;
+		_modelPipeline.AmbLight.Intensity = 0.1f;
 
 		// create camera
 		_camera.Init(1920, 1080, 60.0f, 0.01f, 100.0f);
@@ -74,10 +76,10 @@ public:
 
 		// create mesh
 		std::vector<Vertex> triangleVertices = {
-			Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(0.0f, 1.0f)),
-			Vertex(Vec3(-0.5f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(0.0f, 0.0f)),
-			Vertex(Vec3(0.5f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(1.0f, 0.0f)),
-			Vertex(Vec3(0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(1.0f, 1.0f))
+			Vertex(Vec3(-0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(0.0f, 1.0f)),
+			Vertex(Vec3(-0.5f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(0.0f, 0.0f)),
+			Vertex(Vec3(0.5f, 0.5f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(1.0f, 0.0f)),
+			Vertex(Vec3(0.5f, -0.5f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec2(1.0f, 1.0f))
 		};
 
 		std::vector<uint32_t> triangleIndices = {
@@ -94,6 +96,11 @@ public:
 		_meshMaterial.Mesh = &_mesh;
 		_meshMaterial.ColorTexture = &_brickTexture;
 		_meshMaterial.NormalMap = &_brickNormalMap;
+
+		_testMaterial.Properties.Shininess = 128;
+		_testMaterial.Properties.UseNormalMap = 1.0f;
+		_testMaterial.Create(Vulkan, _modelPipeline.MaterialPropertiesLayout);
+		_meshMaterial.Material = &_testMaterial;
 
 		// create model
 		_model.Drawables.push_back(&_meshMaterial);

@@ -50,6 +50,7 @@ namespace Euler
 			VkDescriptorSetLayout ModelLayout;
 			VkDescriptorSetLayout MaterialLayout;
 			VkDescriptorSetLayout NormalMapLayout;
+			VkDescriptorSetLayout MaterialPropertiesLayout;
 			VkDescriptorSetLayout DirectionalLightLayout;
 			VkDescriptorSetLayout LightViewProjLayout;
 

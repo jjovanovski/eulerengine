@@ -35,7 +35,7 @@ void ModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float viewportHe
 	pipelineInfo.ViewportHeight = viewportHeight;
 
 	CreateDescriptorSetLayouts();
-	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, MaterialLayout, DirectionalLightLayout, LightViewProjLayout, NormalMapLayout };
+	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, MaterialLayout, DirectionalLightLayout, LightViewProjLayout, NormalMapLayout, MaterialPropertiesLayout };
 	pipelineInfo.DescriptorSetLayouts = layouts;
 
 	pipelineInfo.RenderPass = _vulkan->_renderPass;	// TODO: This should be a parameter
@@ -114,16 +114,11 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	_vulkan->CreateDescriptorSetLayout(modelBindings, &ModelLayout);
 
 	/* === ColorTexture DESCRIPTOR SET LAYOUT === */
-	std::vector<VkDescriptorSetLayoutBinding> materialBindings(2);
+	std::vector<VkDescriptorSetLayoutBinding> materialBindings(1);
 	materialBindings[0].binding = 0;
 	materialBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	materialBindings[0].descriptorCount = 1;
 	materialBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-	materialBindings[1].binding = 1;
-	materialBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	materialBindings[1].descriptorCount = 1;
-	materialBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(materialBindings, &MaterialLayout);
 
@@ -136,6 +131,16 @@ void ModelPipeline::CreateDescriptorSetLayouts()
 	normalMapBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(normalMapBindings, &NormalMapLayout);
+
+	/* === MaterialProperties DESCRIPTOR SET LAYOUT */
+	std::vector<VkDescriptorSetLayoutBinding> materialProperties(1);
+
+	materialProperties[0].binding = 0;
+	materialProperties[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	materialProperties[0].descriptorCount = 1;
+	materialProperties[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	_vulkan->CreateDescriptorSetLayout(materialProperties, &MaterialPropertiesLayout);
 
 	/* === DirectionalLight DESCRIPTOR SET LAYOUT === */
 	std::vector<VkDescriptorSetLayoutBinding> directionalLightBindings(3);
@@ -317,6 +322,7 @@ void ModelPipeline::Update(Camera* camera, ViewProj viewProjMatrix)
 	_vulkan->CopyToMemory(_directionalLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(DirectionalLight), DirLight);
 
 	// update ambient light
+	AmbLight.CameraPosition = camera->Transform.GetPosition();
 	_vulkan->CopyToMemory(_ambientLightBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(AmbientLight), &AmbLight);
 
 	void* modelsData;
@@ -371,7 +377,7 @@ void ModelPipeline::Update(Camera* camera, ViewProj viewProjMatrix)
 
 void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 {
-	VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	VkClearValue clearColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 	VkClearValue clearDepth = { 1.0f, 0.0f, 0.0f, 0.0f };
 	VkClearValue clearValues[] = { clearColor, clearDepth };
 
@@ -441,6 +447,19 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 		// draw model meshes
 		for (int j = 0; j < model->Drawables.size(); j++)
 		{
+			// bind material properties
+			vkCmdBindDescriptorSets(
+				*_vulkan->GetMainCommandBuffer(),
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				_pipelineLayout,
+				6,
+				1,
+				&model->Drawables[j]->Material->MaterialPropertiesDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+				0,
+				nullptr
+			);
+
+			// bind color map
 			vkCmdBindDescriptorSets(
 				*_vulkan->GetMainCommandBuffer(),
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -451,7 +470,8 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 				0,
 				nullptr
 			);
-
+			
+			// bind normal map
 			if (model->Drawables[j]->NormalMap != nullptr)
 			{
 				vkCmdBindDescriptorSets(

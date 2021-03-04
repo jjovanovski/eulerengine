@@ -22,8 +22,6 @@ namespace Euler
 			VkImageView _imageView;
 			VkSampler _sampler;
 
-			BufferGroup _shininessBufferGroup;
-
 			static bool DescriptorPoolCreated;
 			static VkDescriptorPool DescriptorPool;
 
