@@ -15,6 +15,7 @@ public:
 	VkFormat Format;
 };
 
+// TODO: Deprecate this class
 class EULER_API PipelineInfo
 {
 public:

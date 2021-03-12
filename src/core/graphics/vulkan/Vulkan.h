@@ -5,6 +5,7 @@
 #include "../../math/Vec3.h"
 #include "../../math/Mat4.h"
 #include "../Common.h"
+#include "../RendererInfo.h"
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -199,6 +200,7 @@ namespace Euler
             void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
 
             void CreatePipeline(const PipelineInfo* pipelineInfo, VkPipelineLayout* pipelineLayout, VkPipeline* pipeline);
+            void CreatePipeline(const Euler::Graphics::RendererInfo* rendererInfo, VkPipelineLayout* pipelineLayout, VkPipeline* pipeline);
             void DestroyPipeline(VkPipelineLayout pipelineLayout, VkPipeline pipeline);
 
             void CreateVertexBuffer(size_t vertexSize, uint32_t vertexCount, void* data, Buffer* buffer);
