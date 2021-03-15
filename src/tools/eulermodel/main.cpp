@@ -154,8 +154,8 @@ void ProcessScene(std::string filePath, const aiScene* scene)
 	/* === write the .bem (binary euler model) file === */
 
 
-	std::string fileName = filePath.substr(0, filePath.length() - filePath.find_last_of(".") + 1) + ".bem";
-	std::cout << "Writing output file " << fileName << std::endl;
+	std::string fileName = filePath.substr(0, filePath.find_last_of(".")) + ".bem";
+	std::cout << "1Writing output file " << fileName << std::endl;
 
 	std::ofstream bfs(fileName, std::ios::out | std::ios::binary);
 

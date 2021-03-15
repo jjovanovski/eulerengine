@@ -466,13 +466,13 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 				_pipelineLayout,
 				2,
 				1,
-				&model->Drawables[j]->ColorTexture->DescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+				&model->Drawables[j]->Material->ColorMap->DescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
 				0,
 				nullptr
 			);
 			
 			// bind normal map
-			if (model->Drawables[j]->NormalMap != nullptr)
+			if (model->Drawables[j]->Material->NormalMap != nullptr)
 			{
 				vkCmdBindDescriptorSets(
 					*_vulkan->GetMainCommandBuffer(),
@@ -480,7 +480,7 @@ void ModelPipeline::RecordCommands(ViewProj viewProjMatrix)
 					_pipelineLayout,
 					5,
 					1,
-					&model->Drawables[j]->NormalMap->DescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+					&model->Drawables[j]->Material->NormalMap->DescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
 					0,
 					nullptr
 				);
