@@ -50,6 +50,13 @@ private:
 	Graphics::MeshMaterial _floorMeshMaterial;
 	Model _floorModel;
 
+	// Wall
+	Mesh _wallMesh;
+	Graphics::Texture _wallTexture, _wallNormalMap;
+	Graphics::Material _wallMaterial;
+	Graphics::MeshMaterial _wallMeshMaterial;
+	Model _wallModel;
+
 public:
 	void OnCreate() override
 	{
@@ -70,6 +77,7 @@ public:
 		_originalCameraRotation = _camera.Transform.GetRotation();
 
 		SetupFloor();
+		SetupWall();
 	}
 
 	void OnUpdate() override
@@ -168,6 +176,42 @@ public:
 		_floorModel.Transform.SetRotation(Quaternion::Euler(Math::Rad(90.0f), Vec3(1, 0, 0)));
 
 		_modelPipeline.Models.push_back(&_floorModel);
+	}
+
+	void SetupWall()
+	{
+		ModelResource modelResource;
+		modelResource.Load("res/walls/walls.bem");
+
+		_wallMesh.Vertices = modelResource.Vertices;
+		_wallMesh.Indices = modelResource.Indices;
+		_wallMesh.Create(Vulkan);
+
+		modelResource.Unload();
+
+		TextureResource textureResource;
+
+		textureResource.Load("res/walls/wallsTexture.png", TEXTURE_CHANNELS_RGBA);
+		_wallTexture.Create(Vulkan, &textureResource, _modelPipeline.MaterialLayout);
+		textureResource.Unload();
+
+		textureResource.Load("res/walls/wallsNormalMap.png", TEXTURE_CHANNELS_RGBA);
+		_wallNormalMap.Create(Vulkan, &textureResource, _modelPipeline.MaterialLayout);
+		textureResource.Unload();
+
+		_wallMaterial.ColorMap = &_wallTexture;
+		_wallMaterial.NormalMap = &_wallNormalMap;
+		_wallMaterial.Properties.Shininess = 1.0f;
+		_wallMaterial.Properties.UseNormalMap = 1.0f;
+		_wallMaterial.Create(Vulkan, _modelPipeline.MaterialPropertiesLayout);
+
+		_wallMeshMaterial.Material = &_wallMaterial;
+		_wallMeshMaterial.Mesh = &_wallMesh;
+
+		_wallModel.Drawables.push_back(&_wallMeshMaterial);
+		_wallModel.Transform.SetRotation(Quaternion::Euler(Math::Rad(90.0f), Vec3(1, 0, 0)));
+
+		_modelPipeline.Models.push_back(&_wallModel);
 	}
 };
 
