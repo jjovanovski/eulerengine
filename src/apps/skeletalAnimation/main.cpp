@@ -11,6 +11,7 @@
 #include "math/Math.h"
 #include "resources/TextureResource.h"
 #include "resources/AnimatedModelResource.h"
+#include "input/Input.h"
 
 #include "stb_image.h"
 
@@ -86,7 +87,14 @@ public:
 
 	void OnUpdate() override
 	{
-
+		if (Input::GetKey(Key::Q))
+		{
+			_animator.Pause();
+		}
+		else
+		{
+			_animator.Resume();
+		}
 	}
 
 	void OnDraw() override

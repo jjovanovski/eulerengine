@@ -48,11 +48,27 @@ bool GLFWInputHandler::GetKey(Key key) {
 };
 
 bool GLFWInputHandler::GetKeyDown(Key key) {
-	return GetKey(key);
+	if (key == MOUSE_LEFT)
+		return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+	if (key == MOUSE_MIDDLE)
+		return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+	if (key == MOUSE_RIGHT)
+		return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+
+	int state = glfwGetKey(window, Map(key));
+	return state == GLFW_PRESS;
 };
 
 bool GLFWInputHandler::GetKeyUp(Key key) {
-	return GetKey(key);
+	if (key == MOUSE_LEFT)
+		return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE;
+	if (key == MOUSE_MIDDLE)
+		return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_RELEASE;
+	if (key == MOUSE_RIGHT)
+		return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE;
+
+	int state = glfwGetKey(window, Map(key));
+	return state == GLFW_RELEASE;
 };
 
 void GLFWInputHandler::CursorPosCallback(GLFWwindow* window, double x, double y) {

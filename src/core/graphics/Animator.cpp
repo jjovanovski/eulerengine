@@ -9,10 +9,24 @@ void Animator::Start()
 {
 	TimeAtStart = std::chrono::steady_clock::now();
 	CurrentFrameIndex = 1;
+	Running = true;
+}
+
+void Animator::Pause()
+{
+	Running = false;
+}
+
+void Animator::Resume()
+{
+	Running = true;
 }
 
 void Animator::Update()
 {
+	if (!Running)
+		return;
+
 	// update time
 	auto now = std::chrono::steady_clock::now();
 	auto timeDiff = now - this->TimeAtStart;

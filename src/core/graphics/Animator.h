@@ -20,7 +20,11 @@ namespace Euler
 		std::vector<int> BoneParents;
 		std::vector<Mat4> BoneOffsetMatrices;
 
+		bool Running = false;
+
 		void Start();
+		void Pause();
+		void Resume();
 		void Update();
 
 		void CalculateMatrix(int index, std::vector<bool> visited, KeyFrame* prevFrame, KeyFrame* currentFrame, float t);

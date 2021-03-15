@@ -13,6 +13,7 @@
 #include "resources/ModelResource.h"
 #include "input/Input.h"
 #include "math/Math.h"
+#include "graphics/ModelRenderer.h"
 
 #include "stb_image.h"
 
