@@ -139,8 +139,8 @@ Mat4 Matrices::Orthographic(uint32_t width, uint32_t height, float size)
 	float bottom = -size;
 	float left = -size * aspectRatio;
 	float right = size * aspectRatio;
-	float far = 10.0f;
-	float near = 0.01f;
+	float far = 50.0f;
+	float near = -50.0f;
 
 	Mat4 mat;
 

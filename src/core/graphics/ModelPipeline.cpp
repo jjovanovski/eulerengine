@@ -359,13 +359,18 @@ void ModelPipeline::Update(Camera* camera, ViewProj viewProjMatrix)
 	rotationMatrix.Set(3, 3, 1);
 
 	Quaternion camrot = Quaternion::FromMatrix(rotationMatrix);
+	Quaternion q1 = Quaternion::Euler(Math::Rad(-45.0f), Vec3(1, 0, 0));
+	Quaternion q2 = Quaternion::Euler(Math::Rad(-45.0f), Vec3(0, 1, 0));
+	Quaternion q = q2 * q1;
 
 	auto campos = camera->Transform.GetPosition();
-	Mat4 view = Math::Matrices::Translate(campos.x, campos.y, campos.z);
-	view = rotationMatrix.Multiply(view);
+	Mat4 view = Math::Matrices::Translate(0, 0, 0);
+	view = q.GetMatrix().Multiply(view);
+	//view = Math::Matrices::Identity();
 	view.Transpose();
 
-	Mat4 proj = Math::Matrices::Orthographic(1920, 1080, 3.0f);
+	Mat4 proj = Math::Matrices::Orthographic(1920, 1080, 6.0f);
+	//Mat4 proj = Math::Matrices::Perspective(1920, 1080, 60.0f, 0.01f, 100.0f);
 	proj.Transpose();
 
 	ViewProj camViewProj;

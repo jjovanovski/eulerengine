@@ -14,6 +14,7 @@
 #include "input/Input.h"
 #include "math/Math.h"
 #include "graphics/ModelRenderer.h"
+#include "graphics/Shadows.h"
 
 #include "stb_image.h"
 
@@ -34,6 +35,8 @@ private:
 	Graphics::ModelPipeline _modelPipeline;
 	Graphics::DirectionalLight _dirLight;
 	Camera _camera;
+
+	Graphics::Shadows _shadows;
 
 	// lookaround
 	float _cameraYaw = 0.0f;
@@ -63,7 +66,7 @@ public:
 		_modelPipeline.Create(Vulkan, 1920, 1080);
 
 		// setup light
-		_dirLight.Direction = Vec3(0, -1, -1);
+		_dirLight.Direction = Vec3(0, -1, 1).Normalized();
 		_dirLight.Color = Vec3(1, 1, 1);
 		_dirLight.Intensity = 0.8f;
 		_modelPipeline.DirLight = &_dirLight;
@@ -78,6 +81,9 @@ public:
 
 		SetupFloor();
 		SetupWall();
+
+		// setup shadows
+		_shadows.Create(Vulkan, &_modelPipeline, 1920, 1080);
 	}
 
 	void OnUpdate() override
@@ -108,6 +114,17 @@ public:
 
 		float movementSpeed = 0.001f;
 
+		if (Input::GetKeyDown(Key::Q))
+		{
+			_dirLight.Direction.y += 0.001f;
+			_dirLight.Direction.Normalize();
+		}
+		if (Input::GetKeyDown(Key::E))
+		{
+			_dirLight.Direction.y -= 0.001f;
+			_dirLight.Direction.Normalize();
+		}
+
 		if (Input::GetKeyDown(Key::A))
 		{
 			_camera.Transform.SetPosition(_camera.Transform.GetPosition() - movementSpeed * _camera.Transform.Right());
@@ -132,12 +149,15 @@ public:
 	void OnDraw() override
 	{
 		_modelPipeline.Update(&_camera, _camera.GetViewProj());
+		_shadows.RecordCommands(_camera);
 		_modelPipeline.RecordCommands(_camera.GetViewProj());
 	}
 
 	void OnDestroy() override
 	{
 		_floorMesh.Destroy(Vulkan);
+
+		_shadows.Destroy();
 
 		_modelPipeline.Destroy();
 	}

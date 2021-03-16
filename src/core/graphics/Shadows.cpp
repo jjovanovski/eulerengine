@@ -44,8 +44,8 @@ void Shadows::Create(Vulkan* vulkan, ModelPipeline* modelPipeline, float viewpor
 	_vulkan->CreateShadowRenderPass(&_shadowRenderPass);
 	pipelineInfo.RenderPass = _shadowRenderPass;
 
-	pipelineInfo.CullMode = VK_CULL_MODE_BACK_BIT;
-	pipelineInfo.FrontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	//pipelineInfo.CullMode = VK_CULL_MODE_BACK_BIT;
+	//pipelineInfo.FrontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
 	_vulkan->CreatePipeline(&pipelineInfo, &_pipelineLayout, &_pipeline);
 
