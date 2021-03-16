@@ -11,8 +11,8 @@ void AnimatedModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float vi
 
 	/* === READ SHADER CODE === */
 
-	std::vector<char> vertexShaderCode = ReadFile("shaders/out/vertex.spv");
-	std::vector<char> fragmentShaderCode = ReadFile("shaders/out/fragment.spv");
+	std::vector<char> vertexShaderCode = ReadFile("shaders/out/animated_vertex.spv");
+	std::vector<char> fragmentShaderCode = ReadFile("shaders/out/animated_fragment.spv");
 
 	/* === CREATE PIPELINE === */
 
@@ -299,20 +299,25 @@ void AnimatedModelPipeline::CreateBoneTransformDescriptorSets()
 
 void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix, std::vector<Mat4> boneMatrices)
 {
-	VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-	VkClearValue clearDepth = { 1.0f, 0.0f, 0.0f, 0.0f };
-	VkClearValue clearValues[] = { clearColor, clearDepth };
+	bool startRenderPass = false;
+	bool endRenderPass = true;
+	if (startRenderPass)
+	{
+		VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+		VkClearValue clearDepth = { 1.0f, 0.0f, 0.0f, 0.0f };
+		VkClearValue clearValues[] = { clearColor, clearDepth };
 
-	VkRenderPassBeginInfo renderPassBeginInfo{};
-	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassBeginInfo.renderPass = _vulkan->_renderPass;
-	renderPassBeginInfo.framebuffer = _vulkan->_swapchainFramebuffers[_vulkan->_currentImage];
-	renderPassBeginInfo.renderArea.extent = _vulkan->_extent;
-	renderPassBeginInfo.renderArea.offset = { 0, 0 };
-	renderPassBeginInfo.clearValueCount = 2;
-	renderPassBeginInfo.pClearValues = clearValues;
+		VkRenderPassBeginInfo renderPassBeginInfo{};
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.renderPass = _vulkan->_renderPass;
+		renderPassBeginInfo.framebuffer = _vulkan->_swapchainFramebuffers[_vulkan->_currentImage];
+		renderPassBeginInfo.renderArea.extent = _vulkan->_extent;
+		renderPassBeginInfo.renderArea.offset = { 0, 0 };
+		renderPassBeginInfo.clearValueCount = 2;
+		renderPassBeginInfo.pClearValues = clearValues;
 
-	vkCmdBeginRenderPass(*_vulkan->GetMainCommandBuffer(), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass(*_vulkan->GetMainCommandBuffer(), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	}
 
 	vkCmdBindPipeline(*_vulkan->GetMainCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 
@@ -417,6 +422,9 @@ void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix, std::vector<
 			);
 		}
 
-		vkCmdEndRenderPass(*_vulkan->GetMainCommandBuffer());
+		if (endRenderPass)
+		{
+			vkCmdEndRenderPass(*_vulkan->GetMainCommandBuffer());
+		}
 	}
 }

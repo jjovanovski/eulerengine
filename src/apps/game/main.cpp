@@ -2,7 +2,9 @@
 
 #include "App.h"
 #include "graphics/Mesh.h"
+#include "graphics/AnimatedMesh.h"
 #include "graphics/ModelPipeline.h"
+#include "graphics/AnimatedModelPipeline.h"
 #include "graphics/Camera.h"
 #include "graphics/Vertex.h"
 #include "graphics/Texture.h"
@@ -15,6 +17,8 @@
 #include "math/Math.h"
 #include "graphics/ModelRenderer.h"
 #include "graphics/Shadows.h"
+#include "graphics/Animator.h"
+#include "resources/AnimatedModelResource.h"
 
 #include "stb_image.h"
 
@@ -35,6 +39,8 @@ private:
 	Graphics::ModelPipeline _modelPipeline;
 	Graphics::DirectionalLight _dirLight;
 	Camera _camera;
+
+	Graphics::AnimatedModelPipeline _animatedPipeline;
 
 	Graphics::Shadows _shadows;
 
@@ -60,18 +66,29 @@ private:
 	Graphics::MeshMaterial _wallMeshMaterial;
 	Model _wallModel;
 
+	// Char
+	Animator _animator;
+	Graphics::Texture _charTexture;
+	AnimatedMesh _charMesh;
+	Graphics::MeshMaterial _animatedMeshMaterial;
+	AnimatedModel _charModel;
+
 public:
 	void OnCreate() override
 	{
 		_modelPipeline.Create(Vulkan, 1920, 1080);
+		_animatedPipeline.Create(Vulkan, 1920, 1080);
 
 		// setup light
 		_dirLight.Direction = Vec3(0, -1, 1).Normalized();
 		_dirLight.Color = Vec3(1, 1, 1);
-		_dirLight.Intensity = 0.8f;
+		_dirLight.Intensity = 1.0f;
 		_modelPipeline.DirLight = &_dirLight;
 		_modelPipeline.AmbLight.Color = Vec3(1, 1, 1);
 		_modelPipeline.AmbLight.Intensity = 0.1f;
+		_animatedPipeline.DirLight = &_dirLight;
+		_animatedPipeline.AmbLight.Color = Vec3(1, 1, 1);
+		_animatedPipeline.AmbLight.Intensity = 0.1f;
 
 		// create camera
 		_camera.Init(1920, 1080, 60.0f, 0.01f, 100.0f);
@@ -81,6 +98,7 @@ public:
 
 		SetupFloor();
 		SetupWall();
+		SetupChar();
 
 		// setup shadows
 		_shadows.Create(Vulkan, &_modelPipeline, 1920, 1080);
@@ -148,9 +166,12 @@ public:
 
 	void OnDraw() override
 	{
+		_animator.Update();
 		_modelPipeline.Update(&_camera, _camera.GetViewProj());
+
 		_shadows.RecordCommands(_camera);
 		_modelPipeline.RecordCommands(_camera.GetViewProj());
+		_animatedPipeline.RecordCommands(_camera.GetViewProj(), _animator.BoneMatrices);
 	}
 
 	void OnDestroy() override
@@ -159,6 +180,7 @@ public:
 
 		_shadows.Destroy();
 
+		_animatedPipeline.Destroy();
 		_modelPipeline.Destroy();
 	}
 
@@ -232,6 +254,40 @@ public:
 		_wallModel.Transform.SetRotation(Quaternion::Euler(Math::Rad(90.0f), Vec3(1, 0, 0)));
 
 		_modelPipeline.Models.push_back(&_wallModel);
+	}
+
+	void SetupChar()
+	{
+		TextureResource textureResource;
+		textureResource.Load("res/char/charTexture.png", TEXTURE_CHANNELS_RGBA);
+
+		_charTexture.Shininess = 2.0f;
+		_charTexture.Create(Vulkan, &textureResource, _animatedPipeline.MaterialLayout);
+
+		textureResource.Unload();
+
+		AnimatedModelResource modelResource;
+		modelResource.Load("res/char/char.beam");
+
+		_charMesh.Vertices = modelResource.Vertices;
+		_charMesh.Indices = modelResource.Indices;
+		_charMesh.Texture = &_charTexture;
+		_charMesh.Create(Vulkan);
+
+		_animatedMeshMaterial.AnimatedMesh = &_charMesh;
+		_animatedMeshMaterial.ColorTexture = &_charTexture;
+
+		_charModel.Transform.SetPosition(Vec3(0, 0.05f, 1));
+		_charModel.Transform.SetScale(0.05f);
+		_charModel.Transform.SetRotation(Quaternion::Euler(1.15f * PI, Vec3(0, 1, 0)) * Quaternion::Euler(PI / 2.0f, Vec3(1, 0, 0)));
+		_charModel.Drawables.push_back(&_animatedMeshMaterial);
+
+		_animatedPipeline.Models.push_back(&_charModel);
+
+		_animator.Animation = modelResource.Animations[0];
+		_animator.BoneParents = modelResource.BoneParents;
+		_animator.BoneOffsetMatrices = modelResource.BoneOffsetMatrices;
+		_animator.Start();
 	}
 };
 
