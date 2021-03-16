@@ -216,17 +216,17 @@ void ProcessSceneWithAnimations(std::string filePath, const aiScene* scene)
 				mesh->Vertices[i].Normal = Vec3(normal.x, normal.y, normal.z);
 			}
 
-			//if (aiMesh->mTangents != nullptr)
-			//{
-			//	auto tangent = aiMesh->mTangents[i];
-			//	mesh->Vertices[i].Tangent = Vec3(tangent.x, tangent.y, tangent.z);
-			//}
+			if (aiMesh->mTangents != nullptr)
+			{
+				auto tangent = aiMesh->mTangents[i];
+				mesh->Vertices[i].Tangent = Vec3(tangent.x, tangent.y, tangent.z);
+			}
 
-			//if (aiMesh->mBitangents != nullptr)
-			//{
-			//	auto bitangent = aiMesh->mBitangents[i];
-			//	mesh->Vertices[i].Bitangent = Vec3(bitangent.x, bitangent.y, bitangent.z);
-			//}
+			if (aiMesh->mBitangents != nullptr)
+			{
+				auto bitangent = aiMesh->mBitangents[i];
+				mesh->Vertices[i].Bitangent = Vec3(bitangent.x, bitangent.y, bitangent.z);
+			}
 
 			if (aiMesh->mTextureCoords != nullptr && aiMesh->mTextureCoords[0] != nullptr)
 			{

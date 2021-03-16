@@ -17,6 +17,7 @@
 #include "math/Math.h"
 #include "graphics/ModelRenderer.h"
 #include "graphics/Shadows.h"
+#include "graphics/AnimatedShadows.h"
 #include "graphics/Animator.h"
 #include "resources/AnimatedModelResource.h"
 
@@ -43,6 +44,7 @@ private:
 	Graphics::AnimatedModelPipeline _animatedPipeline;
 
 	Graphics::Shadows _shadows;
+	Graphics::AnimatedShadows _animatedShadows;
 
 	// lookaround
 	float _cameraYaw = 0.0f;
@@ -102,6 +104,7 @@ public:
 
 		// setup shadows
 		_shadows.Create(Vulkan, &_modelPipeline, 1920, 1080);
+		_animatedShadows.Create(Vulkan, &_animatedPipeline, 1920, 1080, _shadows._shadowRenderPass);
 	}
 
 	void OnUpdate() override
@@ -168,8 +171,10 @@ public:
 	{
 		_animator.Update();
 		_modelPipeline.Update(&_camera, _camera.GetViewProj());
+		_animatedPipeline.Update(&_camera, _camera.GetViewProj(), _animator.BoneMatrices);
 
 		_shadows.RecordCommands(_camera);
+		_animatedShadows.RecordCommands(_camera);
 		_modelPipeline.RecordCommands(_camera.GetViewProj());
 		_animatedPipeline.RecordCommands(_camera.GetViewProj(), _animator.BoneMatrices);
 	}
@@ -277,7 +282,7 @@ public:
 		_animatedMeshMaterial.AnimatedMesh = &_charMesh;
 		_animatedMeshMaterial.ColorTexture = &_charTexture;
 
-		_charModel.Transform.SetPosition(Vec3(0, 0.05f, 1));
+		_charModel.Transform.SetPosition(Vec3(0, 0.03f, 1));
 		_charModel.Transform.SetScale(0.05f);
 		_charModel.Transform.SetRotation(Quaternion::Euler(1.15f * PI, Vec3(0, 1, 0)) * Quaternion::Euler(PI / 2.0f, Vec3(1, 0, 0)));
 		_charModel.Drawables.push_back(&_animatedMeshMaterial);

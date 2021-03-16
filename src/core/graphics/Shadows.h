@@ -5,6 +5,7 @@
 #include "Common.h"
 #include "Vertex.h"
 #include "ModelPipeline.h"
+#include "AnimatedModelPipeline.h"
 #include "Camera.h"
 
 #include <vector>
@@ -15,7 +16,7 @@ namespace Euler
 	{
 		class EULER_API Shadows
 		{
-		private:
+		public:
 			Vulkan* _vulkan;
 
 			VkRenderPass _shadowRenderPass;
@@ -43,6 +44,8 @@ namespace Euler
 			DescriptorSetGroup _viewProjDescriptorSetGroup;
 
 		public:
+			AnimatedModelPipeline* AnimatedModelPipeline;
+
 			void Create(Vulkan* vulkan, ModelPipeline* modelPipeline, float viewportWidth, float viewportHeight);
 			void Destroy();
 

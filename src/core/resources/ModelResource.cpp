@@ -44,7 +44,7 @@ void ModelResource::Load(const char* filePath)
 	uint32_t meshCount;
 	uint32_t vertexCount;
 	uint32_t indexCount;
-
+	
 	fs.read((char*)(&meshCount), sizeof(uint32_t));
 	fs.read((char*)(&vertexCount), sizeof(uint32_t));
 	fs.read((char*)(&indexCount), sizeof(uint32_t));

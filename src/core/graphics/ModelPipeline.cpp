@@ -369,7 +369,7 @@ void ModelPipeline::Update(Camera* camera, ViewProj viewProjMatrix)
 	//view = Math::Matrices::Identity();
 	view.Transpose();
 
-	Mat4 proj = Math::Matrices::Orthographic(1920, 1080, 6.0f);
+	Mat4 proj = Math::Matrices::Orthographic(4096, 4096, 6.0f);
 	//Mat4 proj = Math::Matrices::Perspective(1920, 1080, 60.0f, 0.01f, 100.0f);
 	proj.Transpose();
 

@@ -35,7 +35,7 @@ void AnimatedModelPipeline::Create(Vulkan* vulkan, float viewportWidth, float vi
 	pipelineInfo.ViewportHeight = viewportHeight;
 
 	CreateDescriptorSetLayouts();
-	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, MaterialLayout, DirectionalLightLayout, BoneTransformsLayout };
+	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout, MaterialLayout, DirectionalLightLayout, BoneTransformsLayout, LightViewProjLayout };
 	pipelineInfo.DescriptorSetLayouts = layouts;
 
 	pipelineInfo.RenderPass = _vulkan->_renderPass;	// TODO: This should be a parameter
@@ -63,7 +63,7 @@ void AnimatedModelPipeline::Destroy()
 
 std::vector<VertexAttributeInfo> AnimatedModelPipeline::GetVertexAttributes()
 {
-	std::vector<VertexAttributeInfo> vec(5);
+	std::vector<VertexAttributeInfo> vec(7);
 
 	// position
 	vec[0].Location = 0;
@@ -75,20 +75,30 @@ std::vector<VertexAttributeInfo> AnimatedModelPipeline::GetVertexAttributes()
 	vec[1].Offset = offsetof(AnimatedVertex, Normal);
 	vec[1].Format = VK_FORMAT_R32G32B32_SFLOAT;
 
-	// uv
+	// tangent
 	vec[2].Location = 2;
-	vec[2].Offset = offsetof(AnimatedVertex, UV);
-	vec[2].Format = VK_FORMAT_R32G32_SFLOAT;
+	vec[2].Offset = offsetof(Vertex, Tangent);
+	vec[2].Format = VK_FORMAT_R32G32B32_SFLOAT;
+
+	// bitangent
+	vec[3].Location = 3;
+	vec[3].Offset = offsetof(Vertex, Bitangent);
+	vec[3].Format = VK_FORMAT_R32G32B32_SFLOAT;
+
+	// uv
+	vec[4].Location = 4;
+	vec[4].Offset = offsetof(AnimatedVertex, UV);
+	vec[4].Format = VK_FORMAT_R32G32_SFLOAT;
 
 	// bone ids
-	vec[3].Location = 3;
-	vec[3].Offset = offsetof(AnimatedVertex, BoneIds);
-	vec[3].Format = VK_FORMAT_R32G32B32A32_SINT;
+	vec[5].Location = 5;
+	vec[5].Offset = offsetof(AnimatedVertex, BoneIds);
+	vec[5].Format = VK_FORMAT_R32G32B32A32_SINT;
 
 	// bone weights
-	vec[4].Location = 4;
-	vec[4].Offset = offsetof(AnimatedVertex, BoneWeights);
-	vec[4].Format = VK_FORMAT_R32G32B32_SFLOAT;
+	vec[6].Location = 6;
+	vec[6].Offset = offsetof(AnimatedVertex, BoneWeights);
+	vec[6].Format = VK_FORMAT_R32G32B32_SFLOAT;
 
 	return vec;
 }
@@ -128,7 +138,7 @@ void AnimatedModelPipeline::CreateDescriptorSetLayouts()
 	_vulkan->CreateDescriptorSetLayout(materialBindings, &MaterialLayout);
 
 	/* === DirectionalLight DESCRIPTOR SET LAYOUT === */
-	std::vector<VkDescriptorSetLayoutBinding> directionalLightBindings(2);
+	std::vector<VkDescriptorSetLayoutBinding> directionalLightBindings(3);
 	directionalLightBindings[0].binding = 0;
 	directionalLightBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	directionalLightBindings[0].descriptorCount = 1;
@@ -138,6 +148,11 @@ void AnimatedModelPipeline::CreateDescriptorSetLayouts()
 	directionalLightBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	directionalLightBindings[1].descriptorCount = 1;
 	directionalLightBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	directionalLightBindings[2].binding = 2;
+	directionalLightBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	directionalLightBindings[2].descriptorCount = 1;
+	directionalLightBindings[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(directionalLightBindings, &DirectionalLightLayout);
 
@@ -149,6 +164,16 @@ void AnimatedModelPipeline::CreateDescriptorSetLayouts()
 	boneTransformBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
 	_vulkan->CreateDescriptorSetLayout(boneTransformBindings, &BoneTransformsLayout);
+
+	/* === LightViewProj DESCRIPTOR SET LAYOUT === */
+
+	std::vector<VkDescriptorSetLayoutBinding> lightViewProjBindings(1);
+	lightViewProjBindings[0].binding = 0;
+	lightViewProjBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	lightViewProjBindings[0].descriptorCount = 1;
+	lightViewProjBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	_vulkan->CreateDescriptorSetLayout(lightViewProjBindings, &LightViewProjLayout);
 }
 
 void AnimatedModelPipeline::CreateDescriptorSets()
@@ -157,11 +182,13 @@ void AnimatedModelPipeline::CreateDescriptorSets()
 
 	/* === CREATE DESCRIPTOR SET POOL === */
 
-	std::vector<VkDescriptorPoolSize> poolSizes(4);
-	poolSizes[0] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };					// ViewProj
-	poolSizes[1] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };			// Model
-	poolSizes[2] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };					// DirectionalLight
-	poolSizes[3] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };			// BoneTransforms
+	std::vector<VkDescriptorPoolSize> poolSizes(6);
+	poolSizes[0] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount * 2 };			// ViewProj
+	poolSizes[3] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };	// Model
+	poolSizes[2] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// DirectionalLight
+	poolSizes[3] = { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageCount };	// shadows
+	poolSizes[4] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, imageCount };			// LightViewProj
+	poolSizes[5] = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, imageCount };			// BoneTransforms
 
 	_vulkan->CreateDescriptorPool(poolSizes, poolSizes.size() * imageCount, &_descriptorPool);
 
@@ -171,6 +198,7 @@ void AnimatedModelPipeline::CreateDescriptorSets()
 	CreateModelDescriptorSets();
 	CreateDirectionalLightDescriptorSets();
 	CreateBoneTransformDescriptorSets();
+	CreateLightViewProjDescriptorSets();
 }
 
 void AnimatedModelPipeline::CreateViewProjDescriptorSets()
@@ -297,6 +325,100 @@ void AnimatedModelPipeline::CreateBoneTransformDescriptorSets()
 	}
 }
 
+void AnimatedModelPipeline::CreateLightViewProjDescriptorSets()
+{
+	uint32_t imageCount = _vulkan->GetSwapchainImageCount();
+
+	/* === CREATE LightViewProj BUFFERS === */
+
+	_lightViewProjBuffers.Create(
+		_vulkan,
+		imageCount,
+		sizeof(ViewProj),
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
+
+	/* === ALLOCATE DESCRIPTOR SETS === */
+
+	_lightViewProjDescriptorSetGroup.Allocate(_vulkan, imageCount, LightViewProjLayout, _descriptorPool);
+
+	/* === WRITE DESCRIPTOR SETS === */
+
+	for (int i = 0; i < imageCount; i++)
+	{
+		_lightViewProjDescriptorSetGroup.UpdateUniformBuffer(_vulkan, i, _lightViewProjBuffers.Get(i)->Buffer, 0);
+	}
+}
+
+void AnimatedModelPipeline::Update(Camera* camera, ViewProj viewProjMatrix, std::vector<Mat4> boneMatrices)
+{
+	for (int i = 0; i < Models.size(); i++)
+	{
+		AnimatedModel* model = Models[i];
+
+		// set model matrix
+		uint32_t offset = _modelMatrixAlignment * i;
+		vkCmdBindDescriptorSets(
+			*_vulkan->GetMainCommandBuffer(),
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			_pipelineLayout,
+			1,
+			1,
+			&_modelDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+			1,
+			&offset
+		);
+
+		// bind bone transforms descriptor set
+		void* boneTransformsData;
+		_vulkan->MapMemory(_boneTransformBuffers.Get(_vulkan->_currentImage)->Memory, i * _boneTransformMatrixAlignment, _boneTransformMatrixAlignment, &boneTransformsData);
+		memcpy(boneTransformsData, boneMatrices.data(), sizeof(Mat4) * 32);
+		_vulkan->UnmapMemory(_boneTransformBuffers.Get(_vulkan->_currentImage)->Memory);
+	}
+
+	// update light viewproj
+	Vec3 X = Vec3(0, 1, 0).Cross(DirLight->Direction).Normalized();
+	Vec3 Y = DirLight->Direction.Cross(X).Normalized();
+
+	Mat4 rotationMatrix;
+
+	rotationMatrix.Set(0, 0, X.x);
+	rotationMatrix.Set(1, 0, X.y);
+	rotationMatrix.Set(2, 0, X.z);
+
+	rotationMatrix.Set(0, 1, Y.x);
+	rotationMatrix.Set(1, 1, Y.y);
+	rotationMatrix.Set(2, 1, Y.z);
+
+	rotationMatrix.Set(0, 2, DirLight->Direction.x);
+	rotationMatrix.Set(1, 2, DirLight->Direction.y);
+	rotationMatrix.Set(2, 2, DirLight->Direction.z);
+
+	rotationMatrix.Set(3, 3, 1);
+
+	Quaternion camrot = Quaternion::FromMatrix(rotationMatrix);
+	Quaternion q1 = Quaternion::Euler(Math::Rad(-45.0f), Vec3(1, 0, 0));
+	Quaternion q2 = Quaternion::Euler(Math::Rad(-45.0f), Vec3(0, 1, 0));
+	Quaternion q = q2 * q1;
+
+	auto campos = camera->Transform.GetPosition();
+	Mat4 view = Math::Matrices::Translate(0, 0, 0);
+	view = q.GetMatrix().Multiply(view);
+	//view = Math::Matrices::Identity();
+	view.Transpose();
+
+	Mat4 proj = Math::Matrices::Orthographic(4096, 4096, 6.0f);
+	//Mat4 proj = Math::Matrices::Perspective(1920, 1080, 60.0f, 0.01f, 100.0f);
+	proj.Transpose();
+
+	ViewProj camViewProj;
+	camViewProj.View = view;
+	camViewProj.Projection = proj;
+
+	_vulkan->CopyToMemory(_lightViewProjBuffers.Get(_vulkan->_currentImage)->Memory, 0, sizeof(camViewProj), &camViewProj);
+}
+
 void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix, std::vector<Mat4> boneMatrices)
 {
 	bool startRenderPass = false;
@@ -398,6 +520,17 @@ void AnimatedModelPipeline::RecordCommands(ViewProj viewProjMatrix, std::vector<
 			&_boneTransformDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
 			1,
 			&boneTransformsOffset
+		);
+
+		vkCmdBindDescriptorSets(
+			*_vulkan->GetMainCommandBuffer(),
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			_pipelineLayout,
+			3,
+			1,
+			&_lightDescriptorSetGroup.DescriptorSets[_vulkan->_currentImage],
+			0,
+			nullptr
 		);
 
 		// draw model meshes

@@ -12,6 +12,10 @@ void Shadows::Create(Vulkan* vulkan, ModelPipeline* modelPipeline, float viewpor
 	_viewportWidth = viewportWidth;
 	_viewportHeight = viewportHeight;
 
+	// TODO:
+	_viewportWidth = 4096;
+	_viewportHeight = 4096;
+
 	/* === READ SHADER CODE === */
 
 	std::vector<char> vertexShaderCode = ReadFile("shaders/out/shadow_vertex.spv");
@@ -34,8 +38,8 @@ void Shadows::Create(Vulkan* vulkan, ModelPipeline* modelPipeline, float viewpor
 
 	pipelineInfo.DepthTestEnabled = true;
 
-	pipelineInfo.ViewportWidth = viewportWidth;
-	pipelineInfo.ViewportHeight = viewportHeight;
+	pipelineInfo.ViewportWidth = _viewportWidth;
+	pipelineInfo.ViewportHeight = _viewportHeight;
 
 	CreateDescriptorSetLayouts();
 	std::vector<VkDescriptorSetLayout> layouts = { ViewProjLayout, ModelLayout };
@@ -202,7 +206,8 @@ void Shadows::RecordCommands(Camera camera)
 		0,
 		nullptr
 	);
-
+	
+	// render models
 	for (int i = 0; i < _modelPipeline->Models.size(); i++)
 	{
 		Model* model = _modelPipeline->Models[i];
@@ -232,6 +237,5 @@ void Shadows::RecordCommands(Camera camera)
 		}
 	}
 
-
-	vkCmdEndRenderPass(*_vulkan->GetMainCommandBuffer());
+	//vkCmdEndRenderPass(*_vulkan->GetMainCommandBuffer());
 }

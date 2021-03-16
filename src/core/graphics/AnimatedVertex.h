@@ -11,6 +11,8 @@ namespace Euler
 	public:
 		Vec3 Position;
 		Vec3 Normal;
+		Vec3 Tangent;
+		Vec3 Bitangent;
 		Vec2 UV;
 		Vec3i BoneIds;
 		Vec3 BoneWeights;
