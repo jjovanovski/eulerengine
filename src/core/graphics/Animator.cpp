@@ -24,14 +24,13 @@ void Animator::Resume()
 
 void Animator::Update()
 {
-	if (!Running)
-		return;
-
 	// update time
 	auto now = std::chrono::steady_clock::now();
 	auto timeDiff = now - this->TimeAtStart;
 	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(timeDiff).count();
 	Time = millis / 1000.0f;
+	if (!Running)
+		Time = 0;
 
 	// calculate normalized time between last two frames
 	if (CurrentFrameIndex == 0)

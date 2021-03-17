@@ -26,7 +26,7 @@ namespace Euler
 			/// This constant will be used when calculating the initial size of the dynamic uniform buffer which contains
 			/// the model matrices. The size of the buffer will be INITIAL_MODELS_FOR_BUFFER_SIZE * sizeof(model_matrix).
 			/// </summary>
-			const uint32_t INITIAL_MODELS_FOR_BUFFER_SIZE = 8;
+			const uint32_t INITIAL_MODELS_FOR_BUFFER_SIZE = 25;
 
 			Vulkan* _vulkan;
 

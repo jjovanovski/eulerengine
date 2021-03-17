@@ -33,6 +33,7 @@ add_subdirectory("src/core")
 add_subdirectory("src/apps/sandbox")
 add_subdirectory("src/apps/skeletalAnimation")
 add_subdirectory("src/apps/shadows")
+add_subdirectory("src/apps/game")
 
 add_subdirectory("src/tools/eulermodel")
 

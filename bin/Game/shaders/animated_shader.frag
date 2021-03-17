@@ -45,11 +45,12 @@ float ShadowCalc() {
 void main() {
 	vec3 ambLight = ambientLight.color * ambientLight.intensity;
 	
-	vec3 dirLight = directionalLight.color * max(0, dot(directionalLight.direction, normalize(fragNormal))) * directionalLight.intensity;
+	vec3 lightDir = -normalize(directionalLight.direction);
+	vec3 dirLight = directionalLight.color * max(0, dot(lightDir, normalize(fragNormal))) * directionalLight.intensity;
 	
 	// specular
     vec3 viewDir = normalize(ambientLight.cameraPosition - fragPos);
-    vec3 reflectDir = reflect(directionalLight.direction, fragNormal);  
+    vec3 reflectDir = reflect(lightDir, fragNormal);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = directionalLight.color * spec * 0.5; 
 	
